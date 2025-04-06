@@ -1,0 +1,29 @@
+//
+// Created by 邹嘉旭 on 2024/4/24.
+//
+
+#ifndef HTTP_SERVER_H
+#define HTTP_SERVER_H
+
+#include "http_core.h"
+
+typedef struct http_conn_s{
+    basic_conn_t *bc;
+    //router_opt_t *router_opt;
+
+    buffer_t rpacket;                    /* Receive packet */
+    buffer_t tpacket;                    /* Transmit packet */
+
+    http_parser parser;
+    const struct proto_opt *opt;
+}http_conn_t;
+
+typedef struct http_server_s {
+    int fd;
+    http_conn_t conn;
+    http_parser_settings settings;
+}http_server_t;
+
+l_err init_http_server();
+
+#endif //HTTP_SERVER_H

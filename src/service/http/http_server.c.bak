@@ -1,0 +1,136 @@
+//
+// Created by 邹嘉旭 on 2024/4/24.
+//
+
+#include "http_server.h"
+
+static int message_begin_cb(http_parser *parser);
+
+http_server_t http_conf = {
+    .settings = {
+        .on_message_begin = message_begin_cb, .on_header_field = NULL, .on_header_value = NULL,
+    //.on_url = request_url_cb, .on_status = response_status_cb, .on_body = body_cb,
+    //.on_headers_complete = headers_complete_cb, .on_message_complete = message_complete_cb,
+    //.on_chunk_header = chunk_header_cb, .on_chunk_complete = chunk_complete_cb
+    },
+
+};
+
+static l_err reset_http_conn(basic_conn_t **bcp);
+static l_err recv_http_pkt(basic_conn_t **bcp);
+static l_err send_http_pkt(basic_conn_t **bcp);
+static void close_http_conn(basic_conn_t **bcp);
+
+const struct proto_opt_s http_opt = {
+        .name = "HTTP_OPT",
+        .reset_conn = reset_http_conn,
+        .recv_pkt = recv_http_pkt,
+        .send_pkt = send_http_pkt,
+        .close_conn = close_http_conn,
+};
+
+static l_err init_http_conn(){
+    http_conn_t *http_conn = &http_conf.conn;
+
+    if(init_basic_conn(http_conn, &http_opt, LD_HTTP) == FALSE){
+        return LD_ERR_INTERNAL;
+    }
+
+    http_conn->rpacket.len = 0;
+    http_conn->tpacket.len = 0;
+    return LD_OK;
+}
+
+static l_err reset_http_conn(basic_conn_t **bcp){
+    http_conn_t *http_conn = (http_conn_t *) bcp;
+    buffer_clear(&http_conn->rpacket);
+    buffer_clear(&http_conn->tpacket);
+    return LD_OK;
+}
+
+static l_err process_packet(http_conn_t *conn){
+    log_buf(LOG_WARN, "HTTP IN", conn->rpacket.ptr, conn->rpacket.len);
+    http_parser_init(&conn->parser, HTTP_REQUEST);
+    return LD_OK;
+}
+
+static l_err recv_http_pkt(basic_conn_t **bcp){
+    return process_packet((http_conn_t *)bcp);
+}
+
+static l_err send_http_pkt(basic_conn_t **bcp){
+    http_conn_t *http_conn = (http_conn_t *) bcp;
+    CLONE_TO_CHUNK(http_conn->bc->write_pkt, http_conn->tpacket.ptr, http_conn->tpacket.len);
+    return LD_OK;
+}
+
+static void close_http_conn(basic_conn_t **bcp){
+    http_conn_t *http_conn = (http_conn_t *) bcp;
+    buffer_clear(&http_conn->rpacket);
+    buffer_clear(&http_conn->tpacket);
+    connection_close(bcp);
+}
+
+static bool http_conn_accept(){
+    return init_http_conn();
+}
+
+static int message_begin_cb(http_parser *parser) {
+    fprintf(stderr, "!!!!!!");
+    return LD_OK;
+}
+
+l_err init_http_server() {
+    http_conf.fd = server_entity_setup(LD_HTTP);
+
+    int nfds;
+    int i;
+    while (stop_flag == FALSE) {
+        nfds = core_epoll_wait(epoll_fd, epoll_events, MAX_EVENTS, 20);
+
+        if (nfds == ERROR) {
+            // if not caused by signal, cannot recover
+            ERR_ON(errno != EINTR, "core_epoll_wait");
+        }
+
+        /* processing ready fd one by one */
+        for (i = 0; i < nfds; i++) {
+            struct epoll_event *curr_event = epoll_events + i;
+            int fd = *((int *)(curr_event->data.ptr));
+
+            if (fd == net_fd) {
+                http_conn_accept();  /* gs-gsc accept */
+            }else {
+                basic_conn_t **bcp = curr_event->data.ptr;
+                int status;
+                assert(bcp != NULL);
+
+                if((*bcp)->rp->l_r == (LD_HTTP)){
+                    if (connecion_is_expired(bcp))
+                        continue;
+                }
+
+                if (curr_event->events & EPOLLIN) {  //recv
+                    status = request_handle(bcp);
+                }
+                if (curr_event->events & EPOLLOUT) { //send
+                    status = response_handle(bcp);
+                }
+
+                if((*bcp)->rp->l_r == (LD_HTTP)){
+                    if (status == ERROR)
+                        connecion_set_expired(bcp);
+                    else{
+                        connecion_set_reactivated(bcp);
+                    }
+                }
+            }
+        }
+        log_info("%d", hd_conns.heap_size);
+        server_connection_prune();
+    }
+    close(epoll_fd);
+    server_shutdown();
+    return LD_OK;
+}
+
