@@ -31,8 +31,8 @@ add_executable(${PROJECT_NAME} main.c)
 add_executable(cli::test_client ALIAS ${PROJECT_NAME})
 
 
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal cli::pcap cli::ldacs_device cli::net_core
-        cli::ldacs_security event event_pthreads)
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal  cli::ldacs_device cli::net_core
+        cli::ldacs_security event event_pthreads ldcauc)
 
 find_package(SQLite3 REQUIRED)
 if (SQLite3_FOUND)
@@ -53,11 +53,11 @@ if (Ldacscrypto_FOUND)
     link_libraries(ldacscrypto::ldacscrypto)
 endif ()
 
-find_package(Ldacscrypto REQUIRED)
-if (Ldacscrypto_FOUND)
-    include_directories(${Ldacscrypto_INCLUDE_DIRS})
-    link_libraries(ldacscrypto::ldacscrypto)
-endif ()
+#find_package(Ldcauc REQUIRED)
+#if (Ldcauc_FOUND)
+#    include_directories(${Ldcauc_INCLUDE_DIRS})
+#    link_libraries(ldcauc::ldcauc)
+#endif ()
 
 add_subdirectory(src)
 

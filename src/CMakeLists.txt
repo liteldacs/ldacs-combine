@@ -8,8 +8,8 @@ add_subdirectory(roles)
 add_subdirectory(layer)
 add_subdirectory(device)
 add_subdirectory(ldacs_security)
-add_subdirectory(ldpcap)
 add_subdirectory(service)
 add_subdirectory(net_core)
+add_subdirectory(ldcauc)
 
 

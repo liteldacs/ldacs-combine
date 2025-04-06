@@ -1,3 +1,4 @@
+#include "ldcauc/snp_sub.h"
 #include <service/terminal.h>
 #include "ldacs_role.h"
 #include "http_core.h"

@@ -135,20 +135,6 @@ enum AUTHC_KLEN_E {
     AUTHC_KLEN_256 = 0x2,
 };
 
-enum S_TYP_E {
-    AUC_RQST = 0x41,
-    AUC_RESP = 0x42,
-    AUC_KEY_EXC = 0x43,
-    KEY_UPD_RQST = 0x44,
-    KEY_UPD_RESP = 0x45,
-    G_KEY_UPD_ACK = 0x46,
-
-    FAILED_MESSAGE = 0x4F,
-
-    SN_SESSION_EST_RQST = 0xC1,
-    SN_SESSION_EST_RESP = 0xC2,
-};
-
 
 enum PID_E {
     PID_RESERVED = 0x0,
@@ -156,55 +142,6 @@ enum PID_E {
     PID_MAC = 0x2,
     PID_BOTH = 0x3,
 };
-
-typedef enum {
-    GS_SAC_RQST = 1,
-    GS_SAC_RESP,
-    GS_INITIAL_MSG,
-    GS_SNF_UPLOAD,
-    GS_SNF_DOWNLOAD,
-    GS_KEY_TRANS,
-    GS_HO_REQUEST,
-    GS_HO_REQUEST_ACK,
-    GS_HO_COMPLETE,
-    GS_UP_UPLOAD_TRANSPORT,
-    GS_UP_DOWNLOAD_TRANSPORT,
-    GS_AS_EXIT,
-} GSG_TYPE;
-
-typedef enum {
-    GSNF_INITIAL_AS = 0xD1,
-    GSNF_SNF_UPLOAD = 0x72,
-    GSNF_SNF_DOWNLOAD = 0xD3,
-    GSNF_KEY_TRANS = 0x75,
-    GSNF_AS_AUZ_INFO = 0xB4,
-    GSNF_STATE_CHANGE = 0xEE,
-} GSNF_TYPE;
-
-typedef enum {
-    ELE_TYP_0 = 0x0,
-    ELE_TYP_1 = 0x1,
-    ELE_TYP_2 = 0x2,
-    ELE_TYP_3 = 0x3,
-    ELE_TYP_4 = 0x4,
-    ELE_TYP_5 = 0x5,
-    ELE_TYP_6 = 0x6,
-    ELE_TYP_7 = 0x7,
-    ELE_TYP_8 = 0x8,
-    ELE_TYP_9 = 0x9,
-    ELE_TYP_A = 0xA,
-    ELE_TYP_B = 0xB,
-    ELE_TYP_C = 0xC,
-    ELE_TYP_D = 0xD,
-    ELE_TYP_E = 0xE,
-    ELE_TYP_F = 0xF,
-} GSNF_ELE_TYPE;
-
-typedef enum {
-    GSNF_ACCESS = 0x1,
-    GSNF_SWITCH = 0x2,
-    GSNF_EXIT = 0x3,
-} GSNF_STATE;
 
 
 extern const char *lme_fsm_states[];
@@ -380,20 +317,6 @@ typedef struct lme_en_data_s {
 // }
 
 
-typedef struct ss_recv_handler_s {
-    uint8_t type;
-
-    l_err (*callback)(buffer_t *, lme_as_man_t *);
-} ss_recv_handler_t;
-
-typedef struct gsnf_pkt_format_desc_s {
-    GSNF_TYPE G_TYPE;
-    GSNF_ELE_TYPE ELE_TYPE;
-    struct_desc_t *f_desc;
-    size_t struct_size;
-
-    void (*malloc_cb)(void *);
-} gsnf_pkt_format_desc_t;
 
 #pragma pack(1)
 typedef struct bc_acb_s {
@@ -736,8 +659,6 @@ extern ld_prim_t LME_R_IND_PRIM;
 
 extern size_t as_recv_handlers_sz;
 extern size_t sgw_recv_handlers_sz;
-extern ss_recv_handler_t as_recv_handlers[];
-extern ss_recv_handler_t sgw_recv_handlers[];
 extern fsm_event_t ld_authc_fsm_events[];
 extern struct sm_state_s ld_authc_states[];
 

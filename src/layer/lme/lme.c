@@ -3,6 +3,8 @@
 //
 
 
+#include <ldcauc/snf.h>
+
 #include "ldacs_lme.h"
 
 static lyr_desc_t *sn_upper_lyr[] = {
@@ -144,12 +146,13 @@ l_err make_lme_layer() {
                 }
                 case LD_GS: {
 #ifdef HAS_SGW
-                    lme_layer_objs.net_opt.recv_handler = config.is_merged ? recv_gsg : recv_gsnf;
-                    memcpy(lme_layer_objs.net_opt.addr, config.gsnf_addr_v6, 16);
-                    lme_layer_objs.net_opt.port = config.gsnf_port;
-                    lme_layer_objs.sgw_conn = init_gs_conn(LD_GS, &lme_layer_objs.net_opt);
-                    pthread_create(&lme_layer_objs.client_th, NULL, gs_epoll_setup, &lme_layer_objs.net_opt);
-                    pthread_detach(lme_layer_objs.client_th);
+                    // lme_layer_objs.net_opt.recv_handler = config.is_merged ? recv_gsg : recv_gsnf;
+                    // memcpy(lme_layer_objs.net_opt.addr, config.gsnf_addr_v6, 16);
+                    // lme_layer_objs.net_opt.port = config.gsnf_port;
+                    // lme_layer_objs.sgw_conn = init_gs_conn(LD_GS, &lme_layer_objs.net_opt);
+                    // pthread_create(&lme_layer_objs.client_th, NULL, gs_epoll_setup, &lme_layer_objs.net_opt);
+                    // pthread_detach(lme_layer_objs.client_th);
+                    init_gs_snf_layer_unmerged(get_gs_sac(), config.gsnf_addr_v6, config.gsnf_port);
 #endif
 
                     /* GS set the initial state 'OPEN' */
