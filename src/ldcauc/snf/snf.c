@@ -44,6 +44,20 @@ int8_t init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_p
     return LDCAUC_OK;
 }
 
+int8_t init_sgw_snf_layer(uint16_t listen_port) {
+    snf_obj.snf_emap = init_enode_map();
+    snf_obj.role = LD_SGW;
+
+    init_heap_desc(&hd_conns);
+    snf_obj.net_opt.server_fd = server_entity_setup(LD_SGW, listen_port);
+    snf_obj.net_opt.recv_handler = recv_gsnf;
+
+    log_info("SGW server successfully started.");
+    gs_epoll_setup(&snf_obj.net_opt);
+
+    return LDCAUC_OK;
+}
+
 int8_t init_gs_snf_layer_unmerged(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port, finish_auth finish_auth,
                                   trans_snp trans_snp) {
     init_gs_snf_layer(GS_SAC, gsnf_addr, gsnf_port, finish_auth, trans_snp);
@@ -181,7 +195,7 @@ static buffer_t *gen_failed_pkt(uint8_t failed_type, uint16_t as_sac, buffer_t *
                    }, &failed_message_desc, "FAILED MESSAGE");
 }
 
-int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint8_t buf, size_t buf_len) {
+int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint8_t *buf, size_t buf_len) {
     /* sub-net control will not have unacknowledged data */
 
     buffer_t *in_buf = init_buffer_unptr();

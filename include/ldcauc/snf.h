@@ -338,6 +338,8 @@ int8_t init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_p
 int8_t init_gs_snf_layer_unmerged(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port, finish_auth finish_auth,
                                   trans_snp trans_snp);
 
+int8_t init_sgw_snf_layer(uint16_t listen_port);
+
 int8_t clear_snf_en(snf_entity_t *snf_en);
 
 int8_t destory_snf_layer();
@@ -349,6 +351,8 @@ int8_t exit_LME_AUTH(void *args);
 int8_t register_snf_en(snf_args_t *snf_args);
 
 int8_t unregister_snf_en(uint16_t SAC);
+
+int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint8_t *buf, size_t buf_len);
 
 /*  ss */
 

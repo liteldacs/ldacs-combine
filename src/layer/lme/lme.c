@@ -171,17 +171,15 @@ l_err make_lme_layer() {
             UA_STR(ua_sgw);
             embed_rootkey(LD_SGW, get_ua_str(10010, ua_as), get_ua_str(config.UA, ua_sgw));
 
-            init_lme_fsm(&lme_layer_objs, LME_OPEN);
-            lme_layer_objs.GS_SAC = get_gs_sac();
-            lme_layer_objs.LME_GS_AUTH_AS = init_lme_sac_map();
-            init_lme_ss(&lme_layer_objs);
+            // init_lme_fsm(&lme_layer_objs, LME_OPEN);
+            // lme_layer_objs.GS_SAC = get_gs_sac();
+            // lme_layer_objs.LME_GS_AUTH_AS = init_lme_sac_map();
+            // init_lme_ss(&lme_layer_objs);
 
-            init_heap_desc(&hd_conns);
-            lme_layer_objs.net_opt.server_fd = server_entity_setup();
-            lme_layer_objs.net_opt.recv_handler = recv_gsnf;
-
-            log_info("SGW server successfully started.");
-            gs_epoll_setup(&lme_layer_objs.net_opt);
+            // init_heap_desc(&hd_conns);
+            // lme_layer_objs.net_opt.server_fd = server_entity_setup();
+            // lme_layer_objs.net_opt.recv_handler = recv_gsnf;
+            init_sgw_snf_layer(config.port);
         }
         default:
             break;
@@ -368,6 +366,11 @@ l_err lme_gsnf_upload_forward(pb_stream *pbs, lme_as_man_t *as_man) {
 }
 
 void SN_SAPC_cb(ld_prim_t *prim) {
+}
+
+void SN_SAPD_L_cb(ld_prim_t *prim) {
+    orient_sdu_t *osdu = prim->prim_objs;
+    upload_snf(prim->prim_obj_typ != VER_PASS, osdu->AS_SAC, osdu->buf->ptr, osdu->buf->len);
 }
 
 l_err entry_LME_AUTH(void *args) {
