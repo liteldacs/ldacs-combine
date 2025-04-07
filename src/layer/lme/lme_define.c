@@ -3,6 +3,13 @@
 //
 #include "ldacs_lme.h"
 
+const char *lme_fsm_states[] = {
+    "LME_FSCANNING",
+    "LME_CSCANNING",
+    "LME_CONNECTING",
+    "LME_AUTH",
+    "LME_OPEN",
+};
 
 static field_desc bc_acb_fields[] = {
     {ft_set, B_TYPE_LEN, "B_TYPE", NULL},

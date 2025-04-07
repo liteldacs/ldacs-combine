@@ -222,7 +222,7 @@ void M_SAPR_cb(ld_prim_t *prim) {
                     /* simulate sac alloc procession */
                     uint16_t sac = generate_urand(SAC_LEN);
                     if (has_lme_as_enode(sac) == FALSE) {
-                        set_lme_as_enode(init_as_man(sac, cr->UA, lme_layer_objs.GS_SAC, LD_AUTHC_G0));
+                        set_lme_as_enode(init_as_man(sac, cr->UA, lme_layer_objs.GS_SAC));
                     }
                     register_snf_en(&(snf_args_t){
                         .role = LD_GS,

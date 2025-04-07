@@ -43,15 +43,6 @@ lme_layer_objs_t lme_layer_objs = {
     },
 
     .finish_status = LME_NO_STATE_FINISHED,
-
-    .net_opt = {
-        .server_fd = DEFAULT_FD,
-        .name = "NET_OPT",
-        .reset_conn = NULL,
-        .recv_handler = NULL,
-        .send_handler = NULL,
-        .close_handler = close_gs_conn,
-    }
 };
 
 lyr_desc_t lme_desc = {
@@ -139,7 +130,7 @@ l_err make_lme_layer() {
                 case LD_AS: {
                     /* AS set the initial state 'FSCANNING' */
                     init_lme_fsm(&lme_layer_objs, LME_FSCANNING);
-                    lme_layer_objs.lme_as_man = init_as_man(DEFAULT_SAC, config.UA, DEFAULT_SAC, LD_AUTHC_A0);
+                    lme_layer_objs.lme_as_man = init_as_man(DEFAULT_SAC, config.UA, DEFAULT_SAC);
                     init_as_snf_layer(NULL, NULL);
                     break;
                 }
@@ -359,10 +350,6 @@ void exit_LME_CONN_OPEN_action(void *curr_st_data, struct sm_event_s *event, voi
     };
     preempt_prim(&MAC_DCCH_REQ_PRIM, DC_TYP_CELL_EXIT,
                  gen_pdu(&exit, dc_format_descs[DC_TYP_CELL_EXIT].f_desc, "dc cell exit"), NULL, 0, 0);
-}
-
-l_err lme_gsnf_upload_forward(pb_stream *pbs, lme_as_man_t *as_man) {
-    return LD_OK;
 }
 
 void SN_SAPC_cb(ld_prim_t *prim) {

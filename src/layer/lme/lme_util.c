@@ -97,8 +97,7 @@ void *map_iter(void *(*iter_func)(void *, void *), void *judge) {
 }
 
 
-lme_as_man_t *init_as_man(uint16_t AS_SAC, uint32_t AS_UA, uint16_t AS_CURR_GS_SAC,
-                          enum LD_AUTHC_STATES_E init_st) {
+lme_as_man_t *init_as_man(uint16_t AS_SAC, uint32_t AS_UA, uint16_t AS_CURR_GS_SAC) {
     lme_as_man_t *as_man = calloc(1, sizeof(lme_as_man_t));
 
     as_man->AS_SAC = AS_SAC;
@@ -140,7 +139,6 @@ lme_as_man_t *init_as_man(uint16_t AS_SAC, uint32_t AS_UA, uint16_t AS_CURR_GS_S
     if (config.role == LD_AS || config.role == LD_GS)
         as_man_update_handler(as_man);
 
-    as_man->gs_conn = NULL;
     as_man->gs_finish_auth = FALSE;
     as_man->gsnf_count = 0;
 

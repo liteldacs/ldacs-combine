@@ -146,13 +146,6 @@ enum PID_E {
 
 
 extern const char *lme_fsm_states[];
-extern const char *authc_maclen_name[];
-extern const char *authc_authid_name[];
-extern const char *authc_enc_name[];
-extern const char *authc_klen_name[];
-extern const char *ld_authc_fsm_states[];
-extern const char *s_type_name[];
-extern const char *pid_name[];
 
 extern enum_names sib_mod_names;
 extern enum_names sib_cms_names;
@@ -208,15 +201,11 @@ typedef struct lme_as_man_s {
     KEY_HANDLE key_session_en_h;
     KEY_HANDLE key_session_mac_h;
 
-    /* for SGW */
-    gs_tcp_propt_t *gs_conn; // SGW -> GS
-
     /* for GSC */
     uint32_t gsnf_count;
 } lme_as_man_t;
 
-lme_as_man_t *init_as_man(uint16_t AS_SAC, uint32_t AS_UA, uint16_t AS_CURR_GS_SAC,
-                          enum LD_AUTHC_STATES_E init_st);
+lme_as_man_t *init_as_man(uint16_t AS_SAC, uint32_t AS_UA, uint16_t AS_CURR_GS_SAC);
 
 l_err clear_as_man(lme_as_man_t *as_man);
 
@@ -265,13 +254,8 @@ typedef struct lme_layer_objs_s {
     /* GS <-> AS multi DLS is defined in LME layer */
     struct hashmap *LME_GS_AUTH_AS;
 
-    pthread_t client_th;
-    gs_tcp_propt_t *sgw_conn; // GS -> SGW
-
     /* ====================  for AS ==================== */
     lme_as_man_t *lme_as_man;
-
-    net_opt_t net_opt;
 } lme_layer_objs_t;
 
 extern lme_layer_objs_t lme_layer_objs;
