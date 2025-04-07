@@ -2,6 +2,8 @@
 // Created by 邹嘉旭 on 2024/1/14.
 //
 
+#include <ldcauc/snf.h>
+
 #include "ldacs_lme.h"
 
 typedef struct lme_mms_obj_s {
@@ -214,14 +216,20 @@ void M_SAPR_cb(ld_prim_t *prim) {
                 }
 
                 if (config.is_merged == TRUE) {
-                    trans_gsnf(lme_layer_objs.sgw_conn, &(gsg_sac_pkt_t){GS_SAC_RQST, cr->UA, NULL}, &gsg_sac_pkt_desc,
-                               NULL,NULL);
+                    // trans_gsnf(lme_layer_objs.sgw_conn, &(gsg_sac_pkt_t){GS_SAC_RQST, cr->UA, NULL}, &gsg_sac_pkt_desc,
+                    //            NULL,NULL);
                 } else {
                     /* simulate sac alloc procession */
                     uint16_t sac = generate_urand(SAC_LEN);
                     if (has_lme_as_enode(sac) == FALSE) {
                         set_lme_as_enode(init_as_man(sac, cr->UA, lme_layer_objs.GS_SAC, LD_AUTHC_G0));
                     }
+                    register_snf_en(&(snf_args_t){
+                        .role = LD_GS,
+                        .AS_SAC = sac,
+                        .AS_UA = cr->UA,
+                        .AS_CURR_GS_SAC = lme_layer_objs.GS_SAC,
+                    });
                     dls_en_data_t *dls_en_data = &(dls_en_data_t){
                         .GS_SAC = lme_layer_objs.GS_SAC,
                         .AS_UA = cr->UA,

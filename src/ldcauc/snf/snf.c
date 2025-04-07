@@ -141,8 +141,19 @@ int8_t register_snf_en(snf_args_t *snf_args) {
 }
 
 int8_t unregister_snf_en(uint16_t SAC) {
+    snf_obj.is_merged == FALSE
+        ? trans_gsnf(snf_obj.sgw_conn, &(gsnf_st_chg_t){
+                         .G_TYP = GSNF_STATE_CHANGE,
+                         .VER = DEFAULT_GSNF_VERSION,
+                         .AS_SAC = SAC,
+                         .State = GSNF_EXIT,
+                         .GS_SAC = snf_obj.GS_SAC
+                     }, &gsnf_st_chg_desc, NULL,NULL)
+        : trans_gsnf(snf_obj.sgw_conn, &(gsg_as_exit_t){GS_AS_EXIT, SAC},
+                     &gsg_as_exit_desc, NULL,NULL);
     return delete_enode_by_sac(SAC, clear_snf_en);
 }
+
 
 static void free_snf_en(snf_entity_t *en) {
     clear_snf_en(en);
@@ -150,3 +161,91 @@ static void free_snf_en(snf_entity_t *en) {
 }
 
 
+// static buffer_t *gen_failed_pkt(enum ELE_TYP failed_type, uint16_t as_sac, buffer_t *failed_sdu) {
+//     return gen_pdu(&(failed_message_t){
+//                        .SN_TYP = FAILED_MESSAGE,
+//                        .VER = snf_obj.PROTOCOL_VER,
+//                        .PID = PID_RESERVED,
+//                        .AS_SAC = as_sac,
+//                        .FAILED_TYPE = failed_type,
+//                        .msg = failed_sdu,
+//                    }, &failed_message_desc, "FAILED MESSAGE");
+// }
+//
+//
+// void SN_SAPD_L_cb(ld_prim_t *prim) {
+//     /* sub-net control will not have unacknowledged data */
+//     switch (prim->prim_seq) {
+//         case SN_DATA_IND: {
+//             orient_sdu_t *osdu = prim->prim_objs;
+//             buffer_t *in_buf = NULL;
+//             if (config.role == LD_GS) {
+//                 lme_as_man_t *as_man = get_lme_as_enode(osdu->AS_SAC);
+//                 if (config.is_merged == TRUE) {
+//                     // send failed message to SGW
+//                     if (prim->prim_obj_typ != VER_PASS) {
+//                         in_buf = gen_failed_pkt(prim->prim_obj_typ, as_man->AS_SAC, osdu->buf);
+//                         trans_gsnf(lme_layer_objs.sgw_conn, &(gsg_pkt_t){
+//                                        GS_SNF_DOWNLOAD, as_man->AS_SAC, in_buf
+//                                    }, &gsg_pkt_desc, NULL, NULL);
+//                         free_buffer(in_buf);
+//                     } else {
+//                         uint8_t type;
+//                         in_buf = osdu->buf;
+//                         switch (*in_buf->ptr) {
+//                             case AUC_RQST: {
+//                                 type = GS_INITIAL_MSG;
+//                                 break;
+//                             }
+//                             case SN_SESSION_EST_RESP: {
+//                                 type = GS_UP_DOWNLOAD_TRANSPORT;
+//                                 break;
+//                             }
+//                             default: {
+//                                 type = GS_SNF_DOWNLOAD;
+//                             }
+//                         }
+//                         trans_gsnf(lme_layer_objs.sgw_conn, &(gsg_pkt_t){
+//                                        type, as_man->AS_SAC, in_buf
+//                                    }, &gsg_pkt_desc, NULL, NULL);
+//                     }
+//                 } else {
+//                     in_buf = osdu->buf;
+//                     if (prim->prim_obj_typ != VER_PASS) {
+//                         in_buf = gen_failed_pkt(prim->prim_obj_typ, as_man->AS_SAC, osdu->buf);
+//                         trans_gsnf(lme_layer_objs.sgw_conn, &(gsnf_pkt_cn_t){
+//                                        GSNF_SNF_DOWNLOAD, DEFAULT_GSNF_VERSION, osdu->AS_SAC, prim->prim_obj_typ, in_buf
+//                                    }, &gsnf_pkt_cn_desc, NULL, NULL);
+//                         free_buffer(in_buf);
+//                     } else {
+//                         if (as_man->gsnf_count++ == 0) {
+//                             trans_gsnf(lme_layer_objs.sgw_conn, &(gsnf_pkt_cn_ini_t){
+//                                            GSNF_INITIAL_AS, DEFAULT_GSNF_VERSION, osdu->AS_SAC, ELE_TYP_F,
+//                                            as_man->AS_UA,
+//                                            in_buf
+//                                        }, &gsnf_pkt_cn_ini_desc, NULL,NULL);
+//                         } else {
+//                             trans_gsnf(lme_layer_objs.sgw_conn, &(gsnf_pkt_cn_t){
+//                                            GSNF_SNF_DOWNLOAD, DEFAULT_GSNF_VERSION, osdu->AS_SAC, ELE_TYP_F, in_buf
+//                                        }, &gsnf_pkt_cn_desc, NULL,NULL);
+//                         }
+//                     }
+//                 }
+//             } else if (config.role == LD_AS) {
+//                 const lme_as_man_t *as_man = lme_layer_objs.lme_as_man;
+//                 in_buf = osdu->buf;
+//                 if (as_man == NULL) return;
+//
+//                 handle_recv_msg(in_buf, as_man);
+//             }
+//             break;
+//         }
+//         case SN_DATA_REQ: {
+//             break;
+//         }
+//         default:
+//             break;
+//     }
+// }
+//
+//

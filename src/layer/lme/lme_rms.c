@@ -2,6 +2,8 @@
 // Created by 邹嘉旭 on 2024/1/14.
 //
 
+#include <ldcauc/snf.h>
+
 #include "ldacs_lme.h"
 
 enum lme_rms_timer_index {
@@ -309,16 +311,17 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                         prim->prim_err = LD_ERR_INTERNAL;
                         break;
                     }
-                    config.is_merged == FALSE
-                        ? trans_gsnf(lme_layer_objs.sgw_conn, &(gsnf_st_chg_t){
-                                         .G_TYP = GSNF_STATE_CHANGE,
-                                         .VER = DEFAULT_GSNF_VERSION,
-                                         .AS_SAC = cell_exit->SAC,
-                                         .State = GSNF_EXIT,
-                                         .GS_SAC = lme_layer_objs.GS_SAC
-                                     }, &gsnf_st_chg_desc, NULL,NULL)
-                        : trans_gsnf(lme_layer_objs.sgw_conn, &(gsg_as_exit_t){GS_AS_EXIT, cell_exit->SAC},
-                                     &gsg_as_exit_desc, NULL,NULL);
+                    // config.is_merged == FALSE
+                    //     ? trans_gsnf(lme_layer_objs.sgw_conn, &(gsnf_st_chg_t){
+                    //                      .G_TYP = GSNF_STATE_CHANGE,
+                    //                      .VER = DEFAULT_GSNF_VERSION,
+                    //                      .AS_SAC = cell_exit->SAC,
+                    //                      .State = GSNF_EXIT,
+                    //                      .GS_SAC = lme_layer_objs.GS_SAC
+                    //                  }, &gsnf_st_chg_desc, NULL,NULL)
+                    //     : trans_gsnf(lme_layer_objs.sgw_conn, &(gsg_as_exit_t){GS_AS_EXIT, cell_exit->SAC},
+                    //                  &gsg_as_exit_desc, NULL,NULL);
+                    unregister_snf_en(cell_exit->SAC);
                     delete_lme_as_node_by_sac(cell_exit->SAC, clear_as_man);
                     break;
                 }

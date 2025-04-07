@@ -153,16 +153,8 @@ extern const char *ld_authc_fsm_states[];
 extern const char *s_type_name[];
 extern const char *pid_name[];
 
-extern enum_names s_type_names;
-extern enum_names pid_names;
-extern enum_names key_type_names;
 extern enum_names sib_mod_names;
 extern enum_names sib_cms_names;
-extern enum_names pid_names;
-extern enum_names authc_maclen_names;
-extern enum_names authc_auth_names;
-extern enum_names authc_enc_names;
-extern enum_names authc_klen_names;
 
 extern fsm_event_t lme_fsm_events[];
 
@@ -447,166 +439,6 @@ typedef struct dc_cell_exit_s {
 } dc_cell_exit_t;
 
 
-typedef struct auc_sharedinfo_s {
-    uint8_t MAC_LEN;
-    uint8_t AUTH_ID;
-    uint8_t ENC_ID;
-    uint16_t AS_SAC;
-    uint16_t GS_SAC;
-    uint8_t K_LEN;
-    buffer_t *N_2;
-} auc_sharedinfo_t;
-
-typedef struct auc_rqst_s {
-    uint8_t S_TYP;
-    uint8_t VER;
-    uint8_t PID;
-    uint16_t AS_SAC;
-    uint16_t GS_SAC;
-    uint8_t MAC_LEN;
-    uint8_t AUTH_ID;
-    uint8_t ENC_ID;
-    buffer_t *N_1;
-} auc_rqst_t;
-
-typedef struct auc_resp_s {
-    uint8_t S_TYP;
-    uint8_t VER;
-    uint8_t PID;
-    uint16_t AS_SAC;
-    uint16_t GS_SAC;
-    uint8_t MAC_LEN;
-    uint8_t AUTH_ID;
-    uint8_t ENC_ID;
-    uint8_t K_LEN;
-    buffer_t *N_2;
-} auc_resp_t;
-
-typedef struct key_upd_rqst_s {
-    uint8_t S_TYP;
-    uint8_t VER;
-    uint8_t PID;
-    uint16_t AS_SAC;
-    uint8_t KEY_TYPE;
-    uint16_t SAC_src;
-    uint16_t SAC_dst;
-    uint16_t NCC;
-    buffer_t *NONCE;
-} key_upd_rqst_t;
-
-typedef struct key_upd_resp_s {
-    uint8_t S_TYP;
-    uint8_t VER;
-    uint8_t PID;
-    uint16_t AS_SAC;
-    uint8_t KEY_TYPE;
-    uint16_t SAC_dst;
-    uint16_t NCC;
-} key_upd_resp_t;
-
-
-typedef struct auc_key_exec_s {
-    uint8_t S_TYP;
-    uint8_t VER;
-    uint8_t PID;
-    uint16_t AS_SAC;
-    uint16_t GS_SAC;
-    uint8_t MAC_LEN;
-    uint8_t AUTH_ID;
-    uint8_t ENC_ID;
-    buffer_t *N_3;
-} auc_key_exec_t;
-
-
-typedef struct sn_session_est_rqst_s {
-    uint8_t SN_TYP;
-    uint8_t VER;
-    uint8_t PID;
-    uint16_t AS_SAC;
-    uint8_t SER_TYPE;
-} sn_session_est_rqst_t;
-
-
-typedef struct sn_session_est_resp_s {
-    uint8_t SN_TYP;
-    uint8_t VER;
-    uint8_t PID;
-    uint16_t AS_SAC;
-    buffer_t *IP_AS;
-} sn_session_est_resp_t;
-
-typedef struct failed_message_s {
-    uint8_t SN_TYP;
-    uint8_t VER;
-    uint8_t PID;
-    uint16_t AS_SAC;
-    uint8_t FAILED_TYPE;
-    buffer_t *msg;
-} failed_message_t;
-
-typedef struct gsg_sac_pkt_s {
-    uint8_t TYPE;
-    uint32_t UA;
-    buffer_t *sdu;
-} gsg_sac_pkt_t;
-
-/**
- * TODO： 12.17需改： 除了前两条报文单独解析外，其他报文都是一个head + payload的形式，head共用一个描述，payload各自不同，switch的时候把他们放一起，查出来SAC后对应的as_man后再搞一次switch
- */
-typedef struct gsg_pkt_s {
-    uint8_t TYPE;
-    uint16_t AS_SAC;
-    buffer_t *sdu;
-} gsg_pkt_t;
-
-typedef struct gsg_as_exit_s {
-    uint8_t TYPE;
-    uint16_t AS_SAC;
-} gsg_as_exit_t;
-
-typedef struct gsnf_pkt_cn_s {
-    uint8_t G_TYP;
-    uint8_t VER;
-    uint16_t AS_SAC;
-    uint8_t ELE_TYPE;
-    buffer_t *sdu;
-} gsnf_pkt_cn_t;
-
-typedef struct gsnf_pkt_cn_ini_s {
-    uint8_t G_TYP;
-    uint8_t VER;
-    uint16_t AS_SAC;
-    uint8_t ELE_TYPE;
-    uint32_t UA;
-    buffer_t *sdu;
-} gsnf_pkt_cn_ini_t;
-
-typedef struct gsnf_as_auz_info_s {
-    uint8_t G_TYP;
-    uint8_t VER;
-    uint16_t AS_SAC;
-    uint8_t is_legal;
-    uint8_t auz_type;
-} gsnf_as_auz_info_t;
-
-typedef struct gsnf_st_chg_s {
-    uint8_t G_TYP;
-    uint8_t VER;
-    uint16_t AS_SAC;
-    uint8_t State;
-    uint16_t GS_SAC;
-} gsnf_st_chg_t;
-
-typedef struct gs_key_trans_s {
-    buffer_t *key;
-    buffer_t *nonce;
-} gs_key_trans_t;
-
-typedef struct gs_sac_resp_sdu_s {
-    uint16_t SAC;
-} gs_sac_resp_sdu_t;
-
-
 #pragma pack()
 
 extern lyr_desc_t lme_desc;
@@ -624,25 +456,6 @@ extern struct_desc_t ra_cell_rqst_desc;
 extern struct_desc_t dc_keep_alive_desc;
 extern struct_desc_t dc_rsc_rqst_desc;
 extern struct_desc_t dc_cell_exit_desc;
-extern struct_desc_t auc_sharedinfo_desc;
-extern struct_desc_t auc_rqst_desc;
-extern struct_desc_t auc_resp_desc;
-extern struct_desc_t auc_key_exec_desc;
-extern struct_desc_t key_upd_rqst_desc;
-extern struct_desc_t key_upd_resp_desc;
-extern struct_desc_t sn_session_est_rqst_desc;
-extern struct_desc_t sn_session_est_resp_desc;
-extern struct_desc_t failed_message_desc;
-extern struct_desc_t gsg_sac_pkt_desc;
-extern struct_desc_t gsg_pkt_desc;
-extern struct_desc_t gsg_as_exit_desc;
-extern struct_desc_t gsnf_pkt_cn_desc;
-extern struct_desc_t gsnf_pkt_cn_ini_desc;
-extern struct_desc_t gsnf_as_auz_info_desc;
-extern struct_desc_t gsnf_st_chg_desc;
-extern struct_desc_t gs_sac_resp_desc;
-extern struct_desc_t gs_key_trans_desc;
-
 
 extern ld_format_desc_t bc_format_descs[];
 extern ld_format_desc_t cc_format_descs[];
@@ -656,11 +469,6 @@ extern ld_prim_t LME_AUTH_REQ_PRIM;
 extern ld_prim_t LME_STATE_IND_PRIM;
 extern ld_prim_t LME_R_REQ_PRIM;
 extern ld_prim_t LME_R_IND_PRIM;
-
-extern size_t as_recv_handlers_sz;
-extern size_t sgw_recv_handlers_sz;
-extern fsm_event_t ld_authc_fsm_events[];
-extern struct sm_state_s ld_authc_states[];
 
 l_err make_lme_layer();
 
@@ -713,36 +521,6 @@ l_err init_lme_ss(lme_layer_objs_t *obj);
 
 l_err entry_LME_AUTH(void *);
 
-l_err send_auc_rqst(void *args);
-
-l_err recv_auc_rqst(buffer_t *buf, lme_as_man_t *as_man);
-
-l_err send_auc_resp(void *args);
-
-l_err recv_auc_resp(buffer_t *buf, lme_as_man_t *as_man);
-
-l_err send_auc_key_exec(void *args);
-
-l_err recv_auc_key_exec(buffer_t *buf, lme_as_man_t *as_man);
-
-l_err finish_auc(void *args);
-
-l_err send_key_update_rqst(void *args);
-
-l_err recv_key_update_rqst(buffer_t *buf, lme_as_man_t *as_man);
-
-l_err send_key_update_resp(void *args);
-
-l_err recv_key_update_resp(buffer_t *buf, lme_as_man_t *as_man);
-
-l_err send_sn_session_est_resp(void *args);
-
-l_err recv_sn_session_est_rqst(buffer_t *buf, lme_as_man_t *as_man);
-
-l_err handle_recv_msg(buffer_t *buf, const lme_as_man_t *as_man);
-
-l_err handle_send_msg(void *args, struct_desc_t *desc, lme_as_man_t *as_man, KEY_HANDLE key_med);
-
 /* rms */
 l_err init_lme_rms(lme_layer_objs_t *obj);
 
@@ -770,12 +548,6 @@ l_err trans_gsnf(gs_tcp_propt_t *conn, void *pkg, struct_desc_t *desc, l_err (*m
 l_err recv_gsnf(basic_conn_t **bcp);
 
 l_err recv_gsg(basic_conn_t **bcp);
-
-/* auth */
-buffer_t *get_auc_sharedinfo_buf(auc_sharedinfo_t *info);
-
-l_err generate_auc_kdf(buffer_t *random, KEY_HANDLE*key_as_sgw, KEY_HANDLE*key_as_gs,
-                       buffer_t **key_as_gs_raw);
 
 
 /* lme util */
