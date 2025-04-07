@@ -81,20 +81,13 @@ l_err send_auc_resp(void *args) {
     CLONE_TO_CHUNK(*n_2, n_2_str, NONCE_LEN);
 
     as_man->shared_random = get_auc_sharedinfo_buf(&(auc_sharedinfo_t){
-            .
-            MAC_LEN = as_man->AUTHC_MACLEN,
-            .
-            AUTH_ID = as_man->AUTHC_AUTH_ID,
-            .
-            ENC_ID = as_man->AUTHC_ENC_ID,
-            .
-            N_2 = n_2,
-            .
-            AS_SAC = as_man->AS_SAC,
-            .
-            GS_SAC = as_man->AS_CURR_GS_SAC,
-            .
-            K_LEN = as_man->AUTHC_KLEN,
+            . MAC_LEN = as_man->AUTHC_MACLEN,
+            . AUTH_ID = as_man->AUTHC_AUTH_ID,
+            . ENC_ID = as_man->AUTHC_ENC_ID,
+            . N_2 = n_2,
+            . AS_SAC = as_man->AS_SAC,
+            . GS_SAC = as_man->AS_CURR_GS_SAC,
+            . K_LEN = as_man->AUTHC_KLEN,
         }
     );
 

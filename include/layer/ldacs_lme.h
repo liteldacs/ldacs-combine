@@ -10,6 +10,7 @@
 #include "ldacs_mac.h"
 #include "ldacs_dls.h"
 #include <gs_conn.h>
+#include <ldcauc/snf.h>
 
 #define TIMER_MAX 65535
 #define INIT_FL_CHN     300     /* which mapping to 1110.0 MHZ */
@@ -188,7 +189,6 @@ typedef struct lme_as_man_s {
             AUTHC_AUTH_ID,
             AUTHC_ENC_ID,
             AUTHC_KLEN;
-    sm_statemachine_t auth_fsm;
     ld_co_t CO;
 
     // for GS
@@ -307,7 +307,6 @@ typedef struct lme_en_data_s {
 //     res_req->d_entity = d_entity;
 //     return res_req;
 // }
-
 
 
 #pragma pack(1)
@@ -516,10 +515,6 @@ l_err start_mms();
 
 void free_CO(uint16_t co);
 
-/* ss */
-l_err init_lme_ss(lme_layer_objs_t *obj);
-
-l_err entry_LME_AUTH(void *);
 
 /* rms */
 l_err init_lme_rms(lme_layer_objs_t *obj);

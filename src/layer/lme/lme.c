@@ -3,8 +3,6 @@
 //
 
 
-#include <ldcauc/snf.h>
-
 #include "ldacs_lme.h"
 
 static lyr_desc_t *sn_upper_lyr[] = {
@@ -142,18 +140,17 @@ l_err make_lme_layer() {
                     /* AS set the initial state 'FSCANNING' */
                     init_lme_fsm(&lme_layer_objs, LME_FSCANNING);
                     lme_layer_objs.lme_as_man = init_as_man(DEFAULT_SAC, config.UA, DEFAULT_SAC, LD_AUTHC_A0);
+                    init_as_snf_layer(NULL, NULL);
                     break;
                 }
                 case LD_GS: {
-#ifdef HAS_SGW
                     // lme_layer_objs.net_opt.recv_handler = config.is_merged ? recv_gsg : recv_gsnf;
                     // memcpy(lme_layer_objs.net_opt.addr, config.gsnf_addr_v6, 16);
                     // lme_layer_objs.net_opt.port = config.gsnf_port;
                     // lme_layer_objs.sgw_conn = init_gs_conn(LD_GS, &lme_layer_objs.net_opt);
                     // pthread_create(&lme_layer_objs.client_th, NULL, gs_epoll_setup, &lme_layer_objs.net_opt);
                     // pthread_detach(lme_layer_objs.client_th);
-                    init_gs_snf_layer_unmerged(get_gs_sac(), config.gsnf_addr_v6, config.gsnf_port);
-#endif
+                    init_gs_snf_layer_unmerged(get_gs_sac(), config.gsnf_addr_v6, config.gsnf_port, NULL, NULL);
 
                     /* GS set the initial state 'OPEN' */
                     init_lme_fsm(&lme_layer_objs, LME_OPEN);
@@ -166,10 +163,8 @@ l_err make_lme_layer() {
             }
             init_lme_mms(&lme_layer_objs);
             init_lme_rms(&lme_layer_objs);
-            init_lme_ss(&lme_layer_objs);
             break;
         }
-#ifdef HAS_SGW
         case LD_SGW: {
             /* 默认AS的UA为10010，SGW的UA为10000 */
             UA_STR(ua_as);
@@ -188,7 +183,6 @@ l_err make_lme_layer() {
             log_info("SGW server successfully started.");
             gs_epoll_setup(&lme_layer_objs.net_opt);
         }
-#endif
         default:
             break;
     }
@@ -371,4 +365,68 @@ void exit_LME_CONN_OPEN_action(void *curr_st_data, struct sm_event_s *event, voi
 
 l_err lme_gsnf_upload_forward(pb_stream *pbs, lme_as_man_t *as_man) {
     return LD_OK;
+}
+
+void SN_SAPC_cb(ld_prim_t *prim) {
+}
+
+l_err entry_LME_AUTH(void *args) {
+    l_err err;
+
+    do {
+        //change MAC state into MAC_AUTH
+        if ((err = preempt_prim(&MAC_AUTH_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0))) {
+            log_error("LME can not call mac layers manipulate AUTH");
+            break;
+        }
+
+        //change SNP state into SNP_AUTH
+        if ((err = preempt_prim(&SN_AUTH_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0))) {
+            log_error("LME can not call snp layers manipulate AUTH");
+            break;
+        }
+
+        /* Tell RCU the state of LME is AUTH */
+        if ((err = preempt_prim(&LME_STATE_IND_PRIM, LME_STATE_CHANGE,
+                                &(lme_state_chg_t){
+                                    .ua = lme_layer_objs.lme_as_man->AS_UA,
+                                    .sac = lme_layer_objs.lme_as_man->AS_SAC,
+                                    .state = LME_AUTH
+                                }, NULL, 0, 0))) {
+            log_error("LME can not call RCU current state");
+            break;
+        }
+
+        snf_LME_AUTH(&(snf_args_t){
+            .role = config.role,
+            .AS_SAC = lme_layer_objs.lme_as_man->AS_SAC,
+            .AS_UA = lme_layer_objs.lme_as_man->AS_UA,
+            .AS_CURR_GS_SAC = lme_layer_objs.lme_as_man->AS_CURR_GS_SAC,
+        });
+    } while (0);
+    return err;
+}
+
+
+l_err entry_LME_OPEN(void *args) {
+    l_err err = LD_OK;
+    do {
+        /* change SNP state into SNP_OPEN */
+        if ((err = preempt_prim(&SN_OPEN_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0))) {
+            log_error("LME can not call snp layers manipulate OPEN");
+            break;
+        }
+
+        /* Tell RCU the state of LME is OPEN */
+        if ((err = preempt_prim(&LME_STATE_IND_PRIM, LME_STATE_CHANGE,
+                                &(lme_state_chg_t){
+                                    .ua = lme_layer_objs.lme_as_man->AS_UA,
+                                    .sac = lme_layer_objs.lme_as_man->AS_SAC,
+                                    .state = LME_OPEN
+                                }, NULL, 0, 0))) {
+            log_error("LME can not call RCU current state");
+            break;
+        }
+    } while (0);
+    return err;
 }

@@ -83,9 +83,9 @@ typedef enum {
     GSNF_EXIT = 0x3,
 } GSNF_STATE;
 
-typedef int8_t (*finish_auth_fsm)();
+typedef int8_t (*finish_auth)();
 
-typedef int8_t (*dls_open)();
+typedef int8_t (*trans_snp)();
 
 
 typedef struct snf_entity_s {
@@ -122,9 +122,14 @@ typedef struct snf_obj_s {
     uint8_t PROTOCOL_VER;
     ldacs_roles role;
     uint16_t GS_SAC;
-
     net_opt_t net_opt;
 
+    trans_snp trans_snp_func;
+
+    //AS
+    finish_auth finish_auth_func;
+
+    //SGW
     pthread_t client_th;
     gs_tcp_propt_t *sgw_conn; // GS -> SGW
 
@@ -325,17 +330,19 @@ extern ss_recv_handler_t sgw_recv_handlers[];
 
 extern fsm_event_t ld_authc_fsm_events[];
 
-int8_t init_as_snf_layer(void);
+int8_t init_as_snf_layer(finish_auth finish_auth, trans_snp trans_snp);
 
-int8_t init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_port);
+int8_t init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port, finish_auth finish_auth,
+                         trans_snp trans_snp);
 
-int8_t init_gs_snf_layer_unmerged(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_port);
+int8_t init_gs_snf_layer_unmerged(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port, finish_auth finish_auth,
+                                  trans_snp trans_snp);
 
 int8_t clear_snf_en(snf_entity_t *snf_en);
 
 int8_t destory_snf_layer();
 
-int8_t entry_LME_AUTH(void *args);
+int8_t snf_LME_AUTH(void *args);
 
 int8_t exit_LME_AUTH(void *args);
 

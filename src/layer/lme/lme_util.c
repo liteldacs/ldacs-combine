@@ -135,7 +135,7 @@ lme_as_man_t *init_as_man(uint16_t AS_SAC, uint32_t AS_UA, uint16_t AS_CURR_GS_S
     }
 
 
-    stateM_init(&as_man->auth_fsm, &ld_authc_states[init_st], NULL);
+    // stateM_init(&as_man->auth_fsm, &ld_authc_states[init_st], NULL);
 
     if (config.role == LD_AS || config.role == LD_GS)
         as_man_update_handler(as_man);

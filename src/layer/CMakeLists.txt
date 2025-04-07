@@ -21,7 +21,6 @@ add_library(${PROJECT_NAME} STATIC ${SRC_LIST}
         lme/lme.c
         lme/lme_mms.c
         lme/lme_rms.c
-        lme/lme_ss.c
         lme/lme_util.c
         lme/lme_define.c
         lme/lme_gsnf.c
