@@ -31,8 +31,8 @@ add_executable(${PROJECT_NAME} main.c)
 add_executable(cli::test_client ALIAS ${PROJECT_NAME})
 
 
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal  cli::ldacs_device cli::net_core
-        cli::ldacs_security event event_pthreads ldcauc)
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal  cli::ldacs_device
+         event event_pthreads ldcauc)
 
 find_package(SQLite3 REQUIRED)
 if (SQLite3_FOUND)

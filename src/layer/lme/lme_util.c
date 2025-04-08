@@ -3,7 +3,6 @@
 //
 
 #include "ldacs_lme.h"
-#include "key.h"
 
 fsm_event_t lme_fsm_events[] = {
     {"LME_FSCANNING", NULL, NULL},
@@ -119,19 +118,16 @@ lme_as_man_t *init_as_man(uint16_t AS_SAC, uint32_t AS_UA, uint16_t AS_CURR_GS_S
 
     as_man->send_T_SQN = as_man->recv_T_SQN = 0;
 
-    as_man->shared_random = NULL;
-    as_man->key_as_gs_b = NULL;
-
-    UA_STR(ua_as);
-    UA_STR(ua_sgw);
-    if (config.role == LD_AS) {
-        key_get_handle(config.role, get_ua_str(config.UA, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
-                       &as_man->key_as_sgw_r_h);
-    } else if (config.role == LD_SGW) {
-        as_man->key_as_gs_b = init_buffer_unptr();
-        key_get_handle(config.role, get_ua_str(10010, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
-                       &as_man->key_as_sgw_r_h);
-    }
+    // UA_STR(ua_as);
+    // UA_STR(ua_sgw);
+    // if (config.role == LD_AS) {
+    //     key_get_handle(config.role, get_ua_str(config.UA, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
+    //                    &as_man->key_as_sgw_r_h);
+    // } else if (config.role == LD_SGW) {
+    //     as_man->key_as_gs_b = init_buffer_unptr();
+    //     key_get_handle(config.role, get_ua_str(10010, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
+    //                    &as_man->key_as_sgw_r_h);
+    // }
 
 
     // stateM_init(&as_man->auth_fsm, &ld_authc_states[init_st], NULL);
@@ -150,10 +146,6 @@ l_err clear_as_man(lme_as_man_t *as_man) {
     if (clear_mac_CO(as_man->AS_SAC, &CO) != LD_ERR_WRONG_PARA) {
         free_CO(CO);
     }
-    if (as_man->shared_random) free_buffer(as_man->shared_random);
-    if (as_man->key_as_gs_b) free_buffer(as_man->key_as_gs_b);
-    // as_man->AS_SAC = DEFAULT_SAC;
-    // zero(&as_man->CO);
     return LD_OK;
 }
 

@@ -96,10 +96,7 @@ l_err make_snp_layer() {
     return LD_OK;
 }
 
-static KEY_HANDLE get_hmac_key(uint16_t AS_SAC) {
-    lme_as_man_t *as_man = config.role == LD_AS ? lme_layer_objs.lme_as_man : (lme_as_man_t *) get_lme_as_enode(AS_SAC);
-    return as_man->key_as_gs_h;
-}
+
 
 static uint32_t *get_SQN(uint16_t AS_SAC, bool is_send) {
     lme_as_man_t *as_man = config.role == LD_AS ? lme_layer_objs.lme_as_man : (lme_as_man_t *) get_lme_as_enode(AS_SAC);

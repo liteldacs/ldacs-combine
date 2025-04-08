@@ -9,8 +9,6 @@
 #include "ldacs_lme.h"
 #include "ldacs_dls.h"
 #include "ldacs_phy.h"
-#include "ldacs_security/cipher.h"
-#include "ldacs_security/key.h"
 
 #define C_TYPE_NUMBER 32
 #define D_TYPE_NUMBER 16
@@ -106,7 +104,7 @@ static void free_cc_dch_trans_node(cc_dch_trans_node_t *node) {
 typedef struct mac_layer_objs_s {
     enum MAC_FSM_STATES_E state;
     uint32_t mac_c_rac;
-    enum p_sec mac_p_sec;
+    // enum p_sec mac_p_sec;
 
     bool isAPNT;
     size_t hmac_len;

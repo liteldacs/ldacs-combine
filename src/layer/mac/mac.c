@@ -2,6 +2,9 @@
 // Created by jiaxv on 2023/12/5.
 //
 
+#include <ldcauc/crypto/cipher.h>
+#include <ldcauc/crypto/key.h>
+
 #include "ldacs_mac.h"
 
 static lyr_desc_t *upper_lyr[] = {
@@ -13,7 +16,7 @@ static lyr_desc_t *lower_lyr[] = {
 mac_layer_objs_t mac_layer_objs = {
     .state = MAC_FSCANNING,
     .mac_c_rac = 64,
-    .mac_p_sec = SM3_HMAC,
+    // .mac_p_sec = SM3_HMAC,
     .isAPNT = FALSE,
     .hmac_len = SEC_MACLEN_64,
 

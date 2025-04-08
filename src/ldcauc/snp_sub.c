@@ -31,6 +31,11 @@ static bool is_finish_auth(uint16_t AS_SAC) {
 
 const char *zero_mac[32] = {0};
 
+static KEY_HANDLE get_hmac_key(uint16_t AS_SAC) {
+    snf_entity_t *as_man = config.role == LD_AS ? snf_obj.as_snf_en : (snf_entity_t *) get_enode(AS_SAC);
+    return as_man->key_as_gs_h;
+}
+
 int8_t snpsub_crypto(uint16_t AS_SAC, char *in, size_t in_len, char *out, size_t *out_len, bool is_encrypt) {
     if (is_encrypt) {
 

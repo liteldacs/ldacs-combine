@@ -9,7 +9,6 @@
 #include "layer_rcu.h"
 #include "ldacs_mac.h"
 #include "ldacs_dls.h"
-#include <gs_conn.h>
 #include <ldcauc/snf.h>
 
 #define TIMER_MAX 65535
@@ -193,13 +192,13 @@ typedef struct lme_as_man_s {
     uint32_t send_T_SQN,
             recv_T_SQN;
 
-    buffer_t *shared_random;
-    KEY_HANDLE key_as_sgw_r_h;
-    KEY_HANDLE key_as_sgw_s_h;
-    buffer_t *key_as_gs_b;
-    KEY_HANDLE key_as_gs_h;
-    KEY_HANDLE key_session_en_h;
-    KEY_HANDLE key_session_mac_h;
+    // buffer_t *shared_random;
+    // KEY_HANDLE key_as_sgw_r_h;
+    // KEY_HANDLE key_as_sgw_s_h;
+    // buffer_t *key_as_gs_b;
+    // KEY_HANDLE key_as_gs_h;
+    // KEY_HANDLE key_session_en_h;
+    // KEY_HANDLE key_session_mac_h;
 
     /* for GSC */
     uint32_t gsnf_count;
