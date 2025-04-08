@@ -107,26 +107,7 @@ static uint32_t *get_SQN(uint16_t AS_SAC, bool is_send) {
     return is_send ? &as_man->send_T_SQN : &as_man->recv_T_SQN;
 }
 
-static bool lme_finish_auth(uint16_t AS_SAC) {
-    lme_as_man_t *as_man = config.role == LD_AS
-                               ? lme_layer_objs.lme_as_man
-                               : (lme_as_man_t *) get_lme_as_enode(AS_SAC);
-    switch (config.role) {
-        case LD_AS:
-        case LD_SGW: {
-            const char *authc_str = config.role == LD_AS
-                                        ? ld_authc_fsm_states[LD_AUTHC_A2]
-                                        : ld_authc_fsm_states[LD_AUTHC_G2];
-            return in_state(&as_man->auth_fsm, authc_str);
-        }
-        case LD_GS: {
-            return as_man->gs_finish_auth;
-        }
-        default: {
-            return FALSE;
-        }
-    }
-}
+
 
 void SN_SAPC(ld_prim_t *prim) {
     switch (prim->prim_seq) {
@@ -182,7 +163,6 @@ void SN_SAPD(ld_prim_t *prim) {
     buffer_t *buf = orient_sdu_from->buf;
 
     /* 判断LME是否处于已经完成KAS-GS密钥协商阶段 */
-    bool finish_auth = lme_finish_auth(orient_sdu_to->AS_SAC);
 
     pb_stream snp_pbs;
     zero(&snp_pbs);
@@ -202,7 +182,7 @@ void SN_SAPD(ld_prim_t *prim) {
     /* 如果还没有派生KAS-GS，则不验证完整性 */
     snp_pdu_t snp_pdu = {
         .ctrl = prim->prim_obj_typ == SN_TYP_FROM_UP ? USER_PLANE_PACKET : CONTROL_PLANE_PACKET,
-        .sec_level = finish_auth ? snp_layer_objs.SEC : SEC_MACLEN_INVAILD,
+        .sec_level =  snp_layer_objs.SEC,
         .nsel = prim->prim_obj_typ == SN_TYP_FROM_UP ? NSEL_IPV6 : NSEL_LME,
         .sdu = buf,
         .sqn = (*get_SQN(orient_sdu_to->AS_SAC, TRUE))++,
@@ -213,12 +193,10 @@ void SN_SAPD(ld_prim_t *prim) {
         prim->prim_err = LD_ERR_INTERNAL;
     }
 
-    if (finish_auth) {
-        // buffer_t *asgs_key = get_hmac_key(orient_sdu_to->AS_SAC);
-        // // log_warn("!!!!!!!!!!!!!!!!!! %d", pdu_len);
-        // log_buf(LOG_FATAL, "AS GS KEY", asgs_key->ptr, asgs_key->len);
-        pb_out_mac(&snp_pbs, get_sec_maclen(snp_layer_objs.SEC), get_hmac_key(orient_sdu_to->AS_SAC), calc_hmac_uint);
-    }
+    // if (finish_auth) {
+    //     pb_out_mac(&snp_pbs, get_sec_maclen(snp_layer_objs.SEC), get_hmac_key(orient_sdu_to->AS_SAC), calc_hmac_uint);
+    // }
+
     close_output_pbs(&snp_pbs);
 
     CLONE_TO_CHUNK(*orient_sdu_to->buf, snp_pbs.start, pbs_offset(&snp_pbs));
@@ -240,16 +218,13 @@ void D_SAPD_cb(ld_prim_t *prim) {
 
             uint32_t pdu_len = snp_in->len - (SNP_ELES_SIZE >> 3);
 
-            /* 判断LME是否处于已经完成KAS-GS密钥协商阶段 */
-            bool finish_auth = lme_finish_auth(o_sdu->AS_SAC);
-            if (finish_auth) {
-                /* 应减去MAC长度 */
-                pdu_len -= get_sec_maclen(snp_layer_objs.SEC);
 
-                // buffer_t *asgs_key = get_hmac_key(o_sdu->AS_SAC);
-                // // log_warn("!!!!!!!!!!!!!!!!!! %d", pdu_len);
-                // log_buf(LOG_FATAL, "AS GS KEY", asgs_key->ptr, asgs_key->len);
-            }
+            /* TODO: 如果没完成auth过程，则MAC为全0 */
+            /* 判断LME是否处于已经完成KAS-GS密钥协商阶段 */
+            // if (finish_auth) {
+            //     /* 应减去MAC长度 */
+            //     pdu_len -= get_sec_maclen(snp_layer_objs.SEC);
+            // }
 
             pdu.sdu = init_buffer_ptr(pdu_len);
 
@@ -264,16 +239,16 @@ void D_SAPD_cb(ld_prim_t *prim) {
 
 
             /* TODO: 搞出更多的错误代码，然后再网关显示 */
-            if (finish_auth) {
-                if (!pb_in_mac(&pbs, get_sec_maclen(snp_layer_objs.SEC), get_hmac_key(o_sdu->AS_SAC),
-                               verify_hmac_uint)) {
-                    free_buffer(o_sdu->buf);
-                    o_sdu->buf = pdu.sdu;
-                    preempt_prim(&SN_DATA_IND_PRIM, VER_WRONG_MAC, o_sdu, NULL, 0, 0);
-                    prim->prim_err = LD_ERR_INVALID_MAC;
-                    return;
-                }
-            }
+            // if (finish_auth) {
+            //     if (!pb_in_mac(&pbs, get_sec_maclen(snp_layer_objs.SEC), get_hmac_key(o_sdu->AS_SAC),
+            //                    verify_hmac_uint)) {
+            //         free_buffer(o_sdu->buf);
+            //         o_sdu->buf = pdu.sdu;
+            //         preempt_prim(&SN_DATA_IND_PRIM, VER_WRONG_MAC, o_sdu, NULL, 0, 0);
+            //         prim->prim_err = LD_ERR_INVALID_MAC;
+            //         return;
+            //     }
+            // }
 
             uint32_t *check_sqn = get_SQN(o_sdu->AS_SAC, FALSE);
             if (abs((int) pdu.sqn - *check_sqn) < SNP_RANGE) {

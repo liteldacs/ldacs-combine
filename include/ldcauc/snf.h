@@ -83,7 +83,7 @@ typedef enum {
     GSNF_EXIT = 0x3,
 } GSNF_STATE;
 
-typedef int8_t (*finish_auth)();
+typedef int8_t (*finish_auth)(uint16_t);
 
 typedef int8_t (*trans_snp)();
 
@@ -346,7 +346,7 @@ int8_t destory_snf_layer();
 
 int8_t snf_LME_AUTH(void *args);
 
-int8_t exit_LME_AUTH(void *args);
+int8_t exit_LME_AUTH(uint16_t sac);
 
 int8_t register_snf_en(snf_args_t *snf_args);
 

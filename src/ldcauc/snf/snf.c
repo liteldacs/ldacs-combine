@@ -145,9 +145,12 @@ int8_t snf_LME_AUTH(void *args) {
     return LDCAUC_OK;
 }
 
-int8_t exit_LME_AUTH(void *args) {
-    snf_obj.finish_auth_func();
+int8_t exit_LME_AUTH(uint16_t sac) {
+    if (snf_obj.finish_auth_func) {
+    snf_obj.finish_auth_func(sac);
     return LDCAUC_OK;
+    }
+    return LDCAUC_NULL;
 }
 
 int8_t register_snf_en(snf_args_t *snf_args) {

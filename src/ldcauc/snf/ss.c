@@ -147,10 +147,6 @@ l_err recv_auc_resp(buffer_t *buf, snf_entity_t *as_man) {
         return LD_ERR_INVALID_MAC;
     }
 
-
-    // as_man_update_key_handler(as_man, &as_man->AUTHC_MACLEN, resp.MAC_LEN, sizeof(uint8_t), "maclen");
-    // as_man_update_key_handler(as_man, &as_man->AUTHC_AUTH_ID, resp.AUTH_ID, sizeof(uint8_t), "authid");
-    // as_man_update_key_handler(as_man, &as_man->AUTHC_ENC_ID, resp.ENC_ID, sizeof(uint8_t), "encid");
     as_man->AUTHC_MACLEN = resp.MAC_LEN;
     as_man->AUTHC_AUTH_ID = resp.AUTH_ID;
     as_man->AUTHC_ENC_ID = resp.ENC_ID;
@@ -166,7 +162,7 @@ l_err recv_auc_resp(buffer_t *buf, snf_entity_t *as_man) {
 
     free_buffer(resp.N_2);
 
-    exit_LME_AUTH(NULL);
+    exit_LME_AUTH(resp.AS_SAC);
 
     return LD_OK;
 }
