@@ -438,6 +438,7 @@ l_err handle_send_msg(void *args, struct_desc_t *desc, snf_entity_t *as_man, KEY
         // CLONE_TO_CHUNK(*orient_sdu->buf, lme_ss_pbs.start, pbs_offset(&lme_ss_pbs));
         //
         // preempt_prim(&SN_DATA_REQ_PRIM, SN_TYP_FROM_LME, orient_sdu, free_orient_sdus, 0, 0);
+        snf_obj.trans_snp_func(as_man->AS_SAC, as_man->AS_CURR_GS_SAC, lme_ss_pbs.start, pbs_offset(&lme_ss_pbs));
     }
 
 

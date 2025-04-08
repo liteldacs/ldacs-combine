@@ -131,6 +131,8 @@ l_err recv_gsnf(basic_conn_t **bcp) {
     snf_entity_t *as_man;
     uint8_t gsnf_type = *mlt_ld->bc->read_pkt.ptr;
 
+
+    log_warn("!!!!!!!!!!!!!!!!!!!!! %02x", gsnf_type);
     switch (gsnf_type) {
         case GSNF_INITIAL_AS: {
             gsnf_pkt_cn_ini_t *init_pkt = calloc(1, sizeof(gsnf_pkt_cn_ini_t));

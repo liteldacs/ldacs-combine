@@ -33,6 +33,7 @@ int8_t init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_p
 
     memcpy(snf_obj.net_opt.addr, gsnf_addr, GEN_ADDRLEN);
     snf_obj.net_opt.port = gsnf_port;
+    snf_obj.net_opt.recv_handler = config.is_merged ? recv_gsg : recv_gsnf;
     snf_obj.sgw_conn = init_gs_conn(LD_GS, &snf_obj.net_opt);
 
     pthread_create(&snf_obj.client_th, NULL, gs_epoll_setup, &snf_obj.net_opt);
