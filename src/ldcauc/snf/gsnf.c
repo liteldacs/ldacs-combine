@@ -177,7 +177,7 @@ l_err recv_gsnf(basic_conn_t **bcp) {
                     // /* 通过原语向SNP层传递对应报文 */
                     // CLONE_TO_CHUNK(*orient_sdu->buf, gsnf_pkt->sdu->ptr, gsnf_pkt->sdu->len);
                     // preempt_prim(&SN_DATA_REQ_PRIM, SN_TYP_FROM_LME, orient_sdu, free_orient_sdus, 0, 0);
-                    snf_obj.trans_snp_func();
+                    snf_obj.trans_snp_func(as_man->AS_SAC, snf_obj.GS_SAC, gsnf_pkt->sdu->ptr, gsnf_pkt->sdu->len);
                     break;
                 }
                 case GSNF_SNF_DOWNLOAD: {
@@ -311,7 +311,7 @@ l_err recv_gsg(basic_conn_t **bcp) {
                     // /* 通过原语向SNP层传递对应报文 */
                     // CLONE_TO_CHUNK(*orient_sdu->buf, gsnf_pkg->sdu->ptr, gsnf_pkg->sdu->len);
                     // preempt_prim(&SN_DATA_REQ_PRIM, SN_TYP_FROM_LME, orient_sdu, free_orient_sdus, 0, 0);
-                    snf_obj.trans_snp_func();
+                    snf_obj.trans_snp_func(as_man->AS_SAC, snf_obj.GS_SAC, gsnf_pkg->sdu->ptr, gsnf_pkg->sdu->len);
                     break;
                 }
                 case GS_SNF_DOWNLOAD: {

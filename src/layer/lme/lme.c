@@ -3,6 +3,8 @@
 //
 
 
+#include <ldcauc/crypto/key.h>
+
 #include "ldacs_lme.h"
 
 static lyr_desc_t *sn_upper_lyr[] = {
@@ -131,7 +133,7 @@ l_err make_lme_layer() {
                     /* AS set the initial state 'FSCANNING' */
                     init_lme_fsm(&lme_layer_objs, LME_FSCANNING);
                     lme_layer_objs.lme_as_man = init_as_man(DEFAULT_SAC, config.UA, DEFAULT_SAC);
-                    init_as_snf_layer(NULL, NULL);
+                    init_as_snf_layer(as_finish_auth_func, trans_snp_data);
                     break;
                 }
                 case LD_GS: {
@@ -141,7 +143,7 @@ l_err make_lme_layer() {
                     // lme_layer_objs.sgw_conn = init_gs_conn(LD_GS, &lme_layer_objs.net_opt);
                     // pthread_create(&lme_layer_objs.client_th, NULL, gs_epoll_setup, &lme_layer_objs.net_opt);
                     // pthread_detach(lme_layer_objs.client_th);
-                    init_gs_snf_layer_unmerged(get_gs_sac(), config.gsnf_addr_v6, config.gsnf_port, NULL, NULL);
+                    init_gs_snf_layer_unmerged(get_gs_sac(), config.gsnf_addr_v6, config.gsnf_port, trans_snp_data);
 
                     /* GS set the initial state 'OPEN' */
                     init_lme_fsm(&lme_layer_objs, LME_OPEN);
@@ -331,6 +333,11 @@ l_err change_LME_CONNECTING() {
     return err;
 }
 
+int8_t as_finish_auth_func() {
+    change_LME_OPEN();
+    return 0;
+}
+
 l_err change_LME_OPEN() {
     l_err err = LD_OK;
 
@@ -419,4 +426,13 @@ l_err entry_LME_OPEN(void *args) {
         }
     } while (0);
     return err;
+}
+
+int8_t trans_snp_data(uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size_t buf_len) {
+    orient_sdu_t *orient_sdu = create_orient_sdus(AS_SAC, GS_SAC);
+
+    /* 通过原语向SNP层传递对应报文 */
+    CLONE_TO_CHUNK(*orient_sdu->buf, buf, buf_len);
+    preempt_prim(&SN_DATA_REQ_PRIM, SN_TYP_FROM_LME, orient_sdu, free_orient_sdus, 0, 0);
+    return LD_OK;
 }

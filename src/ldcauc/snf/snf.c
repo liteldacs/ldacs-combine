@@ -23,13 +23,12 @@ int8_t init_as_snf_layer(finish_auth finish_auth, trans_snp trans_snp) {
     return LDCAUC_OK;
 }
 
-int8_t init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port, finish_auth finish_auth,
+int8_t init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port,
                          trans_snp trans_snp) {
     snf_obj.snf_emap = init_enode_map();
     snf_obj.role = LD_GS;
     snf_obj.GS_SAC = GS_SAC;
 
-    snf_obj.finish_auth_func = finish_auth;
     snf_obj.trans_snp_func = trans_snp;
 
     memcpy(snf_obj.net_opt.addr, gsnf_addr, GEN_ADDRLEN);
@@ -40,6 +39,16 @@ int8_t init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_p
     pthread_detach(snf_obj.client_th);
 
     snf_obj.is_merged = TRUE;
+
+    return LDCAUC_OK;
+}
+
+
+int8_t init_gs_snf_layer_unmerged(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port,
+                                  trans_snp trans_snp) {
+    init_gs_snf_layer(GS_SAC, gsnf_addr, gsnf_port, trans_snp);
+
+    snf_obj.is_merged = FALSE;
 
     return LDCAUC_OK;
 }
@@ -58,14 +67,6 @@ int8_t init_sgw_snf_layer(uint16_t listen_port) {
     return LDCAUC_OK;
 }
 
-int8_t init_gs_snf_layer_unmerged(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port, finish_auth finish_auth,
-                                  trans_snp trans_snp) {
-    init_gs_snf_layer(GS_SAC, gsnf_addr, gsnf_port, finish_auth, trans_snp);
-
-    snf_obj.is_merged = FALSE;
-
-    return LDCAUC_OK;
-}
 
 int8_t destory_snf_layer() {
     hashmap_free(snf_obj.snf_emap);
@@ -145,10 +146,10 @@ int8_t snf_LME_AUTH(void *args) {
     return LDCAUC_OK;
 }
 
-int8_t exit_LME_AUTH(uint16_t sac) {
+int8_t exit_LME_AUTH(void) {
     if (snf_obj.finish_auth_func) {
-    snf_obj.finish_auth_func(sac);
-    return LDCAUC_OK;
+        snf_obj.finish_auth_func();
+        return LDCAUC_OK;
     }
     return LDCAUC_NULL;
 }

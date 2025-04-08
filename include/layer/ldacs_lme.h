@@ -477,9 +477,13 @@ void D_SAPC_cb(ld_prim_t *prim);
 
 l_err change_LME_CONNECTING();
 
+int8_t as_finish_auth_func();
+
 l_err change_LME_OPEN();
 
 void exit_LME_CONN_OPEN_action(void *curr_st_data, struct sm_event_s *event, void *new_state_data);
+
+int8_t trans_snp_data(uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size_t buf_len);
 
 /* mms */
 l_err init_lme_mms(lme_layer_objs_t *obj);

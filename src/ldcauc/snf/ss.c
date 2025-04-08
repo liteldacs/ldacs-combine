@@ -162,7 +162,7 @@ l_err recv_auc_resp(buffer_t *buf, snf_entity_t *as_man) {
 
     free_buffer(resp.N_2);
 
-    exit_LME_AUTH(resp.AS_SAC);
+    exit_LME_AUTH();
 
     return LD_OK;
 }

@@ -3,6 +3,8 @@
 //
 
 
+#include <ldcauc/crypto/key.h>
+
 #include "layer_rcu.h"
 #include "layer_interface.h"
 
