@@ -23,8 +23,6 @@ add_library(${PROJECT_NAME} STATIC ${SRC_LIST}
         lme/lme_rms.c
         lme/lme_util.c
         lme/lme_define.c
-        lme/lme_gsnf.c
-        lme/lme_auth.c
         snp/ldacs_snp.c
         snp/snp_define.c
         layer_interface.c

@@ -9,8 +9,8 @@
 #include "layer_interface.h"
 
 rcu_layer_obj_t rcu_layer_obj = {
-    .rcu_status = RCU_CLOSED,
-    .is_occupied = FALSE,
+        .rcu_status = RCU_CLOSED,
+        .is_occupied = FALSE,
 };
 
 static void powering_on() {
@@ -67,17 +67,17 @@ void L_SAPC_cb(ld_prim_t *prim) {
                 case LME_AS_UPDATE: {
                     passert(rcu_layer_obj.service.handle_as_info_upd != NULL);
                     lme_as_man_t *as_man = prim->prim_objs;
-                    rcu_layer_obj.service.handle_as_info_upd(&(as_info_upd_t){
-                        .AS_UA = as_man->AS_UA,
-                        .AS_SAC = as_man->AS_SAC,
-                        .AS_CURR_GS_SAC = as_man->AS_CURR_GS_SAC,
-                        .AUTHC_MACLEN = as_man->AUTHC_MACLEN,
-                        .AUTHC_AUTH_ID = as_man->AUTHC_AUTH_ID,
-                        .AUTHC_ENC_ID = as_man->AUTHC_ENC_ID,
-                        .AUTHC_KLEN = as_man->AUTHC_KLEN,
-                        .CO = as_man->CO.co[0],
-                        .RPSO = as_man->RPSO,
-                        .NRPS = as_man->NRPS,
+                    rcu_layer_obj.service.handle_as_info_upd(&(as_info_upd_t) {
+                            .AS_UA = as_man->AS_UA,
+                            .AS_SAC = as_man->AS_SAC,
+                            .AS_CURR_GS_SAC = as_man->AS_CURR_GS_SAC,
+//                        .AUTHC_MACLEN = as_man->AUTHC_MACLEN,
+//                        .AUTHC_AUTH_ID = as_man->AUTHC_AUTH_ID,
+//                        .AUTHC_ENC_ID = as_man->AUTHC_ENC_ID,
+//                        .AUTHC_KLEN = as_man->AUTHC_KLEN,
+                            .CO = as_man->CO.co[0],
+                            .RPSO = as_man->RPSO,
+                            .NRPS = as_man->NRPS,
                     });
                     break;
                 }
@@ -143,17 +143,17 @@ l_rcu_err rcu_start_auth() {
 enum RCU_STATUS_E rcu_get_rcu_state() {
     if (config.role == LD_AS && rcu_layer_obj.rcu_status == RCU_OPEN) {
         lme_as_man_t *as_man = lme_layer_objs.lme_as_man;
-        rcu_layer_obj.service.handle_as_info_upd(&(as_info_upd_t){
-            .AS_UA = as_man->AS_UA,
-            .AS_SAC = as_man->AS_SAC,
-            .AS_CURR_GS_SAC = as_man->AS_CURR_GS_SAC,
-            .AUTHC_MACLEN = as_man->AUTHC_MACLEN,
-            .AUTHC_AUTH_ID = as_man->AUTHC_AUTH_ID,
-            .AUTHC_ENC_ID = as_man->AUTHC_ENC_ID,
-            .AUTHC_KLEN = as_man->AUTHC_KLEN,
-            .CO = as_man->CO.co[0],
-            .RPSO = as_man->RPSO,
-            .NRPS = as_man->NRPS,
+        rcu_layer_obj.service.handle_as_info_upd(&(as_info_upd_t) {
+                .AS_UA = as_man->AS_UA,
+                .AS_SAC = as_man->AS_SAC,
+                .AS_CURR_GS_SAC = as_man->AS_CURR_GS_SAC,
+//                .AUTHC_MACLEN = as_man->AUTHC_MACLEN,
+//                .AUTHC_AUTH_ID = as_man->AUTHC_AUTH_ID,
+//                .AUTHC_ENC_ID = as_man->AUTHC_ENC_ID,
+//                .AUTHC_KLEN = as_man->AUTHC_KLEN,
+                .CO = as_man->CO.co[0],
+                .RPSO = as_man->RPSO,
+                .NRPS = as_man->NRPS,
         });
     }
     return rcu_layer_obj.rcu_status;

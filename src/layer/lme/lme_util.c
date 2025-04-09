@@ -5,70 +5,70 @@
 #include "ldacs_lme.h"
 
 fsm_event_t lme_fsm_events[] = {
-    {"LME_FSCANNING", NULL, NULL},
-    {"LME_CSCANNING", entry_LME_CSCANNING, NULL},
-    {"LME_CONNECTING", entry_LME_CONNECTING, NULL},
-    {"LME_AUTH", entry_LME_AUTH, NULL},
-    {"LME_OPEN", entry_LME_OPEN, NULL},
+        {"LME_FSCANNING", NULL,                  NULL},
+        {"LME_CSCANNING",  entry_LME_CSCANNING,  NULL},
+        {"LME_CONNECTING", entry_LME_CONNECTING, NULL},
+        {"LME_AUTH",       entry_LME_AUTH,       NULL},
+        {"LME_OPEN",       entry_LME_OPEN,       NULL},
 };
 
 static struct sm_state_s lme_states[] = {
-    {
-        .data = "LME_FSCANNING",
-        .entryAction = &sm_default_entry_action,
-        .exitAction = &sm_default_exit_action,
-        .transitions = (sm_transition_t[]){
-            {LME_EV_DEFAULT, (void *) "LME_CSCANNING", &default_guard, NULL, &lme_states[LME_CSCANNING]},
+        {
+                .data = "LME_FSCANNING",
+                .entryAction = &sm_default_entry_action,
+                .exitAction = &sm_default_exit_action,
+                .transitions = (sm_transition_t[]) {
+                        {LME_EV_DEFAULT, (void *) "LME_CSCANNING", &default_guard, NULL, &lme_states[LME_CSCANNING]},
+                },
+                .numTransitions = 1,
         },
-        .numTransitions = 1,
-    },
-    {
-        .data = "LME_CSCANNING",
-        .entryAction = &sm_default_entry_action,
-        .exitAction = &sm_default_exit_action,
-        .transitions = (sm_transition_t[]){
-            {LME_EV_DEFAULT, (void *) "LME_CONNECTING", &default_guard, NULL, &lme_states[LME_CONNECTING]},
-            {LME_EV_DEFAULT, (void *) "LME_FSCANNING", &default_guard, NULL, &lme_states[LME_FSCANNING]},
+        {
+                .data = "LME_CSCANNING",
+                .entryAction = &sm_default_entry_action,
+                .exitAction = &sm_default_exit_action,
+                .transitions = (sm_transition_t[]) {
+                        {LME_EV_DEFAULT, (void *) "LME_CONNECTING", &default_guard, NULL, &lme_states[LME_CONNECTING]},
+                        {LME_EV_DEFAULT, (void *) "LME_FSCANNING",  &default_guard, NULL, &lme_states[LME_FSCANNING]},
+                },
+                .numTransitions = 2,
         },
-        .numTransitions = 2,
-    },
-    {
-        .data = "LME_CONNECTING",
-        .entryAction = &sm_default_entry_action,
-        .exitAction = &sm_default_exit_action,
-        .transitions = (sm_transition_t[]){
-            {LME_EV_DEFAULT, (void *) "LME_AUTH", &default_guard, NULL, &lme_states[LME_AUTH]},
-            {LME_EV_DEFAULT, (void *) "LME_CSCANNING", &default_guard, NULL, &lme_states[LME_CSCANNING]},
+        {
+                .data = "LME_CONNECTING",
+                .entryAction = &sm_default_entry_action,
+                .exitAction = &sm_default_exit_action,
+                .transitions = (sm_transition_t[]) {
+                        {LME_EV_DEFAULT, (void *) "LME_AUTH",      &default_guard, NULL, &lme_states[LME_AUTH]},
+                        {LME_EV_DEFAULT, (void *) "LME_CSCANNING", &default_guard, NULL, &lme_states[LME_CSCANNING]},
+                },
+                .numTransitions = 2,
         },
-        .numTransitions = 2,
-    },
-    {
-        .data = "LME_AUTH",
-        .entryAction = &sm_default_entry_action,
-        .exitAction = &sm_default_exit_action,
-        .transitions = (sm_transition_t[]){
-            {LME_EV_DEFAULT, (void *) "LME_OPEN", &default_guard, NULL, &lme_states[LME_OPEN]},
-            {
-                LME_EV_DEFAULT, (void *) "LME_FSCANNING", default_guard, exit_LME_CONN_OPEN_action,
-                &lme_states[LME_FSCANNING]
-            },
-            {LME_EV_DEFAULT, (void *) "LME_CONNECTING", &default_guard, NULL, &lme_states[LME_CONNECTING]},
+        {
+                .data = "LME_AUTH",
+                .entryAction = &sm_default_entry_action,
+                .exitAction = &sm_default_exit_action,
+                .transitions = (sm_transition_t[]) {
+                        {LME_EV_DEFAULT, (void *) "LME_OPEN",       &default_guard, NULL, &lme_states[LME_OPEN]},
+                        {
+                         LME_EV_DEFAULT, (void *) "LME_FSCANNING",  default_guard, exit_LME_CONN_OPEN_action,
+                                                                                          &lme_states[LME_FSCANNING]
+                        },
+                        {LME_EV_DEFAULT, (void *) "LME_CONNECTING", &default_guard, NULL, &lme_states[LME_CONNECTING]},
+                },
+                .numTransitions = 3,
         },
-        .numTransitions = 3,
-    },
-    {
-        .data = "LME_OPEN",
-        .entryAction = &sm_default_entry_action,
-        .exitAction = &sm_default_exit_action,
-        .transitions = (sm_transition_t[]){
-            {
-                LME_EV_DEFAULT, (void *) "LME_FSCANNING", default_guard, exit_LME_CONN_OPEN_action,
-                &lme_states[LME_FSCANNING]
-            },
-            {LME_EV_DEFAULT, (void *) "LME_CONNECTING", &default_guard, NULL, &lme_states[LME_CONNECTING]},
-        },
-        .numTransitions = 2,
-    }
+        {
+                .data = "LME_OPEN",
+                .entryAction = &sm_default_entry_action,
+                .exitAction = &sm_default_exit_action,
+                .transitions = (sm_transition_t[]) {
+                        {
+                                LME_EV_DEFAULT, (void *) "LME_FSCANNING",  default_guard, exit_LME_CONN_OPEN_action,
+                                                                                                 &lme_states[LME_FSCANNING]
+                        },
+                        {       LME_EV_DEFAULT, (void *) "LME_CONNECTING", &default_guard, NULL, &lme_states[LME_CONNECTING]},
+                },
+                .numTransitions = 2,
+        }
 };
 
 void init_lme_fsm(lme_layer_objs_t *lme_obj, enum LME_FSM_STATES_E init_state) {
@@ -103,10 +103,10 @@ lme_as_man_t *init_as_man(uint16_t AS_SAC, uint32_t AS_UA, uint16_t AS_CURR_GS_S
     as_man->AS_UA = AS_UA;
     as_man->AS_CURR_GS_SAC = AS_CURR_GS_SAC;
 
-    as_man->AUTHC_MACLEN = AUTHC_MACLEN_256; /* default mac len is 256  */
-    as_man->AUTHC_AUTH_ID = AUTHC_AUTH_SM3HMAC;
-    as_man->AUTHC_ENC_ID = AUTHC_ENC_SM4_CBC;
-    as_man->AUTHC_KLEN = AUTHC_KLEN_128;
+//    as_man->AUTHC_MACLEN = AUTHC_MACLEN_256; /* default mac len is 256  */
+//    as_man->AUTHC_AUTH_ID = AUTHC_AUTH_SM3HMAC;
+//    as_man->AUTHC_ENC_ID = AUTHC_ENC_SM4_CBC;
+//    as_man->AUTHC_KLEN = AUTHC_KLEN_128;
 
     // as_man->CO = DEFAULT_CO;
     // as_man->CO.mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -190,11 +190,11 @@ l_err as_man_update_key_handler(lme_as_man_t *as_man, void *key, uint64_t value,
         buffer_t *buf = init_buffer_unptr();
         CLONE_TO_CHUNK(*buf, key_str, strlen(key_str));
 
-        if ((err = preempt_prim(&LME_STATE_IND_PRIM, LME_AS_KEY_UPDATE, &(as_info_key_upd_t){
-                                    .ua = as_man->AS_UA,
-                                    .key = buf,
-                                    .value = value,
-                                }, NULL, 0, 0))) {
+        if ((err = preempt_prim(&LME_STATE_IND_PRIM, LME_AS_KEY_UPDATE, &(as_info_key_upd_t) {
+                .ua = as_man->AS_UA,
+                .key = buf,
+                .value = value,
+        }, NULL, 0, 0))) {
             return err;
         }
         free_buffer(buf);

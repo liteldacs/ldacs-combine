@@ -177,10 +177,10 @@ typedef struct lme_as_man_s {
     uint16_t AS_SAC;
     uint16_t AS_CURR_GS_SAC; /* current connected/to connect GS SAC for AS */
 
-    uint8_t AUTHC_MACLEN,
-            AUTHC_AUTH_ID,
-            AUTHC_ENC_ID,
-            AUTHC_KLEN;
+//    uint8_t AUTHC_MACLEN,
+//            AUTHC_AUTH_ID,
+//            AUTHC_ENC_ID,
+//            AUTHC_KLEN;
     ld_co_t CO;
 
     // for GS
@@ -191,14 +191,6 @@ typedef struct lme_as_man_s {
 
     uint32_t send_T_SQN,
             recv_T_SQN;
-
-    // buffer_t *shared_random;
-    // KEY_HANDLE key_as_sgw_r_h;
-    // KEY_HANDLE key_as_sgw_s_h;
-    // buffer_t *key_as_gs_b;
-    // KEY_HANDLE key_as_gs_h;
-    // KEY_HANDLE key_session_en_h;
-    // KEY_HANDLE key_session_mac_h;
 
     /* for GSC */
     uint32_t gsnf_count;
@@ -518,19 +510,6 @@ void trans_cc_mac_timer_func(void *args);
 
 void rrm_timer_func(void *args);
 
-/* gsnf */
-
-
-// l_err trans_gsnf(buffer_t *sdu, uint16_t as_sac, gs_tcp_propt_t *conn, GSNF_TYPE g_type);
-l_err trans_gsnf(gs_tcp_propt_t *conn, void *pkg, struct_desc_t *desc, l_err (*mid_func)(buffer_t *, void *),
-                 void *args);
-
-// l_err sgw_recv_gsnf(gs_tcp_propt_t *mlt_ld);
-
-l_err recv_gsnf(basic_conn_t **bcp);
-
-l_err recv_gsg(basic_conn_t **bcp);
-
 
 /* lme util */
 
@@ -542,11 +521,11 @@ static uint64_t hash_lme_as_enode(const void *item, uint64_t seed0, uint64_t see
 }
 
 static lme_as_man_t *get_lme_as_enode(const uint16_t as_sac) {
-    return hashmap_get(lme_layer_objs.LME_GS_AUTH_AS, &(lme_as_man_t){.AS_SAC = as_sac});
+    return hashmap_get(lme_layer_objs.LME_GS_AUTH_AS, &(lme_as_man_t) {.AS_SAC = as_sac});
 }
 
 static const bool has_lme_as_enode(const uint16_t as_sac) {
-    return hashmap_get(lme_layer_objs.LME_GS_AUTH_AS, &(lme_as_man_t){.AS_SAC = as_sac}) != NULL;
+    return hashmap_get(lme_layer_objs.LME_GS_AUTH_AS, &(lme_as_man_t) {.AS_SAC = as_sac}) != NULL;
 }
 
 static struct hashmap *init_lme_sac_map() {
