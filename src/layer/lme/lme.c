@@ -13,102 +13,102 @@ static lyr_desc_t *rl_upper_lyr[] = {
 };
 
 static lyr_desc_t *sn_lower_lyr[] = {
-    //&snp_desc,
+        //&snp_desc,
 };
 
 static lyr_desc_t *rl_lower_lyr[] = {
-    &mac_desc,
+        &mac_desc,
 };
 
 
 lme_layer_objs_t lme_layer_objs = {
-    .LME_T_CELL_RESP = 30,
-    .LME_C_MAKE = 3,
-    .LME_T_MAKE = 60,
-    .LME_T_RLK = 10,
-    .LME_T1_FLK = 3,
-    .LME_T_CSAN = 60,
-    .LME_C_PRLA = 10,
-    .SF_NUMBER = 0,
-    .MF_NUMBER = 0,
+        .LME_T_CELL_RESP = 30,
+        .LME_C_MAKE = 3,
+        .LME_T_MAKE = 60,
+        .LME_T_RLK = 10,
+        .LME_T1_FLK = 3,
+        .LME_T_CSAN = 60,
+        .LME_C_PRLA = 10,
+        .SF_NUMBER = 0,
+        .MF_NUMBER = 0,
 
-    .PROTOCOL_VER = PROTECT_VERSION,
-    .MOD = MOD_CELL_SPECIFIC,
-    .CMS = CMS_TYP_1,
-    .EIRP = 0,
+        .PROTOCOL_VER = PROTECT_VERSION,
+        .MOD = MOD_CELL_SPECIFIC,
+        .CMS = CMS_TYP_1,
+        .EIRP = 0,
 
-    .cc_timer = {{.it_interval = {0, MF_TIMER}, .it_value = {0, 0}}},
-    .gtimer = {
-        {trans_lme_bc_timer_func, NULL, TIMER_INFINITE},
-        {trans_lme_cc_timer_func, NULL, 4},
-        {trans_ra_cr_timer_func, NULL, TIMER_INFINITE},
-    },
+        .cc_timer = {{.it_interval = {0, MF_TIMER}, .it_value = {0, 0}}},
+        .gtimer = {
+                {trans_lme_bc_timer_func, NULL, TIMER_INFINITE},
+                {trans_lme_cc_timer_func, NULL, 4},
+                {trans_ra_cr_timer_func,  NULL, TIMER_INFINITE},
+        },
 
-    .finish_status = LME_NO_STATE_FINISHED,
+        .finish_status = LME_NO_STATE_FINISHED,
 };
 
 lyr_desc_t lme_desc = {
-    .name = "LME_SUB_NET_FUNC",
-    .lyr_funcs = NULL,
-    .upper_lyr = NULL,
-    .lower_lyr = sn_lower_lyr,
-    .lyr_obj = &lme_layer_objs,
+        .name = "LME_SUB_NET_FUNC",
+        .lyr_funcs = NULL,
+        .upper_lyr = NULL,
+        .lower_lyr = sn_lower_lyr,
+        .lyr_obj = &lme_layer_objs,
 };
 
 ld_prim_t LME_OPEN_REQ_PRIM = {
-    .name = "LME_OPEN_REQ",
-    .prim_seq = LME_OPEN_REQ,
-    .SAP = {L_SAPC, NULL, NULL},
-    .req_cb = {L_SAPC_cb, NULL, NULL},
-    .mutex = PTHREAD_MUTEX_INITIALIZER,
+        .name = "LME_OPEN_REQ",
+        .prim_seq = LME_OPEN_REQ,
+        .SAP = {L_SAPC, NULL, NULL},
+        .req_cb = {L_SAPC_cb, NULL, NULL},
+        .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
 ld_prim_t LME_CONF_REQ_PRIM = {
-    .name = "LME_CONF_REQ",
-    .prim_seq = LME_CONF_REQ,
-    .SAP = {L_SAPC, NULL, NULL},
-    .req_cb = {L_SAPC_cb, NULL, NULL},
-    .mutex = PTHREAD_MUTEX_INITIALIZER,
+        .name = "LME_CONF_REQ",
+        .prim_seq = LME_CONF_REQ,
+        .SAP = {L_SAPC, NULL, NULL},
+        .req_cb = {L_SAPC_cb, NULL, NULL},
+        .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
 ld_prim_t LME_AUTH_REQ_PRIM = {
-    .name = "LME_AUTH_REQ",
-    .prim_seq = LME_AUTH_REQ,
-    .SAP = {L_SAPC, NULL, NULL},
-    .req_cb = {L_SAPC_cb, NULL, NULL},
-    .mutex = PTHREAD_MUTEX_INITIALIZER,
+        .name = "LME_AUTH_REQ",
+        .prim_seq = LME_AUTH_REQ,
+        .SAP = {L_SAPC, NULL, NULL},
+        .req_cb = {L_SAPC_cb, NULL, NULL},
+        .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
 ld_prim_t LME_STATE_IND_PRIM = {
-    .name = "LME_STATE_IND",
-    .prim_seq = LME_STATE_IND,
-    .SAP = {NULL, NULL, NULL},
-    .req_cb = {L_SAPC_cb, NULL, NULL},
-    .mutex = PTHREAD_MUTEX_INITIALIZER,
+        .name = "LME_STATE_IND",
+        .prim_seq = LME_STATE_IND,
+        .SAP = {NULL, NULL, NULL},
+        .req_cb = {L_SAPC_cb, NULL, NULL},
+        .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
 ld_prim_t LME_TEST_REQ_PRIM = {
-    .name = "LME_TEST_REQ",
-    .prim_seq = LME_TEST_REQ,
-    .SAP = {L_SAPT, NULL, NULL},
-    .req_cb = {L_SAPT_cb, NULL, NULL},
-    .mutex = PTHREAD_MUTEX_INITIALIZER,
+        .name = "LME_TEST_REQ",
+        .prim_seq = LME_TEST_REQ,
+        .SAP = {L_SAPT, NULL, NULL},
+        .req_cb = {L_SAPT_cb, NULL, NULL},
+        .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
 ld_prim_t LME_R_REQ_PRIM = {
-    .name = "LME_R_REQ",
-    .prim_seq = LME_R_REQ,
-    .SAP = {L_SAPR, NULL, NULL},
-    .req_cb = {L_SAPR_cb, NULL, NULL},
-    .mutex = PTHREAD_MUTEX_INITIALIZER,
+        .name = "LME_R_REQ",
+        .prim_seq = LME_R_REQ,
+        .SAP = {L_SAPR, NULL, NULL},
+        .req_cb = {L_SAPR_cb, NULL, NULL},
+        .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
 ld_prim_t LME_R_IND_PRIM = {
-    .name = "LME_R_IND",
-    .prim_seq = LME_R_IND,
-    .SAP = {NULL, NULL, NULL},
-    .req_cb = {L_SAPR_cb, NULL, NULL},
-    .mutex = PTHREAD_MUTEX_INITIALIZER,
+        .name = "LME_R_IND",
+        .prim_seq = LME_R_IND,
+        .SAP = {NULL, NULL, NULL},
+        .req_cb = {L_SAPR_cb, NULL, NULL},
+        .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
 /**
@@ -143,6 +143,8 @@ l_err make_lme_layer() {
                     // lme_layer_objs.sgw_conn = init_gs_conn(LD_GS, &lme_layer_objs.net_opt);
                     // pthread_create(&lme_layer_objs.client_th, NULL, gs_epoll_setup, &lme_layer_objs.net_opt);
                     // pthread_detach(lme_layer_objs.client_th);
+                    config.is_merged == TRUE ?
+                    init_gs_snf_layer(get_gs_sac(), config.gsnf_addr_v6, config.gsnf_port, trans_snp_data) :
                     init_gs_snf_layer_unmerged(get_gs_sac(), config.gsnf_addr_v6, config.gsnf_port, trans_snp_data);
 
                     /* GS set the initial state 'OPEN' */
@@ -152,7 +154,8 @@ l_err make_lme_layer() {
 
                     break;
                 }
-                default: break;
+                default:
+                    break;
             }
             init_lme_mms(&lme_layer_objs);
             init_lme_rms(&lme_layer_objs);
@@ -197,7 +200,7 @@ void L_SAPC(ld_prim_t *prim) {
 
                     /* if success, change LME state to CSCANNING */
                     if ((prim->prim_err = change_state(&lme_layer_objs.lme_fsm, LME_EV_DEFAULT,
-                                                       &(fsm_event_data_t){&lme_fsm_events[LME_CSCANNING], NULL}))) {
+                                                       &(fsm_event_data_t) {&lme_fsm_events[LME_CSCANNING], NULL}))) {
                         log_error("LME can not change state from LME_FSCANNING to LME_CSACNNING correctly");
                         return;
                     }
@@ -221,7 +224,7 @@ void L_SAPC(ld_prim_t *prim) {
                 }
                 /* if success, change LME state to CSCANNING */
                 if ((prim->prim_err = change_state(&lme_layer_objs.lme_fsm, LME_EV_DEFAULT,
-                                                   &(fsm_event_data_t){&lme_fsm_events[LME_FSCANNING], NULL}))) {
+                                                   &(fsm_event_data_t) {&lme_fsm_events[LME_FSCANNING], NULL}))) {
                     log_error("LME can not change state from LME_FSCANNING to LME_CSACNNING correctly");
                     return;
                 }
@@ -233,7 +236,7 @@ void L_SAPC(ld_prim_t *prim) {
         }
         case LME_AUTH_REQ: {
             if ((prim->prim_err = change_state(&lme_layer_objs.lme_fsm, LME_EV_DEFAULT,
-                                               &(fsm_event_data_t){&lme_fsm_events[LME_AUTH], NULL}))) {
+                                               &(fsm_event_data_t) {&lme_fsm_events[LME_AUTH], NULL}))) {
                 log_error("LME can not change state from LME_CONNECTING to LME_AUTH correctly");
                 return;
             }
@@ -286,11 +289,11 @@ l_err entry_LME_CSCANNING(void *args) {
             break;
         }
 
-        if ((err = preempt_prim(&LME_STATE_IND_PRIM, LME_STATE_CHANGE, &(lme_state_chg_t){
-                                    .ua = lme_layer_objs.lme_as_man->AS_UA,
-                                    .sac = lme_layer_objs.lme_as_man->AS_SAC,
-                                    .state = LME_CSCANNING,
-                                }, NULL, 0, 0))) {
+        if ((err = preempt_prim(&LME_STATE_IND_PRIM, LME_STATE_CHANGE, &(lme_state_chg_t) {
+                .ua = lme_layer_objs.lme_as_man->AS_UA,
+                .sac = lme_layer_objs.lme_as_man->AS_SAC,
+                .state = LME_CSCANNING,
+        }, NULL, 0, 0))) {
             log_error("LME can not call RCU current state");
             break;
         }
@@ -308,11 +311,11 @@ l_err entry_LME_CONNECTING(void *args) {
             log_error("LME can not call lower layers manipulate FSCANNING");
             break;
         }
-        if ((err = preempt_prim(&LME_STATE_IND_PRIM, LME_STATE_CHANGE, &(lme_state_chg_t){
-                                    .ua = lme_layer_objs.lme_as_man->AS_UA,
-                                    .sac = lme_layer_objs.lme_as_man->AS_SAC,
-                                    .state = LME_CONNECTING
-                                }, NULL, 0, 0))) {
+        if ((err = preempt_prim(&LME_STATE_IND_PRIM, LME_STATE_CHANGE, &(lme_state_chg_t) {
+                .ua = lme_layer_objs.lme_as_man->AS_UA,
+                .sac = lme_layer_objs.lme_as_man->AS_SAC,
+                .state = LME_CONNECTING
+        }, NULL, 0, 0))) {
             log_error("LME can not call RCU current state");
             break;
         }
@@ -327,7 +330,7 @@ l_err change_LME_CONNECTING() {
 
     l_err err = LD_OK;
     if ((err = change_state(&lme_layer_objs.lme_fsm, LME_EV_DEFAULT,
-                            &(fsm_event_data_t){&lme_fsm_events[LME_CONNECTING], NULL}))) {
+                            &(fsm_event_data_t) {&lme_fsm_events[LME_CONNECTING], NULL}))) {
         log_error("LME can not change state from LME_CSCANNING to LME_CONNECTING correctly");
     }
     return err;
@@ -342,7 +345,7 @@ l_err change_LME_OPEN() {
     l_err err = LD_OK;
 
     if ((err = change_state(&lme_layer_objs.lme_fsm, LME_EV_DEFAULT,
-                            &(fsm_event_data_t){&lme_fsm_events[LME_OPEN], NULL}))) {
+                            &(fsm_event_data_t) {&lme_fsm_events[LME_OPEN], NULL}))) {
         log_error("LME can not change state from LME_AUTH to LME_OPEN correctly");
     }
 
@@ -352,8 +355,8 @@ l_err change_LME_OPEN() {
 void exit_LME_CONN_OPEN_action(void *curr_st_data, struct sm_event_s *event, void *new_state_data) {
     if (config.role != LD_AS) return;
     dc_cell_exit_t exit = {
-        .d_type = DC_TYP_CELL_EXIT,
-        .SAC = lme_layer_objs.lme_as_man->AS_SAC,
+            .d_type = DC_TYP_CELL_EXIT,
+            .SAC = lme_layer_objs.lme_as_man->AS_SAC,
     };
     preempt_prim(&MAC_DCCH_REQ_PRIM, DC_TYP_CELL_EXIT,
                  gen_pdu(&exit, dc_format_descs[DC_TYP_CELL_EXIT].f_desc, "dc cell exit"), NULL, 0, 0);
@@ -385,20 +388,20 @@ l_err entry_LME_AUTH(void *args) {
 
         /* Tell RCU the state of LME is AUTH */
         if ((err = preempt_prim(&LME_STATE_IND_PRIM, LME_STATE_CHANGE,
-                                &(lme_state_chg_t){
-                                    .ua = lme_layer_objs.lme_as_man->AS_UA,
-                                    .sac = lme_layer_objs.lme_as_man->AS_SAC,
-                                    .state = LME_AUTH
+                                &(lme_state_chg_t) {
+                                        .ua = lme_layer_objs.lme_as_man->AS_UA,
+                                        .sac = lme_layer_objs.lme_as_man->AS_SAC,
+                                        .state = LME_AUTH
                                 }, NULL, 0, 0))) {
             log_error("LME can not call RCU current state");
             break;
         }
 
-        snf_LME_AUTH(&(snf_args_t){
-            .role = config.role,
-            .AS_SAC = lme_layer_objs.lme_as_man->AS_SAC,
-            .AS_UA = lme_layer_objs.lme_as_man->AS_UA,
-            .AS_CURR_GS_SAC = lme_layer_objs.lme_as_man->AS_CURR_GS_SAC,
+        snf_LME_AUTH(&(snf_args_t) {
+                .role = config.role,
+                .AS_SAC = lme_layer_objs.lme_as_man->AS_SAC,
+                .AS_UA = lme_layer_objs.lme_as_man->AS_UA,
+                .AS_CURR_GS_SAC = lme_layer_objs.lme_as_man->AS_CURR_GS_SAC,
         });
     } while (0);
     return err;
@@ -416,10 +419,10 @@ l_err entry_LME_OPEN(void *args) {
 
         /* Tell RCU the state of LME is OPEN */
         if ((err = preempt_prim(&LME_STATE_IND_PRIM, LME_STATE_CHANGE,
-                                &(lme_state_chg_t){
-                                    .ua = lme_layer_objs.lme_as_man->AS_UA,
-                                    .sac = lme_layer_objs.lme_as_man->AS_SAC,
-                                    .state = LME_OPEN
+                                &(lme_state_chg_t) {
+                                        .ua = lme_layer_objs.lme_as_man->AS_UA,
+                                        .sac = lme_layer_objs.lme_as_man->AS_SAC,
+                                        .state = LME_OPEN
                                 }, NULL, 0, 0))) {
             log_error("LME can not call RCU current state");
             break;

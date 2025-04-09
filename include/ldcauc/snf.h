@@ -44,9 +44,7 @@ typedef enum {
 } GSNF_TYPE;
 
 typedef enum {
-    GS_SAC_RQST = 1,
-    GS_SAC_RESP,
-    GS_INITIAL_MSG,
+    GS_INITIAL_MSG = 1,
     GS_SNF_UPLOAD,
     GS_SNF_DOWNLOAD,
     GS_KEY_TRANS,

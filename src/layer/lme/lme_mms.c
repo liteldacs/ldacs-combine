@@ -13,26 +13,26 @@ typedef struct lme_mms_obj_s {
 } lme_mms_obj_t;
 
 static lme_mms_obj_t lme_mms_obj = {
-    .lme_obj = NULL,
-    .stimer = {
-        {trans_bc_mac_timer_func, NULL, BC_MAC_INTVL}
-    },
+        .lme_obj = NULL,
+        .stimer = {
+                {trans_bc_mac_timer_func, NULL, BC_MAC_INTVL}
+        },
 };
 
 static const char *sib_mod_name[] = {
-    "MOD_USER_SPECIFIC",
-    "MOD_CELL_SPECIFIC",
+        "MOD_USER_SPECIFIC",
+        "MOD_CELL_SPECIFIC",
 };
 
 static const char *sib_cms_name[] = {
-    "CMS_TYP_1",
-    "CMS_TYP_2",
-    "CMS_TYP_3",
-    "CMS_TYP_4",
-    "CMS_TYP_5",
-    "CMS_TYP_6",
-    "CMS_TYP_7",
-    "CMS_TYP_8",
+        "CMS_TYP_1",
+        "CMS_TYP_2",
+        "CMS_TYP_3",
+        "CMS_TYP_4",
+        "CMS_TYP_5",
+        "CMS_TYP_6",
+        "CMS_TYP_7",
+        "CMS_TYP_8",
 };
 
 
@@ -93,11 +93,11 @@ void *trans_ra_cr_timer_func(void *args) {
         return NULL;
     }
     ra_cell_rqst_t rqst = {
-        .r_type = R_TYP_CR,
-        .UA = lme_layer_objs.lme_as_man->AS_UA,
-        .SAC = lme_layer_objs.GS_SAC,
-        .SCGS = 1,
-        .VER = 0x1,
+            .r_type = R_TYP_CR,
+            .UA = lme_layer_objs.lme_as_man->AS_UA,
+            .SAC = lme_layer_objs.GS_SAC,
+            .SCGS = 1,
+            .VER = 0x1,
     };
 
     preempt_prim(&MAC_RACH_REQ_PRIM, R_TYP_CR, gen_pdu(&rqst, ra_format_descs[R_TYP_CR].f_desc, "RA OUT"),
@@ -108,10 +108,10 @@ void *trans_ra_cr_timer_func(void *args) {
 
 void trans_bc_acb_func(void *args) {
     bc_acb_t acb_n = {
-        .b_type = B_TYP_ACB,
-        .SAC = lme_mms_obj.lme_obj->GS_SAC,
-        .FLF = lme_mms_obj.lme_obj->init_flf,
-        .RLF = lme_mms_obj.lme_obj->init_rlf,
+            .b_type = B_TYP_ACB,
+            .SAC = lme_mms_obj.lme_obj->GS_SAC,
+            .FLF = lme_mms_obj.lme_obj->init_flf,
+            .RLF = lme_mms_obj.lme_obj->init_rlf,
     };
 
     preempt_prim(&MAC_BCCH_REQ_PRIM, B_TYP_ACB, gen_pdu(&acb_n, bc_format_descs[B_TYP_ACB].f_desc, "ACB_OUT"), NULL, 0,
@@ -121,14 +121,14 @@ void trans_bc_acb_func(void *args) {
 
 void trans_bc_sib_func(void *args) {
     bc_sib_t sib_n = {
-        .b_type = B_TYP_SIB,
-        .SAC = lme_layer_objs.GS_SAC,
-        .VER = lme_layer_objs.PROTOCOL_VER,
-        .FLF = lme_layer_objs.init_flf,
-        .RLF = lme_layer_objs.init_rlf,
-        .MOD = lme_layer_objs.MOD,
-        .CMS = lme_layer_objs.CMS,
-        .EIRP = lme_layer_objs.EIRP,
+            .b_type = B_TYP_SIB,
+            .SAC = lme_layer_objs.GS_SAC,
+            .VER = lme_layer_objs.PROTOCOL_VER,
+            .FLF = lme_layer_objs.init_flf,
+            .RLF = lme_layer_objs.init_rlf,
+            .MOD = lme_layer_objs.MOD,
+            .CMS = lme_layer_objs.CMS,
+            .EIRP = lme_layer_objs.EIRP,
     };
 
     preempt_prim(&MAC_BCCH_REQ_PRIM, B_TYP_SIB, gen_pdu(&sib_n, bc_format_descs[B_TYP_SIB].f_desc, "SIB_OUT"), NULL, 0,
@@ -136,10 +136,10 @@ void trans_bc_sib_func(void *args) {
 }
 
 void trans_bc_mac_timer_func(evutil_socket_t fd, short event, void *arg) {
-    bc_mac_bd_t *mac_n = &(bc_mac_bd_t){
-        .b_type = B_TYP_BC_MAC,
-        .mac_len = SEC_MACLEN_64,
-        .mac = init_buffer_ptr(get_sec_maclen(SEC_MACLEN_64)),
+    bc_mac_bd_t *mac_n = &(bc_mac_bd_t) {
+            .b_type = B_TYP_BC_MAC,
+            .mac_len = SEC_MACLEN_64,
+            .mac = init_buffer_ptr(get_sec_maclen(SEC_MACLEN_64)),
     };
     preempt_prim(&MAC_BCCH_REQ_PRIM, B_TYP_BC_MAC, mac_n, NULL, 0, 0);
 }
@@ -215,29 +215,24 @@ void M_SAPR_cb(ld_prim_t *prim) {
                     return;
                 }
 
-                if (config.is_merged == TRUE) {
-                    // trans_gsnf(lme_layer_objs.sgw_conn, &(gsg_sac_pkt_t){GS_SAC_RQST, cr->UA, NULL}, &gsg_sac_pkt_desc,
-                    //            NULL,NULL);
-                } else {
-                    /* simulate sac alloc procession */
-                    uint16_t sac = generate_urand(SAC_LEN);
-                    if (has_lme_as_enode(sac) == FALSE) {
-                        set_lme_as_enode(init_as_man(sac, cr->UA, lme_layer_objs.GS_SAC));
-                    }
-                    register_snf_en(&(snf_args_t){
+                /* simulate sac alloc procession */
+                uint16_t sac = generate_urand(SAC_LEN);
+                if (has_lme_as_enode(sac) == FALSE) {
+                    set_lme_as_enode(init_as_man(sac, cr->UA, lme_layer_objs.GS_SAC));
+                }
+                register_snf_en(&(snf_args_t) {
                         .role = LD_GS,
                         .AS_SAC = sac,
                         .AS_UA = cr->UA,
                         .AS_CURR_GS_SAC = lme_layer_objs.GS_SAC,
-                    });
-                    dls_en_data_t *dls_en_data = &(dls_en_data_t){
+                });
+                dls_en_data_t *dls_en_data = &(dls_en_data_t) {
                         .GS_SAC = lme_layer_objs.GS_SAC,
                         .AS_UA = cr->UA,
                         .AS_SAC = sac, //和GSC共同协商分配给AS的SAC 10.6.4.5
-                    };
+                };
 
-                    preempt_prim(&DLS_OPEN_REQ_PRIM, DL_TYP_GS_INIT, dls_en_data, NULL, 0, 0);
-                }
+                preempt_prim(&DLS_OPEN_REQ_PRIM, DL_TYP_GS_INIT, dls_en_data, NULL, 0, 0);
 
                 break;
             }

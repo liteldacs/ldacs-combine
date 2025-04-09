@@ -8,10 +8,10 @@
 
 
 snf_obj_t snf_obj = {
-    .PROTOCOL_VER = PROTECT_VERSION,
-    .net_opt = {
-    },
-    .is_merged = TRUE
+        .PROTOCOL_VER = PROTECT_VERSION,
+        .net_opt = {
+        },
+        .is_merged = TRUE
 };
 
 int8_t init_as_snf_layer(finish_auth finish_auth, trans_snp trans_snp) {
@@ -124,13 +124,9 @@ int8_t clear_snf_en(snf_entity_t *snf_en) {
     if (snf_en->key_session_en_h != NULL) { free_buffer(snf_en->key_session_en_h); }
     if (snf_en->key_session_mac_h != NULL) { free_buffer(snf_en->key_session_mac_h); }
 #endif
-    free(snf_en);
     return LDCAUC_OK;
 }
 
-// typedef void (*completion_cb)(void *user_data, int result);
-//
-// void lib_entry(completion_cb cb, void *user_data);
 
 int8_t snf_LME_AUTH(void *args) {
     snf_args_t *snf_args = (snf_args_t *) args;
@@ -138,8 +134,8 @@ int8_t snf_LME_AUTH(void *args) {
     l_err err;
 
     if ((err = change_state(&snf_obj.as_snf_en->auth_fsm, LD_AUTHC_EV_DEFAULT,
-                            &(fsm_event_data_t){
-                                &ld_authc_fsm_events[LD_AUTHC_A1], snf_obj.as_snf_en
+                            &(fsm_event_data_t) {
+                                    &ld_authc_fsm_events[LD_AUTHC_A1], snf_obj.as_snf_en
                             }))) {
         log_error("cant change state correctly, %d", err);
         return LDCAUC_INTERNAL_ERROR;
@@ -163,22 +159,20 @@ int8_t register_snf_en(snf_args_t *snf_args) {
     }
     set_enode(en);
 
-    // TODO: DLS OPEN CALLBACK
-
     return LDCAUC_OK;
 }
 
 int8_t unregister_snf_en(uint16_t SAC) {
     snf_obj.is_merged == FALSE
-        ? trans_gsnf(snf_obj.sgw_conn, &(gsnf_st_chg_t){
-                         .G_TYP = GSNF_STATE_CHANGE,
-                         .VER = DEFAULT_GSNF_VERSION,
-                         .AS_SAC = SAC,
-                         .State = GSNF_EXIT,
-                         .GS_SAC = snf_obj.GS_SAC
-                     }, &gsnf_st_chg_desc, NULL,NULL)
-        : trans_gsnf(snf_obj.sgw_conn, &(gsg_as_exit_t){GS_AS_EXIT, SAC},
-                     &gsg_as_exit_desc, NULL,NULL);
+    ? trans_gsnf(snf_obj.sgw_conn, &(gsnf_st_chg_t) {
+            .G_TYP = GSNF_STATE_CHANGE,
+            .VER = DEFAULT_GSNF_VERSION,
+            .AS_SAC = SAC,
+            .State = GSNF_EXIT,
+            .GS_SAC = snf_obj.GS_SAC
+    }, &gsnf_st_chg_desc, NULL, NULL)
+    : trans_gsnf(snf_obj.sgw_conn, &(gsg_as_exit_t) {GS_AS_EXIT, SAC},
+                 &gsg_as_exit_desc, NULL, NULL);
     return delete_enode_by_sac(SAC, clear_snf_en);
 }
 
@@ -190,14 +184,14 @@ static void free_snf_en(snf_entity_t *en) {
 
 
 static buffer_t *gen_failed_pkt(uint8_t failed_type, uint16_t as_sac, buffer_t *failed_sdu) {
-    return gen_pdu(&(failed_message_t){
-                       .SN_TYP = FAILED_MESSAGE,
-                       .VER = snf_obj.PROTOCOL_VER,
-                       .PID = PID_RESERVED,
-                       .AS_SAC = as_sac,
-                       .FAILED_TYPE = failed_type,
-                       .msg = failed_sdu,
-                   }, &failed_message_desc, "FAILED MESSAGE");
+    return gen_pdu(&(failed_message_t) {
+            .SN_TYP = FAILED_MESSAGE,
+            .VER = snf_obj.PROTOCOL_VER,
+            .PID = PID_RESERVED,
+            .AS_SAC = as_sac,
+            .FAILED_TYPE = failed_type,
+            .msg = failed_sdu,
+    }, &failed_message_desc, "FAILED MESSAGE");
 }
 
 int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint8_t *buf, size_t buf_len) {
@@ -212,9 +206,9 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint8_t *buf, size_t buf_len) 
             // send failed message to SGW
             if (!is_valid) {
                 to_trans_buf = gen_failed_pkt(0xFF, as_man->AS_SAC, in_buf);
-                trans_gsnf(snf_obj.sgw_conn, &(gsg_pkt_t){
-                               GS_SNF_DOWNLOAD, as_man->AS_SAC, to_trans_buf
-                           }, &gsg_pkt_desc, NULL, NULL);
+                trans_gsnf(snf_obj.sgw_conn, &(gsg_pkt_t) {
+                        GS_SNF_DOWNLOAD, as_man->AS_SAC, to_trans_buf
+                }, &gsg_pkt_desc, NULL, NULL);
                 free_buffer(to_trans_buf);
             } else {
                 uint8_t type;
@@ -232,29 +226,29 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint8_t *buf, size_t buf_len) 
                         type = GS_SNF_DOWNLOAD;
                     }
                 }
-                trans_gsnf(snf_obj.sgw_conn, &(gsg_pkt_t){
-                               type, as_man->AS_SAC, to_trans_buf
-                           }, &gsg_pkt_desc, NULL, NULL);
+                trans_gsnf(snf_obj.sgw_conn, &(gsg_pkt_t) {
+                        type, as_man->AS_SAC, to_trans_buf
+                }, &gsg_pkt_desc, NULL, NULL);
             }
         } else {
             to_trans_buf = in_buf;
             if (!is_valid) {
                 to_trans_buf = gen_failed_pkt(0xFF, as_man->AS_SAC, in_buf);
-                trans_gsnf(snf_obj.sgw_conn, &(gsnf_pkt_cn_t){
-                               GSNF_SNF_DOWNLOAD, DEFAULT_GSNF_VERSION, AS_SAC, 0xFF, to_trans_buf
-                           }, &gsnf_pkt_cn_desc, NULL, NULL);
+                trans_gsnf(snf_obj.sgw_conn, &(gsnf_pkt_cn_t) {
+                        GSNF_SNF_DOWNLOAD, DEFAULT_GSNF_VERSION, AS_SAC, 0xFF, to_trans_buf
+                }, &gsnf_pkt_cn_desc, NULL, NULL);
                 free_buffer(to_trans_buf);
             } else {
                 if (as_man->gsnf_count++ == 0) {
-                    trans_gsnf(snf_obj.sgw_conn, &(gsnf_pkt_cn_ini_t){
-                                   GSNF_INITIAL_AS, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_F,
-                                   as_man->AS_UA,
-                                   to_trans_buf
-                               }, &gsnf_pkt_cn_ini_desc, NULL,NULL);
+                    trans_gsnf(snf_obj.sgw_conn, &(gsnf_pkt_cn_ini_t) {
+                            GSNF_INITIAL_AS, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_F,
+                            as_man->AS_UA,
+                            to_trans_buf
+                    }, &gsnf_pkt_cn_ini_desc, NULL, NULL);
                 } else {
-                    trans_gsnf(snf_obj.sgw_conn, &(gsnf_pkt_cn_t){
-                                   GSNF_SNF_DOWNLOAD, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_F, to_trans_buf
-                               }, &gsnf_pkt_cn_desc, NULL,NULL);
+                    trans_gsnf(snf_obj.sgw_conn, &(gsnf_pkt_cn_t) {
+                            GSNF_SNF_DOWNLOAD, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_F, to_trans_buf
+                    }, &gsnf_pkt_cn_desc, NULL, NULL);
                 }
             }
         }
