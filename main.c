@@ -1,4 +1,3 @@
-#include "ldcauc/snp_sub.h"
 #include <service/terminal.h>
 #include "ldacs_role.h"
 #include "http_core.h"
@@ -34,17 +33,17 @@ void init_signal() {
 }
 
 config_t config = {
-    .port = 8081,
-    .debug = FALSE,
-    .timeout = 999,
-    .worker = 4,
-    .ip_ver = IPVERSION_4,
-    .init_fl_freq = 960.0,
-    .use_http = FALSE,
-    .auto_auth = TRUE,
-    .UA = 0,
-    .is_merged = FALSE,
-    .role = LD_UNDEFINED,
+        .port = 8081,
+        .debug = FALSE,
+        .timeout = 999,
+        .worker = 4,
+        .ip_ver = IPVERSION_4,
+        .init_fl_freq = 960.0,
+        .use_http = FALSE,
+        .auto_auth = TRUE,
+        .UA = 0,
+        .is_merged = FALSE,
+        .role = LD_UNDEFINED,
 
 };
 

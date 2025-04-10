@@ -397,12 +397,12 @@ l_err entry_LME_AUTH(void *args) {
             break;
         }
 
-        snf_LME_AUTH(&(snf_args_t) {
-                .role = config.role,
-                .AS_SAC = lme_layer_objs.lme_as_man->AS_SAC,
-                .AS_UA = lme_layer_objs.lme_as_man->AS_UA,
-                .SGW_SAC = lme_layer_objs.lme_as_man->AS_CURR_GS_SAC,
-        });
+        snf_LME_AUTH(
+                config.role,
+                lme_layer_objs.lme_as_man->AS_SAC,
+                lme_layer_objs.lme_as_man->AS_UA,
+                lme_layer_objs.lme_as_man->AS_CURR_GS_SAC
+        );
     } while (0);
     return err;
 }

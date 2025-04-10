@@ -4,9 +4,10 @@
 
 #ifndef LDACS_SIM_LDACS_SNP_H
 #define LDACS_SIM_LDACS_SNP_H
+
 #include "layer_core.h"
 #include "ldacs_lme.h"
-#include "ldcauc/crypto/secure_core.h"
+#include "ldcauc/ldcauc.h"
 
 #define MAX_SNP_SDU_LEN 2012
 #define MAX_SNP_PDU_LEN 2048

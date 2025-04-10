@@ -9,8 +9,6 @@
 
 snf_obj_t snf_obj = {
         .PROTOCOL_VER = PROTECT_VERSION,
-        .net_opt = {
-        },
         .is_merged = TRUE
 };
 
@@ -74,14 +72,13 @@ int8_t destory_snf_layer() {
     return LDCAUC_OK;
 }
 
-static snf_entity_t *init_snf_en(snf_args_t *args) {
+static snf_entity_t *init_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, uint16_t GS_SAC) {
     snf_entity_t *snf_en = calloc(1, sizeof(snf_entity_t));
 
-    uint8_t role = args->role;
-    snf_en->AS_SAC = args->AS_SAC;
-    snf_en->SGW_UA = args->SGW_SAC;
-    snf_en->AS_UA = args->AS_UA;
-    snf_en->AS_CURR_GS_SAC = args->SGW_SAC;
+    snf_en->AS_SAC = AS_SAC;
+    snf_en->SGW_UA = GS_SAC;
+    snf_en->AS_UA = AS_UA;
+    snf_en->AS_CURR_GS_SAC = GS_SAC;
 
     snf_en->AUTHC_MACLEN = AUTHC_MACLEN_256; /* default mac len is 256  */
     snf_en->AUTHC_AUTH_ID = AUTHC_AUTH_SM3HMAC;
@@ -128,9 +125,8 @@ int8_t clear_snf_en(snf_entity_t *snf_en) {
 }
 
 
-int8_t snf_LME_AUTH(void *args) {
-    snf_args_t *snf_args = (snf_args_t *) args;
-    snf_obj.as_snf_en = init_snf_en(snf_args);
+int8_t snf_LME_AUTH(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, uint16_t GS_SAC) {
+    snf_obj.as_snf_en = init_snf_en(role, AS_SAC, AS_UA, GS_SAC);
     l_err err;
 
     if ((err = change_state(&snf_obj.as_snf_en->auth_fsm, LD_AUTHC_EV_DEFAULT,
@@ -151,9 +147,10 @@ int8_t exit_LME_AUTH(void) {
     return LDCAUC_NULL;
 }
 
-int8_t register_snf_en(snf_args_t *snf_args) {
-    if (snf_args->AS_SAC >= 4096 || snf_args->SGW_SAC >= 4096) return LDCAUC_WRONG_PARA;
-    snf_entity_t *en = init_snf_en(snf_args);
+int8_t register_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, uint16_t GS_SAC) {
+    log_warn("!!!!!!!!!!!! %d %d %d", AS_SAC, AS_UA, GS_SAC);
+    if (AS_SAC >= 4096 || GS_SAC >= 4096) return LDCAUC_WRONG_PARA;
+    snf_entity_t *en = init_snf_en(role, AS_SAC, AS_UA, GS_SAC);
     if (en == NULL) {
         return LDCAUC_NULL;
     }

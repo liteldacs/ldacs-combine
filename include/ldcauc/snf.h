@@ -81,10 +81,6 @@ typedef enum {
     GSNF_EXIT = 0x3,
 } GSNF_STATE;
 
-typedef int8_t (*finish_auth)();
-
-typedef int8_t (*trans_snp)(uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size_t buf_len);
-
 
 typedef struct snf_entity_s {
     uint32_t AS_UA;
@@ -135,13 +131,6 @@ typedef struct snf_obj_s {
 } snf_obj_t;
 
 extern snf_obj_t snf_obj;
-
-typedef struct snf_args_s {
-    uint8_t role;
-    uint16_t AS_SAC;
-    uint32_t AS_UA;
-    uint16_t SGW_SAC;
-} snf_args_t;
 
 typedef struct ss_recv_handler_s {
     uint8_t type;
@@ -328,29 +317,17 @@ extern ss_recv_handler_t sgw_recv_handlers[];
 
 extern fsm_event_t ld_authc_fsm_events[];
 
-int8_t init_as_snf_layer(finish_auth finish_auth, trans_snp trans_snp);
-
-int8_t init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port,
-                         trans_snp trans_snp);
-
-int8_t init_gs_snf_layer_unmerged(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port,
-                                  trans_snp trans_snp);
-
-int8_t init_sgw_snf_layer(uint16_t listen_port);
 
 int8_t clear_snf_en(snf_entity_t *snf_en);
 
 int8_t destory_snf_layer();
 
-int8_t snf_LME_AUTH(void *args);
 
 int8_t exit_LME_AUTH(void);
 
-int8_t register_snf_en(snf_args_t *snf_args);
 
 int8_t unregister_snf_en(uint16_t SAC);
 
-int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint8_t *buf, size_t buf_len);
 
 /*  ss */
 
@@ -387,8 +364,6 @@ l_err handle_recv_msg(buffer_t *buf, const snf_entity_t *as_man);
 l_err handle_send_msg(void *args, struct_desc_t *desc, snf_entity_t *as_man, KEY_HANDLE key_med);
 
 /* gsnf */
-
-
 l_err trans_gsnf(gs_tcp_propt_t *conn, void *pkg, struct_desc_t *desc, l_err (*mid_func)(buffer_t *, void *),
                  void *args);
 

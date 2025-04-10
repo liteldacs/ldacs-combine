@@ -9,7 +9,6 @@
 #include "layer_rcu.h"
 #include "ldacs_mac.h"
 #include "ldacs_dls.h"
-#include <ldcauc/snf.h>
 
 #define TIMER_MAX 65535
 #define INIT_FL_CHN     300     /* which mapping to 1110.0 MHZ */

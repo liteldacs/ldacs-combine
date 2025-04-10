@@ -5,7 +5,6 @@
 #ifndef LDACS_SIM_SECURE_CORE_H
 #define LDACS_SIM_SECURE_CORE_H
 
-#define PROTECT_VERSION 1
 
 #include <ldacs_sim.h>
 #include <ldacs_utils.h>
@@ -37,13 +36,13 @@
 //     SM3_HMAC,
 // };
 
-enum SEC_ALG_MACLEN {
-    SEC_MACLEN_INVAILD = 0x0,
-    SEC_MACLEN_96 = 0x1,
-    SEC_MACLEN_128 = 0x2,
-    SEC_MACLEN_64 = 0x3,
-    SEC_MACLEN_256 = 0x4,
-};
+//enum SEC_ALG_MACLEN {
+//    SEC_MACLEN_INVAILD = 0x0,
+//    SEC_MACLEN_96 = 0x1,
+//    SEC_MACLEN_128 = 0x2,
+//    SEC_MACLEN_64 = 0x3,
+//    SEC_MACLEN_256 = 0x4,
+//};
 
 #define get_sec_maclen(en)({    \
     int ret;                    \
@@ -68,7 +67,6 @@ enum SEC_ALG_MACLEN {
 })
 
 
-/* TODO: 处理一下和km_src的关系 */
 void generate_rand(uint8_t *rand, size_t len);
 
 /* generate a rand int, max size is 64bits (8 bytes) */
@@ -76,4 +74,5 @@ uint64_t generate_urand(size_t rand_bits_sz);
 
 /* generate a unlimit rand array */
 void generate_nrand(uint8_t *rand, size_t sz);
+
 #endif //LDACS_SIM_SECURE_CORE_H
