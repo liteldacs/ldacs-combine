@@ -217,7 +217,7 @@ void L_SAPC(ld_prim_t *prim) {
                 }
                 break;
             } else if (prim->prim_obj_typ == RC_TYP_CLOSE) {
-                if (!in_state(&lme_layer_objs.lme_fsm, lme_fsm_states[LME_OPEN]) || !!in_state(
+                if (!in_state(&lme_layer_objs.lme_fsm, lme_fsm_states[LME_OPEN]) && !in_state(
                         &lme_layer_objs.lme_fsm, lme_fsm_states[LME_AUTH])) {
                     prim->prim_err = LD_ERR_WRONG_STATE;
                     break;

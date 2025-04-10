@@ -148,7 +148,6 @@ int8_t exit_LME_AUTH(void) {
 }
 
 int8_t register_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, uint16_t GS_SAC) {
-    log_warn("!!!!!!!!!!!! %d %d %d", AS_SAC, AS_UA, GS_SAC);
     if (AS_SAC >= 4096 || GS_SAC >= 4096) return LDCAUC_WRONG_PARA;
     snf_entity_t *en = init_snf_en(role, AS_SAC, AS_UA, GS_SAC);
     if (en == NULL) {

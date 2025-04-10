@@ -320,13 +320,8 @@ extern fsm_event_t ld_authc_fsm_events[];
 
 int8_t clear_snf_en(snf_entity_t *snf_en);
 
-int8_t destory_snf_layer();
-
 
 int8_t exit_LME_AUTH(void);
-
-
-int8_t unregister_snf_en(uint16_t SAC);
 
 
 /*  ss */
