@@ -79,9 +79,9 @@ static snf_entity_t *init_snf_en(snf_args_t *args) {
 
     uint8_t role = args->role;
     snf_en->AS_SAC = args->AS_SAC;
-    snf_en->GS_UA = args->AS_CURR_GS_SAC;
+    snf_en->SGW_UA = args->SGW_SAC;
     snf_en->AS_UA = args->AS_UA;
-    snf_en->AS_CURR_GS_SAC = args->AS_CURR_GS_SAC;
+    snf_en->AS_CURR_GS_SAC = args->SGW_SAC;
 
     snf_en->AUTHC_MACLEN = AUTHC_MACLEN_256; /* default mac len is 256  */
     snf_en->AUTHC_AUTH_ID = AUTHC_AUTH_SM3HMAC;
@@ -94,11 +94,11 @@ static snf_entity_t *init_snf_en(snf_args_t *args) {
     UA_STR(ua_as);
     UA_STR(ua_sgw);
     if (role == ROLE_AS) {
-        key_get_handle(LD_AS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(snf_en->GS_UA, ua_sgw), ROOT_KEY,
+        key_get_handle(LD_AS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
                        &snf_en->key_as_sgw_r_h);
     } else if (role == ROLE_SGW) {
         snf_en->key_as_gs_b = init_buffer_unptr();
-        key_get_handle(LD_SGW, get_ua_str(snf_en->GS_UA, ua_as), get_ua_str(snf_en->AS_UA, ua_sgw), ROOT_KEY,
+        key_get_handle(LD_SGW, get_ua_str(10010, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
                        &snf_en->key_as_sgw_r_h);
     }
 
@@ -152,7 +152,7 @@ int8_t exit_LME_AUTH(void) {
 }
 
 int8_t register_snf_en(snf_args_t *snf_args) {
-    if (snf_args->AS_SAC >= 4096 || snf_args->AS_CURR_GS_SAC >= 4096) return LDCAUC_WRONG_PARA;
+    if (snf_args->AS_SAC >= 4096 || snf_args->SGW_SAC >= 4096) return LDCAUC_WRONG_PARA;
     snf_entity_t *en = init_snf_en(snf_args);
     if (en == NULL) {
         return LDCAUC_NULL;

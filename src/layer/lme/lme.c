@@ -401,7 +401,7 @@ l_err entry_LME_AUTH(void *args) {
                 .role = config.role,
                 .AS_SAC = lme_layer_objs.lme_as_man->AS_SAC,
                 .AS_UA = lme_layer_objs.lme_as_man->AS_UA,
-                .AS_CURR_GS_SAC = lme_layer_objs.lme_as_man->AS_CURR_GS_SAC,
+                .SGW_SAC = lme_layer_objs.lme_as_man->AS_CURR_GS_SAC,
         });
     } while (0);
     return err;

@@ -88,7 +88,7 @@ typedef int8_t (*trans_snp)(uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size
 
 typedef struct snf_entity_s {
     uint32_t AS_UA;
-    uint32_t GS_UA;
+    uint32_t SGW_UA;
     uint16_t AS_SAC;
     uint16_t AS_CURR_GS_SAC; /* current connected/to connect GS SAC for AS */
 
@@ -140,7 +140,7 @@ typedef struct snf_args_s {
     uint8_t role;
     uint16_t AS_SAC;
     uint32_t AS_UA;
-    uint16_t AS_CURR_GS_SAC;
+    uint16_t SGW_SAC;
 } snf_args_t;
 
 typedef struct ss_recv_handler_s {

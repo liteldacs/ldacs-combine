@@ -140,7 +140,7 @@ l_err recv_gsnf(basic_conn_t **bcp) {
                         .role = ROLE_SGW,
                         .AS_UA = init_pkt->UA,
                         .AS_SAC = init_pkt->AS_SAC,
-                        .AS_CURR_GS_SAC = snf_obj.GS_SAC
+                        .SGW_SAC = snf_obj.GS_SAC
                 });
             } else {
                 return LD_ERR_INTERNAL;
@@ -264,7 +264,7 @@ l_err recv_gsg(basic_conn_t **bcp) {
 //                                .role = ROLE_SGW,
 //                                .AS_UA = gsnf_sac_pkg->UA,
 //                                .AS_SAC = resp.SAC,
-//                                .AS_CURR_GS_SAC = snf_obj.GS_SAC
+//                                .SGW_SAC = snf_obj.GS_SAC
 //                        });
 //                    }
 //

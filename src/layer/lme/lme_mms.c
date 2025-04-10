@@ -224,7 +224,7 @@ void M_SAPR_cb(ld_prim_t *prim) {
                         .role = LD_GS,
                         .AS_SAC = sac,
                         .AS_UA = cr->UA,
-                        .AS_CURR_GS_SAC = lme_layer_objs.GS_SAC,
+                        .SGW_SAC = lme_layer_objs.GS_SAC,
                 });
                 dls_en_data_t *dls_en_data = &(dls_en_data_t) {
                         .GS_SAC = lme_layer_objs.GS_SAC,
