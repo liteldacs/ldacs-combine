@@ -23,7 +23,6 @@ static void powering_on() {
 }
 
 void init_rcu(ld_service_t service) {
-    /* SGW(GS)：生成根密钥并存入密码卡，AS：从密码卡读取密钥并存入数据库, 由于当前并没有SGW，且AS-GS为一对一通信，因此GS并不参与 */
     if (config.role == LD_AS) {
         UA_STR(ua_as);
         UA_STR(ua_sgw);
