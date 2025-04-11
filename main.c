@@ -21,7 +21,7 @@ static void sigint_handler(int signum) {
     // mempool_clear(global_mp);
 
     log_info("ldacs simulator(PID: %u) exit...", getpid());
-    kill(-getpid(), SIGINT);
+//    kill(-getpid(), SIGINT);
     exit(0);
 }
 

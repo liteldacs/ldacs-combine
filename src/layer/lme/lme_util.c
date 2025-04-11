@@ -103,34 +103,11 @@ lme_as_man_t *init_as_man(uint16_t AS_SAC, uint32_t AS_UA, uint16_t AS_CURR_GS_S
     as_man->AS_UA = AS_UA;
     as_man->AS_CURR_GS_SAC = AS_CURR_GS_SAC;
 
-//    as_man->AUTHC_MACLEN = AUTHC_MACLEN_256; /* default mac len is 256  */
-//    as_man->AUTHC_AUTH_ID = AUTHC_AUTH_SM3HMAC;
-//    as_man->AUTHC_ENC_ID = AUTHC_ENC_SM4_CBC;
-//    as_man->AUTHC_KLEN = AUTHC_KLEN_128;
-
-    // as_man->CO = DEFAULT_CO;
-    // as_man->CO.mutex = PTHREAD_MUTEX_INITIALIZER;
-    // as_man->CO.co_n = 2;
-    // as_man->CO.co = {1, 15};
     zero(&as_man->CO);
     as_man->RPSO = DEFAULT_RPSO;
     as_man->NRPS = DEFAULT_NRPS;
 
     as_man->send_T_SQN = as_man->recv_T_SQN = 0;
-
-    // UA_STR(ua_as);
-    // UA_STR(ua_sgw);
-    // if (config.role == LD_AS) {
-    //     key_get_handle(config.role, get_ua_str(config.UA, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
-    //                    &as_man->key_as_sgw_r_h);
-    // } else if (config.role == LD_SGW) {
-    //     as_man->key_as_gs_b = init_buffer_unptr();
-    //     key_get_handle(config.role, get_ua_str(10010, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
-    //                    &as_man->key_as_sgw_r_h);
-    // }
-
-
-    // stateM_init(&as_man->auth_fsm, &ld_authc_states[init_st], NULL);
 
     if (config.role == LD_AS || config.role == LD_GS)
         as_man_update_handler(as_man);

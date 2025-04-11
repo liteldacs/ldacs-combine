@@ -7,8 +7,11 @@
 
 #include <ldacs_sim.h>
 #include <layer_rcu.h>
+#include <layer_interface.h>
 
 extern ld_service_t terminal_service;
+
+typedef void (*terminal_func)(void *);
 
 
 #endif //TERMINAL_H

@@ -3,7 +3,6 @@
 //
 
 
-#include <ldcauc/crypto/key.h>
 
 #include "ldacs_lme.h"
 
@@ -137,12 +136,7 @@ l_err make_lme_layer() {
                     break;
                 }
                 case LD_GS: {
-                    // lme_layer_objs.net_opt.recv_handler = config.is_merged ? recv_gsg : recv_gsnf;
-                    // memcpy(lme_layer_objs.net_opt.addr, config.gsnf_addr_v6, 16);
-                    // lme_layer_objs.net_opt.port = config.gsnf_port;
-                    // lme_layer_objs.sgw_conn = init_gs_conn(LD_GS, &lme_layer_objs.net_opt);
-                    // pthread_create(&lme_layer_objs.client_th, NULL, gs_epoll_setup, &lme_layer_objs.net_opt);
-                    // pthread_detach(lme_layer_objs.client_th);
+
                     config.is_merged == TRUE ?
                     init_gs_snf_layer(get_gs_sac(), config.gsnf_addr_v6, config.gsnf_port, trans_snp_data) :
                     init_gs_snf_layer_unmerged(get_gs_sac(), config.gsnf_addr_v6, config.gsnf_port, trans_snp_data);
@@ -165,16 +159,9 @@ l_err make_lme_layer() {
             /* 默认AS的UA为10010，SGW的UA为10000 */
             UA_STR(ua_as);
             UA_STR(ua_sgw);
-            embed_rootkey(LD_SGW, get_ua_str(10010, ua_as), get_ua_str(config.UA, ua_sgw));
+            //TODO;AAA
+//            embed_rootkey(LD_SGW, get_ua_str(10010, ua_as), get_ua_str(config.UA, ua_sgw));
 
-            // init_lme_fsm(&lme_layer_objs, LME_OPEN);
-            // lme_layer_objs.GS_SAC = get_gs_sac();
-            // lme_layer_objs.LME_GS_AUTH_AS = init_lme_sac_map();
-            // init_lme_ss(&lme_layer_objs);
-
-            // init_heap_desc(&hd_conns);
-            // lme_layer_objs.net_opt.server_fd = server_entity_setup();
-            // lme_layer_objs.net_opt.recv_handler = recv_gsnf;
             init_sgw_snf_layer(config.port);
         }
         default:
@@ -338,6 +325,7 @@ l_err change_LME_CONNECTING() {
 
 int8_t as_finish_auth_func() {
     change_LME_OPEN();
+    lme_layer_objs.finish_status = LME_AUTH_FINISHED;
     return 0;
 }
 

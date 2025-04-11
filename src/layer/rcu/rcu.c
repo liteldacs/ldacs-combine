@@ -3,7 +3,6 @@
 //
 
 
-#include <ldcauc/crypto/key.h>
 
 #include "layer_rcu.h"
 #include "layer_interface.h"
@@ -23,15 +22,6 @@ static void powering_on() {
 }
 
 void init_rcu(ld_service_t service) {
-    if (config.role == LD_AS) {
-        UA_STR(ua_as);
-        UA_STR(ua_sgw);
-        embed_rootkey(LD_AS, get_ua_str(config.UA, ua_as), get_ua_str(10000, ua_sgw));
-    } else {
-        UA_STR(ua_as);
-        UA_STR(ua_sgw);
-        embed_rootkey(LD_GS, get_ua_str(10010, ua_as), get_ua_str(10000, ua_sgw));
-    }
     register_int_handler(service.handle_recv_user_msg);
     rcu_layer_obj.service = service;
     rcu_layer_obj.service.init_service();

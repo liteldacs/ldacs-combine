@@ -91,10 +91,12 @@ static snf_entity_t *init_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, 
     UA_STR(ua_as);
     UA_STR(ua_sgw);
     if (role == ROLE_AS) {
+        embed_rootkey(LD_AS, get_ua_str(config.UA, ua_as), get_ua_str(10000, ua_sgw));
         key_get_handle(LD_AS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
                        &snf_en->key_as_sgw_r_h);
     } else if (role == ROLE_SGW) {
         snf_en->key_as_gs_b = init_buffer_unptr();
+        embed_rootkey(LD_GS, get_ua_str(10010, ua_as), get_ua_str(10000, ua_sgw));
         key_get_handle(LD_SGW, get_ua_str(10010, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
                        &snf_en->key_as_sgw_r_h);
     }
