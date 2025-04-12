@@ -77,7 +77,7 @@ static snf_entity_t *init_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, 
 
     snf_en->AS_SAC = AS_SAC;
     snf_en->AS_UA = AS_UA;
-    snf_en->AS_CURR_GS_SAC = GS_SAC;
+    snf_en->GS_SAC = GS_SAC;
 
     snf_en->AUTHC_MACLEN = AUTHC_MACLEN_256; /* default mac len is 256  */
     snf_en->AUTHC_AUTH_ID = AUTHC_AUTH_SM3HMAC;
@@ -191,7 +191,7 @@ static buffer_t *gen_failed_pkt(uint8_t failed_type, uint16_t as_sac, buffer_t *
     }, &failed_message_desc, "FAILED MESSAGE");
 }
 
-int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint8_t *buf, size_t buf_len) {
+int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size_t buf_len) {
     /* sub-net control will not have unacknowledged data */
 
     buffer_t *in_buf = init_buffer_unptr();
@@ -238,9 +238,8 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint8_t *buf, size_t buf_len) 
             } else {
                 if (as_man->gsnf_count++ == 0) {
                     trans_gsnf(snf_obj.sgw_conn, &(gsnf_pkt_cn_ini_t) {
-                            GSNF_INITIAL_AS, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_F,
-                            as_man->AS_UA,
-                            to_trans_buf
+                            GSNF_INITIAL_AS, DEFAULT_GSNF_VERSION, AS_SAC, GS_SAC,
+                            as_man->AS_UA,ELE_TYP_F,to_trans_buf
                     }, &gsnf_pkt_cn_ini_desc, NULL, NULL);
                 } else {
                     trans_gsnf(snf_obj.sgw_conn, &(gsnf_pkt_cn_t) {

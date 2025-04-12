@@ -87,7 +87,7 @@ typedef enum {
 typedef struct snf_entity_s {
     uint32_t AS_UA;
     uint16_t AS_SAC;
-    uint16_t AS_CURR_GS_SAC; /* current connected/to connect GS SAC for AS */
+    uint16_t GS_SAC; /* current connected/to connect GS SAC for AS */
 
     uint8_t AUTHC_MACLEN,
             AUTHC_AUTH_ID,
@@ -258,8 +258,9 @@ typedef struct gsnf_pkt_cn_ini_s {
     uint8_t G_TYP;
     uint8_t VER;
     uint16_t AS_SAC;
-    uint8_t ELE_TYPE;
+    uint16_t GS_SAC;
     uint32_t UA;
+    uint8_t ELE_TYPE;
     buffer_t *sdu;
 } gsnf_pkt_cn_ini_t;
 
