@@ -1,12 +1,10 @@
 //
 // Created by 邹嘉旭 on 2025/3/28.
 //
-#include "ldcauc/snp_sub.h"
-
-#include <ld_config.h>
 #include <ld_log.h>
-#include <snf.h>
-#include <crypto/authc.h>
+#include "ldcauc/snf.h"
+#include "ldcauc/crypto/authc.h"
+#include "ldcauc/snp_sub.h"
 
 static bool is_finish_auth(uint16_t AS_SAC) {
     snf_entity_t *snf_en = snf_obj.role == LD_AS
@@ -32,7 +30,7 @@ static bool is_finish_auth(uint16_t AS_SAC) {
 const char *zero_mac[32] = {0};
 
 static KEY_HANDLE get_hmac_key(uint16_t AS_SAC) {
-    snf_entity_t *as_man = config.role == LD_AS ? snf_obj.as_snf_en : (snf_entity_t *) get_enode(AS_SAC);
+    snf_entity_t *as_man = snf_obj.role == LD_AS ? snf_obj.as_snf_en : (snf_entity_t *) get_enode(AS_SAC);
     return as_man->key_as_gs_h;
 }
 

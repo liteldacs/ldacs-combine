@@ -92,7 +92,7 @@ l_err send_auc_resp(void *args) {
     );
 
     if (generate_auc_kdf(snf_obj.role, as_man->shared_random, &as_man->key_as_sgw_s_h, &as_man->key_as_gs_h,
-                         &as_man->key_as_gs_b)) {
+                         &as_man->key_as_gs_b, as_man->AS_UA)) {
         //进入错误状态
         return LD_ERR_INTERNAL;
     }
@@ -138,7 +138,7 @@ l_err recv_auc_resp(buffer_t *buf, snf_entity_t *as_man) {
     );
 
     if (generate_auc_kdf(snf_obj.role, as_man->shared_random, &as_man->key_as_sgw_s_h, &as_man->key_as_gs_h,
-                         &as_man->key_as_gs_b)) {
+                         &as_man->key_as_gs_b, as_man->AS_UA)) {
         //进入错误状态
         return LD_ERR_INTERNAL;
     }

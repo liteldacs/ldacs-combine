@@ -19,6 +19,8 @@
 #define GSNF_MSG_MAX_LEN 512
 #define GTYP_LEN 4
 
+#define DFT_SGW_UA 10000
+
 
 enum S_TYP_E {
     AUC_RQST = 0x41,
@@ -84,7 +86,6 @@ typedef enum {
 
 typedef struct snf_entity_s {
     uint32_t AS_UA;
-    uint32_t SGW_UA;
     uint16_t AS_SAC;
     uint16_t AS_CURR_GS_SAC; /* current connected/to connect GS SAC for AS */
 

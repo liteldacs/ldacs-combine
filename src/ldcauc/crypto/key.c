@@ -178,7 +178,7 @@ l_km_err as_derive_keys(uint8_t *rand, uint32_t randlen, const char *as_ua,
         return err;
     }
 
-    if ((err = key_get_handle(config.role, as_ua, gs_ua, MASTER_KEY_AS_GS, key_ag)) != LD_KM_OK) {
+    if ((err = key_get_handle(LD_AS, as_ua, gs_ua, MASTER_KEY_AS_GS, key_ag)) != LD_KM_OK) {
         log_error("Can not get handle");
         return err;
     }

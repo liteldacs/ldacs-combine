@@ -31,7 +31,7 @@ int8_t init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_p
 
     memcpy(snf_obj.net_opt.addr, gsnf_addr, GEN_ADDRLEN);
     snf_obj.net_opt.port = gsnf_port;
-    snf_obj.net_opt.recv_handler = config.is_merged ? recv_gsg : recv_gsnf;
+    snf_obj.net_opt.recv_handler =  recv_gsg;
     snf_obj.sgw_conn = init_gs_conn(LD_GS, &snf_obj.net_opt);
 
     pthread_create(&snf_obj.client_th, NULL, gs_epoll_setup, &snf_obj.net_opt);
@@ -46,7 +46,7 @@ int8_t init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_p
 int8_t init_gs_snf_layer_unmerged(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port,
                                   trans_snp trans_snp) {
     init_gs_snf_layer(GS_SAC, gsnf_addr, gsnf_port, trans_snp);
-
+    snf_obj.net_opt.recv_handler = recv_gsnf;
     snf_obj.is_merged = FALSE;
 
     return LDCAUC_OK;
@@ -76,7 +76,6 @@ static snf_entity_t *init_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, 
     snf_entity_t *snf_en = calloc(1, sizeof(snf_entity_t));
 
     snf_en->AS_SAC = AS_SAC;
-    snf_en->SGW_UA = GS_SAC;
     snf_en->AS_UA = AS_UA;
     snf_en->AS_CURR_GS_SAC = GS_SAC;
 
@@ -91,13 +90,13 @@ static snf_entity_t *init_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, 
     UA_STR(ua_as);
     UA_STR(ua_sgw);
     if (role == ROLE_AS) {
-        embed_rootkey(LD_AS, get_ua_str(config.UA, ua_as), get_ua_str(10000, ua_sgw));
-        key_get_handle(LD_AS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
+        embed_rootkey(LD_AS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw));
+        key_get_handle(LD_AS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw), ROOT_KEY,
                        &snf_en->key_as_sgw_r_h);
     } else if (role == ROLE_SGW) {
         snf_en->key_as_gs_b = init_buffer_unptr();
-        embed_rootkey(LD_GS, get_ua_str(10010, ua_as), get_ua_str(10000, ua_sgw));
-        key_get_handle(LD_SGW, get_ua_str(10010, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
+        embed_rootkey(LD_GS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw));
+        key_get_handle(LD_SGW, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw), ROOT_KEY,
                        &snf_en->key_as_sgw_r_h);
     }
 
@@ -250,7 +249,7 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint8_t *buf, size_t buf_len) 
                 }
             }
         }
-    } else if (config.role == LD_AS) {
+    } else if (snf_obj.role == LD_AS) {
         const snf_entity_t *as_man = snf_obj.as_snf_en;
         to_trans_buf = in_buf;
         if (as_man == NULL) return LDCAUC_INTERNAL_ERROR;
