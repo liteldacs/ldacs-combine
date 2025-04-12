@@ -32,7 +32,7 @@ l_err send_auc_rqst(void *args) {
     /* 生成随机数N1 */
     uint8_t n_1_str[NONCE_LEN] = {0};
     generate_nrand(n_1_str, NONCE_LEN);
-    CLONE_TO_CHUNK(*auc_rqst->N_1, n_1_str, NONCE_LEN);
+    CLONE_TO_CHUNK(*auc_rqst->N_1, n_1_str, NONCE_LEN)
 
     return handle_send_msg(auc_rqst, &auc_rqst_desc, as_man, as_man->key_as_sgw_r_h);
 }
@@ -78,7 +78,7 @@ l_err send_auc_resp(void *args) {
     buffer_t *n_2 = init_buffer_ptr(32);
     uint8_t n_2_str[NONCE_LEN] = {0};
     generate_nrand(n_2_str, NONCE_LEN);
-    CLONE_TO_CHUNK(*n_2, n_2_str, NONCE_LEN);
+    CLONE_TO_CHUNK(*n_2, n_2_str, NONCE_LEN)
 
     as_man->shared_random = get_auc_sharedinfo_buf(&(auc_sharedinfo_t) {
                                                            . MAC_LEN = as_man->AUTHC_MACLEN,
@@ -174,7 +174,7 @@ l_err send_auc_key_exec(void *args) {
     buffer_t *n_3 = init_buffer_ptr(32);
     uint8_t n_3_str[NONCE_LEN] = {0};
     generate_nrand(n_3_str, NONCE_LEN);
-    CLONE_TO_CHUNK(*n_3, n_3_str, NONCE_LEN);
+    CLONE_TO_CHUNK(*n_3, n_3_str, NONCE_LEN)
 
     auc_key_exec_t *auc_key_exec = &(auc_key_exec_t) {
             .
@@ -237,7 +237,7 @@ static l_err generate_auz_info(buffer_t *buf, void *args) {
                                 }, &gsnf_as_auz_info_desc, "AS AUZ INFO"
     );
 
-    log_buf(LOG_ERROR, "MID FUNC", auz_buf->ptr, auz_buf->len);
+    log_buf(LOG_ERROR, "MID FUNC", auz_buf->ptr, auz_buf->len)
     cat_to_buffer(buf, auz_buf->ptr, auz_buf->len);
     free_buffer(auz_buf);
 
@@ -253,7 +253,6 @@ l_err finish_auc(void *args) {
                                     . nonce = as_man->shared_random
                             }, &gs_key_trans_desc, "GS KEY"
     );
-    log_warn("%p", as_man->gs_conn);
     if (trans_gsnf(as_man->gs_conn, &(gsnf_pkt_cn_t) {
                            GSNF_KEY_TRANS, DEFAULT_GSNF_VERSION, as_man->AS_SAC, ELE_TYP_8, sdu
                    }, &gsnf_pkt_cn_desc, generate_auz_info, &as_man->AS_SAC
@@ -281,7 +280,7 @@ l_err send_key_update_rqst(void *args) {
     buffer_t *nonce = init_buffer_ptr(32);
     uint8_t NONCE_str[NONCE_LEN] = {0};
     generate_nrand(NONCE_str, NONCE_LEN);
-    CLONE_TO_CHUNK(*nonce, NONCE_str, NONCE_LEN);
+    CLONE_TO_CHUNK(*nonce, NONCE_str, NONCE_LEN)
 
     key_upd_rqst_t *key_upd_rqst = &(key_upd_rqst_t) {
             .S_TYP = KEY_UPD_RQST,
@@ -377,7 +376,7 @@ l_err send_sn_session_est_resp(void *args) {
         return LD_ERR_INTERNAL;
     }
 
-    CLONE_TO_CHUNK(*est_resp.IP_AS, ipv6_bin, IPV6_ADDRLEN >> 3);
+    CLONE_TO_CHUNK(*est_resp.IP_AS, (uint8_t *)ipv6_bin, IPV6_ADDRLEN >> 3)
 
     handle_send_msg(&est_resp, &sn_session_est_resp_desc, as_man, NULL);
 
@@ -423,7 +422,7 @@ l_err handle_send_msg(void *args, struct_desc_t *desc, snf_entity_t *as_man, KEY
 
 
     if (snf_obj.role == LD_SGW) {
-        CLONE_TO_CHUNK(*sdu, lme_ss_pbs.start, pbs_offset(&lme_ss_pbs));
+        CLONE_TO_CHUNK(*sdu, lme_ss_pbs.start, pbs_offset(&lme_ss_pbs))
         trans_gsnf(as_man->gs_conn,
                    &(gsnf_pkt_cn_t) {GSNF_SNF_UPLOAD, DEFAULT_GSNF_VERSION, as_man->AS_SAC, ELE_TYP_F, sdu},
                    &gsnf_pkt_cn_desc, NULL, NULL);
