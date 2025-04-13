@@ -218,29 +218,27 @@ void D_SAPD_cb(ld_prim_t *prim) {
             zero(&pbs);
             snp_pdu_t pdu;
 
-            uint32_t pdu_len = snp_in->len - (SNP_ELES_SIZE >> 3);
-
-
             /* TODO: 如果没完成auth过程，则MAC为全0 */
             /* 判断LME是否处于已经完成KAS-GS密钥协商阶段 */
             // if (finish_auth) {
             //     /* 应减去MAC长度 */
             //     pdu_len -= get_sec_maclen(snp_layer_objs.SEC);
             // }
-
-            snpsub_vfy_hmac(o_sdu->AS_SAC, snp_layer_objs.SEC, snp_in->ptr, snp_in->len);
-
-            pdu.sdu = init_buffer_ptr(pdu_len);
-
-            init_pbs(&pbs, snp_in->ptr, snp_in->len, "SNP IN");
-
             log_buf(LOG_WARN, "SNP IN", snp_in->ptr, snp_in->len);
 
-            if (!in_struct(&pdu, &snp_pdu_desc, &pbs, NULL)) {
-                prim->prim_err = LD_ERR_INTERNAL;
+            if (snpsub_vfy_hmac(o_sdu->AS_SAC, snp_layer_objs.SEC, snp_in->ptr, snp_in->len) != LDCAUC_OK) {
+                log_warn("HMAC verify failed");
+                free_buffer(o_sdu->buf);
                 return;
             }
 
+            pdu.sdu = init_buffer_ptr(snp_in->len - get_sec_maclen(snp_layer_objs.SEC) - (SNP_HEAD_LEN >> 3));
+            init_pbs(&pbs, snp_in->ptr, snp_in->len, "SNP IN");
+            if (!in_struct(&pdu, &snp_pdu_desc, &pbs, NULL)) {
+                prim->prim_err = LD_ERR_INTERNAL;
+                free_buffer(o_sdu->buf);
+                return;
+            }
 
             /* TODO: 搞出更多的错误代码，然后再网关显示 */
             // if (finish_auth) {
@@ -260,6 +258,7 @@ void D_SAPD_cb(ld_prim_t *prim) {
                 // log_fatal("SQQNNNN %d %d", pdu.sqn, *check_sqn);
             } else {
                 log_warn("The received sqn is out of range.");
+                free_buffer(o_sdu->buf);
                 return;
             }
 

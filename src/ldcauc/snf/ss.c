@@ -122,6 +122,8 @@ l_err recv_auc_resp(buffer_t *buf, snf_entity_t *as_man) {
     zero(&pbs);
     init_pbs(&pbs, buf->ptr, buf->len, "IN MSG");
 
+    log_buf(LOG_ERROR, "AUC RESP", buf->ptr, buf->len);
+
     if (in_struct(&resp, &auc_resp_desc, &pbs, NULL) == FALSE) {
         return LD_ERR_INTERNAL;
     }
@@ -376,7 +378,7 @@ l_err send_sn_session_est_resp(void *args) {
         return LD_ERR_INTERNAL;
     }
 
-    CLONE_TO_CHUNK(*est_resp.IP_AS, (uint8_t *)ipv6_bin, IPV6_ADDRLEN >> 3)
+    CLONE_TO_CHUNK(*est_resp.IP_AS, (uint8_t *) ipv6_bin, IPV6_ADDRLEN >> 3)
 
     handle_send_msg(&est_resp, &sn_session_est_resp_desc, as_man, NULL);
 
@@ -420,7 +422,6 @@ l_err handle_send_msg(void *args, struct_desc_t *desc, snf_entity_t *as_man, KEY
     }
     close_output_pbs(&lme_ss_pbs);
 
-
     if (snf_obj.role == LD_SGW) {
         CLONE_TO_CHUNK(*sdu, lme_ss_pbs.start, pbs_offset(&lme_ss_pbs))
         trans_gsnf(as_man->gs_conn,
@@ -429,7 +430,6 @@ l_err handle_send_msg(void *args, struct_desc_t *desc, snf_entity_t *as_man, KEY
     } else if (snf_obj.role == LD_AS) {
         snf_obj.trans_snp_func(as_man->AS_SAC, as_man->GS_SAC, lme_ss_pbs.start, pbs_offset(&lme_ss_pbs));
     }
-
 
     return LD_OK;
 }

@@ -31,7 +31,7 @@ int8_t init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_p
 
     memcpy(snf_obj.net_opt.addr, gsnf_addr, GEN_ADDRLEN);
     snf_obj.net_opt.port = gsnf_port;
-    snf_obj.net_opt.recv_handler =  recv_gsg;
+    snf_obj.net_opt.recv_handler = recv_gsg;
     snf_obj.sgw_conn = init_gs_conn(LD_GS, &snf_obj.net_opt);
 
     pthread_create(&snf_obj.client_th, NULL, gs_epoll_setup, &snf_obj.net_opt);
@@ -239,7 +239,7 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf,
                 if (as_man->gsnf_count++ == 0) {
                     trans_gsnf(snf_obj.sgw_conn, &(gsnf_pkt_cn_ini_t) {
                             GSNF_INITIAL_AS, DEFAULT_GSNF_VERSION, AS_SAC, GS_SAC,
-                            as_man->AS_UA,ELE_TYP_F,to_trans_buf
+                            as_man->AS_UA, ELE_TYP_F, to_trans_buf
                     }, &gsnf_pkt_cn_ini_desc, NULL, NULL);
                 } else {
                     trans_gsnf(snf_obj.sgw_conn, &(gsnf_pkt_cn_t) {

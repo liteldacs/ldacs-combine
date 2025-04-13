@@ -76,7 +76,7 @@ extern enum_names snp_pdu_sec_names;
 extern enum_names snp_fin_names;
 
 /* 不包含MAC长度 */
-#define SNP_ELES_SIZE 1+3+4+24
+#define SNP_HEAD_LEN (1+3+4+24)
 
 extern struct_desc_t snp_pdu_desc;
 

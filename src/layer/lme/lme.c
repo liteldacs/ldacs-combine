@@ -354,8 +354,15 @@ void SN_SAPC_cb(ld_prim_t *prim) {
 }
 
 void SN_SAPD_L_cb(ld_prim_t *prim) {
-    orient_sdu_t *osdu = prim->prim_objs;
-    upload_snf(prim->prim_obj_typ == VER_PASS, osdu->AS_SAC, osdu->GS_SAC, osdu->buf->ptr, osdu->buf->len);
+    switch (prim->prim_seq) {
+        case SN_DATA_IND: {
+            orient_sdu_t *osdu = prim->prim_objs;
+            upload_snf(prim->prim_obj_typ == VER_PASS, osdu->AS_SAC, osdu->GS_SAC, osdu->buf->ptr, osdu->buf->len);
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 l_err entry_LME_AUTH(void *args) {
