@@ -11,7 +11,5 @@
 #define MAX_SNP_PDU_LEN 2048
 #define SNP_RANGE 10
 
-int8_t snpsub_crypto(uint16_t AS_SAC, char *in, size_t in_len, char *out, size_t *out_len, bool is_encrypt);
-
 
 #endif //SNP_SUB_H

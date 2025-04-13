@@ -7,9 +7,9 @@
 
 #include "secure_core.h"
 
-l_err encrypt_buf(buffer_t *p_buf, buffer_t *key, buffer_t *e_buf);
+l_err encrypt_uint8(void *key, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len);
 
-l_err decrypt_buf(buffer_t *e_buf, buffer_t *key, buffer_t *p_buf);
+l_err decrypt_uint8(void *key, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len);
 
 void calc_hmac_uint(uint8_t *udata, size_t data_len, void *key_med, uint8_t *mac_dst, size_t mac_limit);
 

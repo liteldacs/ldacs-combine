@@ -35,16 +35,27 @@ static KEY_HANDLE get_hmac_key(uint16_t AS_SAC) {
     return as_man->key_as_gs_h;
 }
 
-int8_t snpsub_crypto(uint16_t AS_SAC, char *in, size_t in_len, char *out, size_t *out_len, bool is_encrypt) {
+static KEY_HANDLE get_enc_key(uint16_t AS_SAC) {
+    snf_entity_t *as_man = snf_obj.role == LD_AS ? snf_obj.as_snf_en : (snf_entity_t *) get_enode(AS_SAC);
+    return as_man->key_as_gs_h;
+}
+
+int8_t snpsub_crypto(uint16_t AS_SAC, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len, bool is_encrypt) {
+    if (!in || in_len == 0 || !out) return LDCAUC_WRONG_PARA;
+    if (!is_finish_auth(AS_SAC)) {
+        memcpy(out, in, in_len);
+        *out_len = in_len;
+        return LDCAUC_OK;
+    }
     if (is_encrypt) {
-
+        encrypt_uint8(get_enc_key(AS_SAC), in, in_len, out, out_len);
     } else {
-
+        decrypt_uint8(get_enc_key(AS_SAC), in, in_len, out, out_len);
     }
     return LDCAUC_OK;
 }
 
-int8_t snpsub_calc_hmac(uint16_t AS_SAC, uint8_t SEC, char *in, size_t in_len, char *out, size_t *out_len) {
+int8_t snpsub_calc_hmac(uint16_t AS_SAC, uint8_t SEC, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len) {
 
     if (!in || in_len == 0 || !out) return LDCAUC_WRONG_PARA;
 
@@ -59,7 +70,7 @@ int8_t snpsub_calc_hmac(uint16_t AS_SAC, uint8_t SEC, char *in, size_t in_len, c
     return LDCAUC_OK;
 }
 
-int8_t snpsub_vfy_hmac(uint16_t AS_SAC, uint8_t SEC, char *snp_pdu, size_t pdu_len) {
+int8_t snpsub_vfy_hmac(uint16_t AS_SAC, uint8_t SEC, uint8_t *snp_pdu, size_t pdu_len) {
     if (!snp_pdu || pdu_len == 0) return LDCAUC_WRONG_PARA;
     if (!is_finish_auth(AS_SAC)) return LDCAUC_OK;
 

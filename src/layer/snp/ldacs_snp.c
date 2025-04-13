@@ -175,12 +175,22 @@ void SN_SAPD(ld_prim_t *prim) {
             break;
     }
 
+    uint8_t enc_arr[2048] = {0};
+    size_t enc_sz = 0;
+    buffer_t *enc_buf = init_buffer_unptr();
+    snpsub_crypto(orient_sdu_to->AS_SAC, buf->ptr, buf->len, enc_arr, &enc_sz, TRUE);
+    CLONE_TO_CHUNK(*enc_buf, enc_arr, enc_sz);
+
+//    log_buf()
+
+
     /* 如果还没有派生KAS-GS，则不验证完整性 */
     snp_pdu_t snp_pdu = {
             .ctrl = prim->prim_obj_typ == SN_TYP_FROM_UP ? USER_PLANE_PACKET : CONTROL_PLANE_PACKET,
             .sec_level =  snp_layer_objs.SEC,
             .nsel = prim->prim_obj_typ == SN_TYP_FROM_UP ? NSEL_IPV6 : NSEL_LME,
-            .sdu = buf,
+            .sdu = enc_buf,
+//            .sdu = buf,
             .sqn = (*get_SQN(orient_sdu_to->AS_SAC, TRUE))++,
     };
 
@@ -255,7 +265,6 @@ void D_SAPD_cb(ld_prim_t *prim) {
             uint32_t *check_sqn = get_SQN(o_sdu->AS_SAC, FALSE);
             if (abs((int) pdu.sqn - *check_sqn) < SNP_RANGE) {
                 (*check_sqn) = pdu.sqn;
-                // log_fatal("SQQNNNN %d %d", pdu.sqn, *check_sqn);
             } else {
                 log_warn("The received sqn is out of range.");
                 free_buffer(o_sdu->buf);
@@ -264,7 +273,15 @@ void D_SAPD_cb(ld_prim_t *prim) {
 
             /* free the previous orient buffer, and set the new one */
             free_buffer(o_sdu->buf);
-            o_sdu->buf = pdu.sdu;
+
+
+            uint8_t dec_arr[2048] = {0};
+            size_t dec_sz = 0;
+            o_sdu->buf = init_buffer_unptr();
+            snpsub_crypto(o_sdu->AS_SAC, pdu.sdu->ptr, pdu.sdu->len, dec_arr, &dec_sz, FALSE);
+            CLONE_TO_CHUNK(*(o_sdu->buf), dec_arr, dec_sz);
+//            o_sdu->buf = pdu.sdu;
+
 
             if (pdu.ctrl == CONTROL_PLANE_PACKET) {
                 preempt_prim(&SN_DATA_IND_PRIM, VER_PASS, o_sdu, NULL, 0, 0);

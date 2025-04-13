@@ -5,37 +5,53 @@
 #include "crypto/cipher.h"
 
 
-// l_err encrypt_buf(buffer_t *p_buf, buffer_t *key, buffer_t *e_buf) {
-//     if (e_buf == NULL || p_buf == NULL || key == NULL) {
-//         return LD_ERR_INTERNAL;
-//     }
-//     SM4_KEY sm4_key;
-//     uint8_t iv[16] = {0};
-//     uint8_t out[8192] = {0};
-//     size_t outlen = 0;
+//l_err encrypt_buf(buffer_t *p_buf, buffer_t *key, buffer_t *e_buf) {
+//    if (e_buf == NULL || p_buf == NULL || key == NULL) {
+//        return LD_ERR_INTERNAL;
+//    }
+//    SM4_KEY sm4_key;
+//    uint8_t iv[16] = {0};
+//    uint8_t out[2048] = {0};
+//    size_t outlen = 0;
 //
-//     sm4_set_encrypt_key(&sm4_key, key->ptr);
-//     sm4_cbc_padding_encrypt(&sm4_key, iv, p_buf->ptr, p_buf->len, out, &outlen);
-//     CLONE_TO_CHUNK(*e_buf, out, outlen);
+//    sm4_set_encrypt_key(&sm4_key, key->ptr);
+//    sm4_cbc_padding_encrypt(&sm4_key, iv, p_buf->ptr, p_buf->len, out, &outlen);
+//    CLONE_TO_CHUNK(*e_buf, out, outlen);
 //
-//     return LD_OK;
-// }
+//    return LD_OK;
+//}
+
+l_err encrypt_uint8(void *key, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len) {
+    SM4_KEY sm4_key;
+    uint8_t iv[16] = {0};
+    sm4_set_encrypt_key(&sm4_key, key);
+    sm4_cbc_padding_encrypt(&sm4_key, iv, in, in_len, out, out_len);
+    return LD_OK;
+}
+
+l_err decrypt_uint8(void *key, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len) {
+    SM4_KEY sm4_key;
+    uint8_t iv[16] = {0};
+    sm4_set_decrypt_key(&sm4_key, key);
+    sm4_cbc_padding_decrypt(&sm4_key, iv, in, in_len, out, out_len);
+    return LD_OK;
+}
+
+//l_err decrypt_buf(buffer_t *e_buf, buffer_t *key, buffer_t *p_buf) {
+//    if (p_buf == NULL || e_buf == NULL || key == NULL) {
+//        return LD_ERR_INTERNAL;
+//    }
+//    SM4_KEY sm4_key;
+//    uint8_t iv[16] = {0};
+//    uint8_t out[2048] = {0};
+//    size_t outlen = 0;
 //
-// l_err decrypt_buf(buffer_t *e_buf, buffer_t *key, buffer_t *p_buf) {
-//     if (p_buf == NULL || e_buf == NULL || key == NULL) {
-//         return LD_ERR_INTERNAL;
-//     }
-//     SM4_KEY sm4_key;
-//     uint8_t iv[16] = {0};
-//     uint8_t out[8192] = {0};
-//     size_t outlen = 0;
+//    sm4_set_decrypt_key(&sm4_key, key->ptr);
+//    sm4_cbc_padding_decrypt(&sm4_key, iv, e_buf->ptr, e_buf->len, out, &outlen);
+//    CLONE_TO_CHUNK(*p_buf, out, outlen);
 //
-//     sm4_set_decrypt_key(&sm4_key, key->ptr);
-//     sm4_cbc_padding_decrypt(&sm4_key, iv, e_buf->ptr, e_buf->len, out, &outlen);
-//     CLONE_TO_CHUNK(*p_buf, out, outlen);
-//
-//     return LD_OK;
-// }
+//    return LD_OK;
+//}
 
 #ifdef UNUSE_CRYCARD
 
