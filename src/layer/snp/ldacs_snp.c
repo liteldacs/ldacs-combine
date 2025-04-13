@@ -8,76 +8,76 @@
 #include <layer_interface.h>
 #include <ldacs_def.h>
 
-enum_names snp_pdu_ctrl_names = {USER_PLANE_PACKET, CONTROL_PLANE_PACKET, snp_ctrl_name, NULL};
-enum_names snp_pdu_sec_names = {SEC_MACLEN_INVAILD, SEC_MACLEN_256, snp_sec_name, NULL};
+const enum_names snp_pdu_ctrl_names = {USER_PLANE_PACKET, CONTROL_PLANE_PACKET, snp_ctrl_name, NULL};
+const enum_names snp_pdu_sec_names = {SEC_MACLEN_INVAILD, SEC_MACLEN_256, snp_sec_name, NULL};
 
 static snp_layer_objs_t snp_layer_objs = {
-        .SNP_P_SDU = MAX_SNP_SDU_LEN, /* 2048 octets - HEADER_LEN(1 octet) - SQN(3 octet) - MAX_MAC(256bits(32 octet)) */
-        .SEC = SEC_MACLEN_256,
-        .T_SQN = 0,
+    .SNP_P_SDU = MAX_SNP_SDU_LEN, /* 2048 octets - HEADER_LEN(1 octet) - SQN(3 octet) - MAX_MAC(256bits(32 octet)) */
+    .SEC = SEC_MACLEN_256,
+    .T_SQN = 0,
 };
 
 ld_prim_t SN_DATA_REQ_PRIM = {
-        .name = "SN_DATA_REQ",
-        .prim_seq = SN_DATA_REQ,
-        .SAP = {SN_SAPD, NULL, NULL},
-        .req_cb = {SN_SAPD_L_cb, SN_SAPD_U_cb, NULL},
-        .mutex = PTHREAD_MUTEX_INITIALIZER,
+    .name = "SN_DATA_REQ",
+    .prim_seq = SN_DATA_REQ,
+    .SAP = {SN_SAPD, NULL, NULL},
+    .req_cb = {SN_SAPD_L_cb, SN_SAPD_U_cb, NULL},
+    .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
 ld_prim_t SN_DATA_IND_PRIM = {
-        .name = "SN_DATA_IND",
-        .prim_seq = SN_DATA_IND,
-        .SAP = {NULL, NULL, NULL},
-        .req_cb = {SN_SAPD_L_cb, SN_SAPD_U_cb, NULL},
-        .mutex = PTHREAD_MUTEX_INITIALIZER,
+    .name = "SN_DATA_IND",
+    .prim_seq = SN_DATA_IND,
+    .SAP = {NULL, NULL, NULL},
+    .req_cb = {SN_SAPD_L_cb, SN_SAPD_U_cb, NULL},
+    .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
 ld_prim_t SN_UDATA_REQ_PRIM = {
-        .name = "SN_UDATA_REQ",
-        .prim_seq = SN_UDATA_REQ,
-        .SAP = {SN_SAPD, NULL, NULL},
-        .req_cb = {SN_SAPD_L_cb, SN_SAPD_U_cb, NULL},
-        .mutex = PTHREAD_MUTEX_INITIALIZER,
+    .name = "SN_UDATA_REQ",
+    .prim_seq = SN_UDATA_REQ,
+    .SAP = {SN_SAPD, NULL, NULL},
+    .req_cb = {SN_SAPD_L_cb, SN_SAPD_U_cb, NULL},
+    .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
 ld_prim_t SN_UDATA_IND_PRIM = {
-        .name = "SN_UDATA_IND",
-        .prim_seq = SN_UDATA_IND,
-        .SAP = {NULL, NULL, NULL},
-        .req_cb = {SN_SAPD_L_cb, SN_SAPD_U_cb, NULL},
-        .mutex = PTHREAD_MUTEX_INITIALIZER,
+    .name = "SN_UDATA_IND",
+    .prim_seq = SN_UDATA_IND,
+    .SAP = {NULL, NULL, NULL},
+    .req_cb = {SN_SAPD_L_cb, SN_SAPD_U_cb, NULL},
+    .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
 ld_prim_t SN_OPEN_REQ_PRIM = {
-        .name = "SN_OPEN_REQ",
-        .prim_seq = SN_OPEN_REQ,
-        .SAP = {SN_SAPC, NULL, NULL},
-        .req_cb = {SN_SAPC_cb, NULL, NULL},
-        .mutex = PTHREAD_MUTEX_INITIALIZER,
+    .name = "SN_OPEN_REQ",
+    .prim_seq = SN_OPEN_REQ,
+    .SAP = {SN_SAPC, NULL, NULL},
+    .req_cb = {SN_SAPC_cb, NULL, NULL},
+    .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
 ld_prim_t SN_AUTH_REQ_PRIM = {
-        .name = "SN_AUTH_REQ",
-        .prim_seq = SN_AUTH_REQ,
-        .SAP = {SN_SAPC, NULL, NULL},
-        .req_cb = {SN_SAPC_cb, NULL, NULL},
-        .mutex = PTHREAD_MUTEX_INITIALIZER,
+    .name = "SN_AUTH_REQ",
+    .prim_seq = SN_AUTH_REQ,
+    .SAP = {SN_SAPC, NULL, NULL},
+    .req_cb = {SN_SAPC_cb, NULL, NULL},
+    .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
 ld_prim_t SN_CLOSE_REQ_PRIM = {
-        .name = "SN_CLOSE_REQ",
-        .prim_seq = SN_CLOSE_REQ,
-        .SAP = {SN_SAPC, NULL, NULL},
-        .req_cb = {SN_SAPC_cb, NULL, NULL},
-        .mutex = PTHREAD_MUTEX_INITIALIZER,
+    .name = "SN_CLOSE_REQ",
+    .prim_seq = SN_CLOSE_REQ,
+    .SAP = {SN_SAPC, NULL, NULL},
+    .req_cb = {SN_SAPC_cb, NULL, NULL},
+    .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 ld_prim_t SN_CONF_REQ_PRIM = {
-        .name = "SN_CONF_REQ",
-        .prim_seq = SN_CONF_REQ,
-        .SAP = {SN_SAPC, NULL, NULL},
-        .req_cb = {SN_SAPC_cb, NULL, NULL},
-        .mutex = PTHREAD_MUTEX_INITIALIZER,
+    .name = "SN_CONF_REQ",
+    .prim_seq = SN_CONF_REQ,
+    .SAP = {SN_SAPC, NULL, NULL},
+    .req_cb = {SN_SAPC_cb, NULL, NULL},
+    .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
 l_err make_snp_layer() {
@@ -116,7 +116,7 @@ void SN_SAPC(ld_prim_t *prim) {
 
             /* change to the new state auth */
             if ((prim->prim_err = change_state(&snp_layer_objs.snp_fsm, SNP_EV_DEFAULT,
-                                               &(fsm_event_data_t) {&snp_fsm_events[SNP_AUTH], NULL}))) {
+                                               &(fsm_event_data_t){&snp_fsm_events[SNP_AUTH], NULL}))) {
                 log_error("cant change state correctly");
                 break;
             }
@@ -131,7 +131,7 @@ void SN_SAPC(ld_prim_t *prim) {
 
             /* change to the new state auth */
             if ((prim->prim_err = change_state(&snp_layer_objs.snp_fsm, SNP_EV_DEFAULT,
-                                               &(fsm_event_data_t) {&snp_fsm_events[SNP_OPEN], NULL}))) {
+                                               &(fsm_event_data_t){&snp_fsm_events[SNP_OPEN], NULL}))) {
                 log_error("cant change state correctly");
                 break;
             }
@@ -158,8 +158,6 @@ void SN_SAPD(ld_prim_t *prim) {
     orient_sdu_t *orient_sdu_to = create_orient_sdus(orient_sdu_from->AS_SAC, orient_sdu_from->GS_SAC);
     buffer_t *buf = orient_sdu_from->buf;
 
-    /* 判断LME是否处于已经完成KAS-GS密钥协商阶段 */
-
     pb_stream snp_pbs;
     zero(&snp_pbs);
     uint8_t snp_buf[MAX_SNP_SDU_LEN] = {0};
@@ -178,25 +176,26 @@ void SN_SAPD(ld_prim_t *prim) {
     uint8_t enc_arr[2048] = {0};
     size_t enc_sz = 0;
     buffer_t *enc_buf = init_buffer_unptr();
-    snpsub_crypto(orient_sdu_to->AS_SAC, buf->ptr, buf->len, enc_arr, &enc_sz, TRUE);
+    if (snpsub_crypto(orient_sdu_to->AS_SAC, buf->ptr, buf->len, enc_arr, &enc_sz, TRUE) != LDCAUC_OK) {
+        free_buffer(enc_buf);
+        prim->prim_err = LD_ERR_INTERNAL;
+        return;
+    }
     CLONE_TO_CHUNK(*enc_buf, enc_arr, enc_sz);
-
-//    log_buf()
-
 
     /* 如果还没有派生KAS-GS，则不验证完整性 */
     snp_pdu_t snp_pdu = {
-            .ctrl = prim->prim_obj_typ == SN_TYP_FROM_UP ? USER_PLANE_PACKET : CONTROL_PLANE_PACKET,
-            .sec_level =  snp_layer_objs.SEC,
-            .nsel = prim->prim_obj_typ == SN_TYP_FROM_UP ? NSEL_IPV6 : NSEL_LME,
-            .sdu = enc_buf,
-//            .sdu = buf,
-            .sqn = (*get_SQN(orient_sdu_to->AS_SAC, TRUE))++,
+        .ctrl = prim->prim_obj_typ == SN_TYP_FROM_UP ? USER_PLANE_PACKET : CONTROL_PLANE_PACKET,
+        .sec_level = snp_layer_objs.SEC,
+        .nsel = prim->prim_obj_typ == SN_TYP_FROM_UP ? NSEL_IPV6 : NSEL_LME,
+        .sdu = enc_buf,
+        .sqn = (*get_SQN(orient_sdu_to->AS_SAC, TRUE))++,
     };
 
     init_pbs(&snp_pbs, snp_buf, MAX_SNP_SDU_LEN, "SNP BUF");
     if (!out_struct(&snp_pdu, &snp_pdu_desc, &snp_pbs, NULL)) {
         prim->prim_err = LD_ERR_INTERNAL;
+        return;
     }
 
     char hmac[32] = {0};
@@ -228,17 +227,14 @@ void D_SAPD_cb(ld_prim_t *prim) {
             zero(&pbs);
             snp_pdu_t pdu;
 
-            /* TODO: 如果没完成auth过程，则MAC为全0 */
-            /* 判断LME是否处于已经完成KAS-GS密钥协商阶段 */
-            // if (finish_auth) {
-            //     /* 应减去MAC长度 */
-            //     pdu_len -= get_sec_maclen(snp_layer_objs.SEC);
-            // }
             log_buf(LOG_WARN, "SNP IN", snp_in->ptr, snp_in->len);
 
+            /* TODO: 搞出更多的错误代码，然后再网关显示 */
             if (snpsub_vfy_hmac(o_sdu->AS_SAC, snp_layer_objs.SEC, snp_in->ptr, snp_in->len) != LDCAUC_OK) {
                 log_warn("HMAC verify failed");
                 free_buffer(o_sdu->buf);
+                preempt_prim(&SN_DATA_IND_PRIM, VER_WRONG_MAC, o_sdu, NULL, 0, 0);
+                prim->prim_err = LD_ERR_INVALID_MAC;
                 return;
             }
 
@@ -250,17 +246,6 @@ void D_SAPD_cb(ld_prim_t *prim) {
                 return;
             }
 
-            /* TODO: 搞出更多的错误代码，然后再网关显示 */
-            // if (finish_auth) {
-            //     if (!pb_in_mac(&pbs, get_sec_maclen(snp_layer_objs.SEC), get_hmac_key(o_sdu->AS_SAC),
-            //                    verify_hmac_uint)) {
-            //         free_buffer(o_sdu->buf);
-            //         o_sdu->buf = pdu.sdu;
-            //         preempt_prim(&SN_DATA_IND_PRIM, VER_WRONG_MAC, o_sdu, NULL, 0, 0);
-            //         prim->prim_err = LD_ERR_INVALID_MAC;
-            //         return;
-            //     }
-            // }
 
             uint32_t *check_sqn = get_SQN(o_sdu->AS_SAC, FALSE);
             if (abs((int) pdu.sqn - *check_sqn) < SNP_RANGE) {
@@ -274,14 +259,15 @@ void D_SAPD_cb(ld_prim_t *prim) {
             /* free the previous orient buffer, and set the new one */
             free_buffer(o_sdu->buf);
 
-
             uint8_t dec_arr[2048] = {0};
             size_t dec_sz = 0;
             o_sdu->buf = init_buffer_unptr();
-            snpsub_crypto(o_sdu->AS_SAC, pdu.sdu->ptr, pdu.sdu->len, dec_arr, &dec_sz, FALSE);
+            if (snpsub_crypto(o_sdu->AS_SAC, pdu.sdu->ptr, pdu.sdu->len, dec_arr, &dec_sz, FALSE) != LDCAUC_OK) {
+                free_buffer(o_sdu->buf);
+                prim->prim_err = LD_ERR_INTERNAL;
+                return;
+            }
             CLONE_TO_CHUNK(*(o_sdu->buf), dec_arr, dec_sz);
-//            o_sdu->buf = pdu.sdu;
-
 
             if (pdu.ctrl == CONTROL_PLANE_PACKET) {
                 preempt_prim(&SN_DATA_IND_PRIM, VER_PASS, o_sdu, NULL, 0, 0);

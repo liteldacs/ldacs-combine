@@ -9,14 +9,14 @@
 
 static bool is_finish_auth(uint16_t AS_SAC) {
     snf_entity_t *snf_en = snf_obj.role == LD_AS
-                           ? snf_obj.as_snf_en
-                           : (snf_entity_t *) get_enode(AS_SAC);
+                               ? snf_obj.as_snf_en
+                               : (snf_entity_t *) get_enode(AS_SAC);
     switch (snf_obj.role) {
         case LD_AS:
         case LD_SGW: {
             const char *authc_str = snf_obj.role == LD_AS
-                                    ? ld_authc_fsm_states[LD_AUTHC_A2]
-                                    : ld_authc_fsm_states[LD_AUTHC_G2];
+                                        ? ld_authc_fsm_states[LD_AUTHC_A2]
+                                        : ld_authc_fsm_states[LD_AUTHC_G2];
             return in_state(&snf_en->auth_fsm, authc_str);
         }
         case LD_GS: {
@@ -48,15 +48,17 @@ int8_t snpsub_crypto(uint16_t AS_SAC, uint8_t *in, size_t in_len, uint8_t *out, 
         return LDCAUC_OK;
     }
     if (is_encrypt) {
-        encrypt_uint8(get_enc_key(AS_SAC), in, in_len, out, out_len);
+        return encrypt_uint8(get_enc_key(AS_SAC), in, in_len, out, out_len) == LD_OK
+                   ? LDCAUC_OK
+                   : LDCAUC_INTERNAL_ERROR;
     } else {
-        decrypt_uint8(get_enc_key(AS_SAC), in, in_len, out, out_len);
+        return decrypt_uint8(get_enc_key(AS_SAC), in, in_len, out, out_len) == LD_OK
+                   ? LDCAUC_OK
+                   : LDCAUC_INTERNAL_ERROR;
     }
-    return LDCAUC_OK;
 }
 
 int8_t snpsub_calc_hmac(uint16_t AS_SAC, uint8_t SEC, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len) {
-
     if (!in || in_len == 0 || !out) return LDCAUC_WRONG_PARA;
 
     *out_len = get_sec_maclen(SEC);

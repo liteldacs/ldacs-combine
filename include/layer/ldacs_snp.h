@@ -70,10 +70,9 @@ typedef struct snp_pdu_s {
 } snp_pdu_t;
 
 #pragma pack() //恢复（一定要恢复）
-extern enum_names sec_ua_names;
-extern enum_names snp_pdu_ctrl_names;
-extern enum_names snp_pdu_sec_names;
-extern enum_names snp_fin_names;
+
+extern const enum_names snp_pdu_ctrl_names;
+extern const enum_names snp_pdu_sec_names;
 
 /* 不包含MAC长度 */
 #define SNP_HEAD_LEN (1+3+4+24)

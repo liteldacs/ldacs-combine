@@ -35,11 +35,12 @@ ELSE ()
     target_compile_definitions(${PROJECT_NAME} PRIVATE UNUSE_CRYCARD)
 ENDIF ()
 
-find_package(Ldacsutils REQUIRED)
-if (Ldacsutils_FOUND)
-    target_include_directories(${PROJECT_NAME} PUBLIC ${Ldacsutils_INCLUDE_DIRS})
-    target_link_libraries(${PROJECT_NAME} PUBLIC ldacsutils::ldacsutils base64)
+find_package(LiteLdacsSdk REQUIRED)
+if (LiteLdacsSdk_FOUND)
+    include_directories(${LiteLdacsSdk_INCLUDE_DIRS})
+    link_libraries(liteldacssdk::liteldacssdk)
 endif ()
+
 
 find_package(Ldacscrypto REQUIRED)
 if (Ldacscrypto_FOUND)

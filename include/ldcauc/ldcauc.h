@@ -60,7 +60,7 @@ typedef int8_t (*trans_snp)(uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size
  * @param[in] finish_auth   认证完成回调函数
  * @param[in] trans_snp     LME->SNP 回调函数
  */
-int8_t init_as_snf_layer(finish_auth finish_auth, trans_snp trans_snp);
+void init_as_snf_layer(finish_auth finish_auth, trans_snp trans_snp);
 
 /**
  * \brief  GS初始化SNF层
@@ -68,17 +68,17 @@ int8_t init_as_snf_layer(finish_auth finish_auth, trans_snp trans_snp);
  * @param[in] gsnf_addr     GSC/网关IPv6地址
  * @param[in] trans_snp     LME->SNP 回调函数
  */
-int8_t init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port,
-                         trans_snp trans_snp);
+void init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port,
+                       trans_snp trans_snp);
 
-int8_t init_gs_snf_layer_unmerged(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port,
-                                  trans_snp trans_snp);
+void init_gs_snf_layer_unmerged(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port,
+                                trans_snp trans_snp);
 
 /**
  * \brief  网关初始化SNF层
  * @param[in] listen_port     监听端口
  */
-int8_t init_sgw_snf_layer(uint16_t listen_port);
+void init_sgw_snf_layer(uint16_t listen_port);
 
 /**
  * \brief  清理SNF层数据并释放对应内存
@@ -86,7 +86,7 @@ int8_t init_sgw_snf_layer(uint16_t listen_port);
 int8_t destory_snf_layer();
 
 /**
- * \brief AUTH状态转换流程
+ * \brief AUTH状态转换流程(AS)
  * AS进入LME-AUTH状态时调用函数，该函数初始化AS唯一的SNF实体，并启动内部AUTHC流程
  * @param[in] role      角色（ROLE_AS、ROLE_GS、ROLE_SGW）
  * @param[in] AS_SAC    AS SAC
@@ -96,21 +96,51 @@ int8_t destory_snf_layer();
 int8_t snf_LME_AUTH(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, uint16_t GS_SAC);
 
 /**
- * \brief AUTH状态转换流程
- * AS进入LME-AUTH状态时调用函数，该函数初始化AS唯一的SNF实体，并启动内部AUTHC流程
- * @param[in] role      角色（ROLE_AS、ROLE_GS、ROLE_SGW）
- * @param[in] AS_SAC    AS SAC
- * @param[in] AS_UA     AS UA
- * @param[in] GS_SAC    GS SAC
+ * \brief 注册SNF实体（GS）
+ * GS在收到RA的CELL RESP后，在SNF中注册飞机实体
+ * @param role      角色宏定义（ROLE_AS、ROLE_GS）
+ * @param AS_SAC    AS SAC
+ * @param AS_UA     AS UA
+ * @param GS_SAC    GS SAC
+ * @return
  */
-int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size_t buf_len);
-
 int8_t register_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, uint16_t GS_SAC);
 
-int8_t unregister_snf_en(uint16_t SAC);
+/**
+ * \brief 注销SNF实体（GS）
+ * @param AS_SAC AS SAC
+ * @return
+ */
+int8_t unregister_snf_en(uint16_t AS_SAC);
 
+/**
+ * \brief LME向SNF上传控制数据
+ * 当LME通过SN原语收到控制数据后，通过此函数触发对应SNF功能
+ * @param[in] is_valid  SNP报文是否有效
+ * @param[in] AS_SAC    AS SAC
+ * @param[in] GS_SAC    GS SAC
+ * @param[in] snp_buf   SNP报文
+ * @param[in] buf_len   报文长度
+ */
+int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_buf, size_t buf_len);
+
+/**
+ * \brief 产生至多64位随机数
+ * @param rand_bits_sz  随机数比特长度
+ * @return  返回随机数
+ */
 uint64_t generate_urand(size_t rand_bits_sz);
 
+/**
+ *
+ * @param AS_SAC
+ * @param in
+ * @param in_len
+ * @param out
+ * @param out_len
+ * @param is_encrypt
+ * @return
+ */
 int8_t snpsub_crypto(uint16_t AS_SAC, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len, bool is_encrypt);
 
 int8_t snpsub_calc_hmac(uint16_t AS_SAC, uint8_t SEC, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len);

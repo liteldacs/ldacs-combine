@@ -22,22 +22,22 @@ static void send_user_data_terminal();
 
 static const size_t funcs_sz = 1;
 static terminal_func terminal_funcs[] = {
-        send_user_data_terminal
+    send_user_data_terminal
 };
 
 ld_service_t terminal_service = {
-        .init_service = init_terminal_service,
-        .handle_state_chg = handle_st_chg_terminal,
-        .handle_as_info_key_upd = handle_as_info_key_upd_terminal,
-        .handle_as_info_upd = handle_as_info_upd_terminal,
-        .handle_recv_user_msg = handle_user_msg_terminal,
+    .init_service = init_terminal_service,
+    .handle_state_chg = handle_st_chg_terminal,
+    .handle_as_info_key_upd = handle_as_info_key_upd_terminal,
+    .handle_as_info_upd = handle_as_info_upd_terminal,
+    .handle_recv_user_msg = handle_user_msg_terminal,
 };
 
 static void listen_terminal_input() {
     char input[1024];
     while (stop_flag == FALSE) {
-        printf("> ");          // 提示符
-        fflush(stdout);        // 确保提示符立即显示
+        printf("> "); // 提示符
+        fflush(stdout); // 确保提示符立即显示
 
         if (fgets(input, sizeof(input), stdin) == NULL || !strncmp(input, "exit", 4)) {
             kill(-getpid(), SIGINT);
@@ -48,7 +48,7 @@ static void listen_terminal_input() {
         input[strcspn(input, "\n")] = '\0';
 
         if (strlen(input)) {
-//            printf("接收到输入: %s\n", input);
+            //            printf("接收到输入: %s\n", input);
             long serial = strtol(input, NULL, 10);
             if (serial >= funcs_sz) {
                 log_warn("Invalid func serial number");
@@ -85,12 +85,11 @@ static void handle_as_info_key_upd_terminal(as_info_key_upd_t *as_upd) {
     const char *tag = "AS_SAC";
     if (as_upd->key->len >= strlen(tag) && !memcmp(as_upd->key->ptr, tag, strlen(tag))) {
         terminal_obj.AS_SAC = as_upd->value;
-//        log_warn("!!!!!!!!!!!!!! %d", terminal_obj.AS_SAC);
     }
 }
 
 static void handle_as_info_upd_terminal(as_info_upd_t *as_info) {
-//    log_fatal("NEW value of AS by %.02x", as_info->AS_SAC);
+    //    log_fatal("NEW value of AS by %.02x", as_info->AS_SAC);
 }
 
 static void handle_user_msg_terminal(user_msg_t *umsg) {

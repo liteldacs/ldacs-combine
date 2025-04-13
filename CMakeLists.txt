@@ -31,8 +31,8 @@ add_executable(${PROJECT_NAME} main.c)
 add_executable(cli::test_client ALIAS ${PROJECT_NAME})
 
 
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal  cli::ldacs_device
-         event event_pthreads ldcauc)
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal cli::ldacs_device
+        event event_pthreads ldcauc)
 
 find_package(SQLite3 REQUIRED)
 if (SQLite3_FOUND)
@@ -41,10 +41,10 @@ if (SQLite3_FOUND)
     message(${SQLite3_VERSION})
 endif (SQLite3_FOUND)
 
-find_package(Ldacsutils REQUIRED)
-if (Ldacsutils_FOUND)
-    include_directories(${Ldacsutils_INCLUDE_DIRS})
-    link_libraries(ldacsutils::ldacsutils)
+find_package(LiteLdacsSdk REQUIRED)
+if (LiteLdacsSdk_FOUND)
+    include_directories(${LiteLdacsSdk_INCLUDE_DIRS})
+    link_libraries(liteldacssdk::liteldacssdk)
 endif ()
 
 find_package(Ldacscrypto REQUIRED)
