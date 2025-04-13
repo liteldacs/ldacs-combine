@@ -38,6 +38,7 @@
 // }
 
 #ifdef UNUSE_CRYCARD
+
 static void ld_sm3_hmac(const uint8_t *key, size_t key_len,
                         const uint8_t *data, size_t data_len,
                         uint8_t mac[SM3_HMAC_SIZE]) {
@@ -46,6 +47,7 @@ static void ld_sm3_hmac(const uint8_t *key, size_t key_len,
     sm3_hmac_update(&ctx, data, data_len);
     sm3_hmac_finish(&ctx, mac);
 }
+
 #endif
 
 

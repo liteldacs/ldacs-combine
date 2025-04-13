@@ -9,6 +9,10 @@
 #include <layer_rcu.h>
 #include <layer_interface.h>
 
+typedef struct terminal_obj_s {
+    uint16_t AS_SAC;
+} terminal_obj_t;
+
 extern ld_service_t terminal_service;
 
 typedef void (*terminal_func)(void *);

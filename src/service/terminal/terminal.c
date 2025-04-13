@@ -4,6 +4,10 @@
 
 #include "service/terminal.h"
 
+terminal_obj_t terminal_obj = {
+
+};
+
 static l_err init_terminal_service();
 
 static void handle_st_chg_terminal(lme_state_chg_t *);
@@ -77,7 +81,12 @@ static void handle_st_chg_terminal(lme_state_chg_t *st_chg) {
 }
 
 static void handle_as_info_key_upd_terminal(as_info_key_upd_t *as_upd) {
-    log_warn("NEW value of AS key %s is %02x, by %.02x", as_upd->key->ptr, as_upd->value);
+    log_warn("NEW value of AS key `%s` is `%x`", as_upd->key->ptr, as_upd->value);
+    const char *tag = "AS_SAC";
+    if (as_upd->key->len >= strlen(tag) && !memcmp(as_upd->key->ptr, tag, strlen(tag))) {
+        terminal_obj.AS_SAC = as_upd->value;
+//        log_warn("!!!!!!!!!!!!!! %d", terminal_obj.AS_SAC);
+    }
 }
 
 static void handle_as_info_upd_terminal(as_info_upd_t *as_info) {
@@ -89,6 +98,6 @@ static void handle_user_msg_terminal(user_msg_t *umsg) {
 }
 
 static void send_user_data_terminal() {
-    char *test_msg = "AAAAAAAA\0";
-//    send_user_data(test_msg, strlen(test_msg), );
+    char *test_msg = "BBBBBBBBBBBBBBBBBBB\0";
+    send_user_data((uint8_t *) test_msg, strlen(test_msg), terminal_obj.AS_SAC);
 }

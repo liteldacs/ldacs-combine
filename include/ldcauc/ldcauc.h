@@ -111,4 +111,8 @@ int8_t unregister_snf_en(uint16_t SAC);
 
 uint64_t generate_urand(size_t rand_bits_sz);
 
+int8_t snpsub_calc_hmac(uint16_t AS_SAC, uint8_t SEC, char *in, size_t in_len, char *out, size_t *out_len);
+
+int8_t snpsub_vfy_hmac(uint16_t AS_SAC, uint8_t SEC, char *snp_pdu, size_t pdu_len);
+
 #endif //LDCAUC_H
