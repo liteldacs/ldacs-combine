@@ -98,7 +98,7 @@ static l_km_err key_install(buffer_t *key_ag, const char *as_ua, const char *gs_
 }
 
 #elif UNUSE_CRYCARD
-
+#include <gmssl/pbkdf2.h>
 /** generate key by sm3 kdf, using gmssl lib */
 static l_km_err gmssl_kdf(uint8_t *rand, size_t rand_len, KEY_HANDLE*handle, size_t key_sz) {
     *handle = init_buffer_unptr();
