@@ -132,19 +132,37 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
 uint64_t generate_urand(size_t rand_bits_sz);
 
 /**
- *
- * @param AS_SAC
- * @param in
- * @param in_len
- * @param out
- * @param out_len
- * @param is_encrypt
+ * \brief SNP SUB 加密/解密
+ * @param[in] AS_SAC        AS SAC
+ * @param[in] in            输入
+ * @param[in] in_len        输入长度
+ * @param[out] out          输出
+ * @param[out] out_len      输出长度
+ * @param[in] is_encrypt    是否为加密模式
  * @return
  */
 int8_t snpsub_crypto(uint16_t AS_SAC, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len, bool is_encrypt);
 
+/**
+ * \brief SNP SUB 计算HMAC
+ * @param[in] AS_SAC        AS SAC
+ * @param[in] SEC           安全模式（HMAC长度）
+ * @param[in] in            输入
+ * @param[in] in_len        输入长度
+ * @param[out] out          输出
+ * @param[out] out_len      输出长度
+ * @return
+ */
 int8_t snpsub_calc_hmac(uint16_t AS_SAC, uint8_t SEC, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len);
 
+/**
+ * \brief SNP SUB 验证HMAC
+ * @param[in] AS_SAC        AS SAC
+ * @param[in] SEC           安全模式（HMAC长度）
+ * @param[in] snp_pdu       SNP PDU
+ * @param[in] pdu_len       PDU长度
+ * @return
+ */
 int8_t snpsub_vfy_hmac(uint16_t AS_SAC, uint8_t SEC, uint8_t *snp_pdu, size_t pdu_len);
 
 #endif //LDCAUC_H
