@@ -20,9 +20,9 @@
 
 //#define KEY_DB_NAME "/root/ldacs/stack_new/ldacs_stack/resources/ld_sql.db"
 //#define KEY_DB_NAME "/root/ldacs/ldacs_sim_sgw/resources/ld_sql.db"
-#define AS_DB_NAME "/root/ldacs/stack_new/ldacs_stack/resources/as_sql.db"
-#define GS_DB_NAME "/root/ldacs/stack_new/ldacs_stack/resources/gs_sql.db"
-#define SGW_DB_NAME "/root/ldacs/stack_new/ldacs_stack/resources/sgw_sql.db"
+#define AS_DB_NAME "/root/ldacs/combine/ldacs-combine/resources/as_sql.db"
+#define GS_DB_NAME "/root/ldacs/combine/ldacs-combine/resources/gs_sql.db"
+#define SGW_DB_NAME "/root/ldacs/combine/ldacs-combine/resources/sgw_sql.db"
 #define AS_KEY_TABLE "as_keystore"
 #define GS_KEY_TABLE "gs_keystore"
 #define SGW_KEY_TABLE "sgw_keystore"

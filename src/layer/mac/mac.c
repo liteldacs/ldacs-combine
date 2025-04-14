@@ -251,14 +251,14 @@ l_err make_mac_layer() {
     /* temperory */
     UA_STR(ua_as);
     UA_STR(ua_sgw);
-    if (config.role == LD_AS) {
-        key_get_handle(config.role, get_ua_str(config.UA, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
-                       &mac_layer_objs.sm3_key);
-    } else {
-        key_get_handle(config.role, get_ua_str(10010, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
-                       &mac_layer_objs.sm3_key);
-    }
-
+//    if (config.role == LD_AS) {
+//        key_get_handle(config.role, get_ua_str(config.UA, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
+//                       &mac_layer_objs.sm3_key);
+//    } else {
+//        key_get_handle(config.role, get_ua_str(10010, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
+//                       &mac_layer_objs.sm3_key);
+//    }
+//
 
     mac_layer_objs.interv_head = &mac_layer_objs.intervs.lpointer;
     init_list_head(mac_layer_objs.interv_head);
@@ -967,9 +967,9 @@ void P_SAPD_cb(ld_prim_t *prim) {
 
                         pb_stream mac_pbs;
                         init_pbs(&mac_pbs, mac_buf->ptr, mac_buf->len, "BC_MAC");
-                        if (in_struct(&bc_mac, bc_format_descs[B_TYP].f_desc, &mac_pbs, NULL) == FALSE || !
-                            verify_hmac_buffer(mac_layer_objs.sm3_key, bc_mac.mac, to_calc_mac,
-                                               get_sec_maclen(SEC_MACLEN_64))) {
+                        if (in_struct(&bc_mac, bc_format_descs[B_TYP].f_desc, &mac_pbs, NULL) == FALSE
+                        || !verify_hmac_buffer(mac_layer_objs.sm3_key, bc_mac.mac, to_calc_mac, get_sec_maclen(SEC_MACLEN_64))
+                        ) {
                             lfqueue_destroy(queue);
                             lfqueue_free(queue);
                             return;

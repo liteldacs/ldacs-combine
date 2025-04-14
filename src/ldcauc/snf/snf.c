@@ -88,11 +88,10 @@ static snf_entity_t *init_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, 
                        &snf_en->key_as_sgw_r_h);
     } else if (role == ROLE_SGW) {
         snf_en->key_as_gs_b = init_buffer_unptr();
-        embed_rootkey(LD_GS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw));
+        embed_rootkey(LD_SGW, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw));
         key_get_handle(LD_SGW, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw), ROOT_KEY,
                        &snf_en->key_as_sgw_r_h);
     }
-
 
     stateM_init(&snf_en->auth_fsm, &ld_authc_states[role == ROLE_AS ? LD_AUTHC_A0 : LD_AUTHC_G0], NULL);
 

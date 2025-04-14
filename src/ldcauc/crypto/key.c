@@ -31,8 +31,6 @@ static char *get_table_name(ldacs_roles role) {
 }
 
 
-#include <gmssl/pbkdf2.h>
-
 #define KDF_ITER 10000
 #ifdef USE_CRYCARD
 /* for AS / SGW */

@@ -232,9 +232,9 @@ void D_SAPD_cb(ld_prim_t *prim) {
             /* TODO: 搞出更多的错误代码，然后再网关显示 */
             if (snpsub_vfy_hmac(o_sdu->AS_SAC, snp_layer_objs.SEC, snp_in->ptr, snp_in->len) != LDCAUC_OK) {
                 log_warn("HMAC verify failed");
-                free_buffer(o_sdu->buf);
                 preempt_prim(&SN_DATA_IND_PRIM, VER_WRONG_MAC, o_sdu, NULL, 0, 0);
                 prim->prim_err = LD_ERR_INVALID_MAC;
+                free_buffer(o_sdu->buf);
                 return;
             }
 

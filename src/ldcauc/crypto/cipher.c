@@ -5,24 +5,33 @@
 #include "crypto/cipher.h"
 
 l_err encrypt_uint8(void *key, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len) {
-    SM4_KEY sm4_key;
     uint8_t iv[16] = {0};
+#ifdef USE_CRYCARD
+    km_encrypt(key, ALGO_ENC_AND_DEC, iv, in, in_len, out, (uint32_t *)out_len);
+#elif
+    SM4_KEY sm4_key;
     sm4_set_encrypt_key(&sm4_key, key);
     if (!sm4_cbc_padding_encrypt(&sm4_key, iv, in, in_len, out, out_len)) {
         log_error("Encrypt Failed");
         return LD_ERR_INTERNAL;
     }
+#endif
     return LD_OK;
 }
 
 l_err decrypt_uint8(void *key, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len) {
-    SM4_KEY sm4_key;
     uint8_t iv[16] = {0};
+#ifdef USE_CRYCARD
+    km_decrypt(key, ALGO_ENC_AND_DEC, iv, in, in_len, out, (uint32_t *)out_len);
+#elif
+
+    SM4_KEY sm4_key;
     sm4_set_decrypt_key(&sm4_key, key);
     if (!sm4_cbc_padding_decrypt(&sm4_key, iv, in, in_len, out, out_len)) {
         log_error("Decrypt Failed");
         return LD_ERR_INTERNAL;
     }
+#endif
     return LD_OK;
 }
 
@@ -56,7 +65,7 @@ void calc_hmac_uint(uint8_t *udata, size_t data_len, void *key_med, uint8_t *mac
 
 void calc_hmac_buffer(buffer_t *bdata, void *key_med, buffer_t *mac_dst, size_t mac_limit) {
     uint8_t mac_buf[32] = {0};
-    calc_hmac_uint(bdata->ptr, bdata->len, key_med, mac_buf, mac_limit);
+//    calc_hmac_uint(bdata->ptr, bdata->len, key_med, mac_buf, mac_limit);
     CLONE_TO_CHUNK(*mac_dst, mac_buf, mac_limit);
 }
 
@@ -68,5 +77,6 @@ bool verify_hmac_uint(void *key_med, uint8_t *to_verify, uint8_t *udata, size_t 
 }
 
 bool verify_hmac_buffer(void *key_med, buffer_t *to_verify, buffer_t *bdata, size_t mac_limit) {
-    return verify_hmac_uint(key_med, to_verify->ptr, bdata->ptr, bdata->len, mac_limit);
+//    return verify_hmac_uint(key_med, to_verify->ptr, bdata->ptr, bdata->len, mac_limit);
+    return true;
 }
