@@ -83,14 +83,22 @@ static snf_entity_t *init_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, 
     UA_STR(ua_as);
     UA_STR(ua_sgw);
     if (role == ROLE_AS) {
-        embed_rootkey(LD_AS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw));
+        if(embed_rootkey(LD_AS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw)) != LD_KM_OK ||
         key_get_handle(LD_AS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw), ROOT_KEY,
-                       &snf_en->key_as_sgw_r_h);
+                       &snf_en->key_as_sgw_r_h) != LD_KM_OK){
+            log_error("Embed or Get rootkey Error");
+            free(snf_en);
+            return NULL;
+                       }
     } else if (role == ROLE_SGW) {
         snf_en->key_as_gs_b = init_buffer_unptr();
-        embed_rootkey(LD_SGW, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw));
+        if(embed_rootkey(LD_SGW, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw)) != LD_KM_OK ||
         key_get_handle(LD_SGW, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw), ROOT_KEY,
-                       &snf_en->key_as_sgw_r_h);
+                       &snf_en->key_as_sgw_r_h)!= LD_KM_OK) {
+            log_error("Embed or Get rootkey Error");
+            free(snf_en);
+            return NULL;
+        }
     }
 
     stateM_init(&snf_en->auth_fsm, &ld_authc_states[role == ROLE_AS ? LD_AUTHC_A0 : LD_AUTHC_G0], NULL);
@@ -120,6 +128,7 @@ int8_t clear_snf_en(snf_entity_t *snf_en) {
 
 int8_t snf_LME_AUTH(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, uint16_t GS_SAC) {
     snf_obj.as_snf_en = init_snf_en(role, AS_SAC, AS_UA, GS_SAC);
+    if(!snf_obj.as_snf_en)  return LDCAUC_INTERNAL_ERROR;
     l_err err;
 
     if ((err = change_state(&snf_obj.as_snf_en->auth_fsm, LD_AUTHC_EV_DEFAULT,
@@ -146,7 +155,7 @@ int8_t register_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, uint16_t G
     if (AS_SAC >= 4096 || GS_SAC >= 4096) return LDCAUC_WRONG_PARA;
     snf_entity_t *en = init_snf_en(role, AS_SAC, AS_UA, GS_SAC);
     if (en == NULL) {
-        return LDCAUC_NULL;
+        return LDCAUC_INTERNAL_ERROR;
     }
     set_enode(en);
 
