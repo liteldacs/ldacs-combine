@@ -34,7 +34,9 @@ l_err send_auc_rqst(void *args) {
     generate_nrand(n_1_str, NONCE_LEN);
     CLONE_TO_CHUNK(*auc_rqst->N_1, n_1_str, NONCE_LEN)
 
-    return handle_send_msg(auc_rqst, &auc_rqst_desc, as_man, as_man->key_as_sgw_r_h);
+    l_err err = handle_send_msg(auc_rqst, &auc_rqst_desc, as_man, as_man->key_as_sgw_r_h);
+    free_buffer(auc_rqst->N_1);
+    return err;
 }
 
 l_err recv_auc_rqst(buffer_t *buf, snf_entity_t *as_man) {
@@ -111,7 +113,9 @@ l_err send_auc_resp(void *args) {
     };
 
 
-    return handle_send_msg(auc_resp, &auc_resp_desc, as_man, as_man->key_as_sgw_s_h);
+    l_err err = handle_send_msg(auc_resp, &auc_resp_desc, as_man, as_man->key_as_sgw_s_h);
+    free_buffer(n_2);
+    return err;
 }
 
 l_err recv_auc_resp(buffer_t *buf, snf_entity_t *as_man) {
@@ -177,27 +181,20 @@ l_err send_auc_key_exec(void *args) {
     CLONE_TO_CHUNK(*n_3, n_3_str, NONCE_LEN)
 
     auc_key_exec_t *auc_key_exec = &(auc_key_exec_t){
-        .
-        S_TYP = AUC_KEY_EXC,
-        .
-        VER = snf_obj.PROTOCOL_VER,
-        .
-        PID = PID_MAC,
-        .
-        AS_SAC = as_man->AS_SAC,
-        .
-        GS_SAC = as_man->GS_SAC,
-        .
-        MAC_LEN = as_man->AUTHC_MACLEN,
-        .
-        AUTH_ID = as_man->AUTHC_AUTH_ID,
-        .
-        ENC_ID = as_man->AUTHC_ENC_ID,
-        .
-        N_3 = n_3,
+        . S_TYP = AUC_KEY_EXC,
+        . VER = snf_obj.PROTOCOL_VER,
+        . PID = PID_MAC,
+        . AS_SAC = as_man->AS_SAC,
+        . GS_SAC = as_man->GS_SAC,
+        . MAC_LEN = as_man->AUTHC_MACLEN,
+        . AUTH_ID = as_man->AUTHC_AUTH_ID,
+        . ENC_ID = as_man->AUTHC_ENC_ID,
+        . N_3 = n_3,
     };
 
-    return handle_send_msg(auc_key_exec, &auc_key_exec_desc, as_man, as_man->key_as_sgw_s_h);
+    l_err err = handle_send_msg(auc_key_exec, &auc_key_exec_desc, as_man, as_man->key_as_sgw_s_h);
+    free_buffer(n_3);
+    return err;
 }
 
 
