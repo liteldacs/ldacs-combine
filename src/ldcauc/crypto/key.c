@@ -134,15 +134,15 @@ l_km_err embed_rootkey(ldacs_roles role, const char *as_ua, const char *sgw_ua) 
     }
     else if (role == LD_SGW) // 网关生成并导出根密钥
     {
-        if (km_rkey_gen_export(as_ua, sgw_ua, ROOT_KEY_LEN, DEFAULT_VALIDATE, db_name, table_name,
-                               KEY_BIN_PATH))
-        {
-            log_error("根密钥生成、保存和导出失败。");
-        }
-        if (km_writefile_to_cryptocard(KEY_BIN_PATH, "rootkey.bin") != LD_KM_OK)
-        {
-            log_error("Error writing to ccard.");
-        }
+//        if (km_rkey_gen_export(as_ua, sgw_ua, ROOT_KEY_LEN, DEFAULT_VALIDATE, db_name, table_name,
+//                               KEY_BIN_PATH))
+//        {
+//            log_error("根密钥生成、保存和导出失败。");
+//        }
+//        if (km_writefile_to_cryptocard(KEY_BIN_PATH, "rootkey.bin") != LD_KM_OK)
+//        {
+//            log_error("Error writing to ccard.");
+//        }
     }
     // 激活as端根密钥
     QueryResult_for_queryid *query_result_as = query_id(db_name, table_name, as_ua, sgw_ua, ROOT_KEY,

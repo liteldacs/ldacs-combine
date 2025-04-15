@@ -96,7 +96,7 @@ static snf_entity_t *init_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, 
                        }
     } else if (role == ROLE_SGW) {
         snf_en->key_as_gs_b = init_buffer_unptr();
-        if(embed_rootkey(LD_GS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw)) != LD_KM_OK ||
+        if(embed_rootkey(LD_SGW, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw)) != LD_KM_OK ||
         key_get_handle(LD_SGW, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw), ROOT_KEY,
                        &snf_en->key_as_sgw_r_h)!= LD_KM_OK) {
             log_error("Embed or Get rootkey Error");
