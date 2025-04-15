@@ -134,30 +134,27 @@ l_km_err embed_rootkey(ldacs_roles role, const char *as_ua, const char *sgw_ua) 
     }
     else if (role == LD_SGW) // 网关生成并导出根密钥
     {
-        /* 临时，GS模拟SGW根密钥生成， as_name，sgw_name未来应为各自的UA */
-        if (km_rkey_gen_export(as_ua, sgw_ua, ROOT_KEY_LEN, DEFAULT_VALIDATE, db_name, table_name,
-                               KEY_BIN_PATH))
-        {
-            log_error("根密钥生成、保存和导出失败。");
-        }
-        if (km_writefile_to_cryptocard(KEY_BIN_PATH, "rootkey.bin") != LD_KM_OK)
-        {
-            log_error("Error writing to ccard.");
-        }
+//        if (km_rkey_gen_export(as_ua, sgw_ua, ROOT_KEY_LEN, DEFAULT_VALIDATE, db_name, table_name,
+//                               KEY_BIN_PATH))
+//        {
+//            log_error("根密钥生成、保存和导出失败。");
+//        }
+//        if (km_writefile_to_cryptocard(KEY_BIN_PATH, "rootkey.bin") != LD_KM_OK)
+//        {
+//            log_error("Error writing to ccard.");
+//        }
     }
     // 激活as端根密钥
     QueryResult_for_queryid *query_result_as = query_id(db_name, table_name, as_ua, sgw_ua, ROOT_KEY,
                                                         PRE_ACTIVATION);
-    if (query_result_as != NULL)
-    {
+    if (query_result_as != NULL)    {
         if (enable_key(db_name, table_name, query_result_as->ids[0]) != LD_KM_OK)
         {
             printf("enable key failed\n");
         }
     }
-    else
-    {
-        printf("query failed. query count %d\n", query_result_as->count);
+    else    {
+        printf("query failed");
         return LD_ERR_KM_QUERY; // 查询失败
     }
 

@@ -120,6 +120,7 @@ typedef struct snf_obj_s {
     net_opt_t net_opt;
 
     trans_snp trans_snp_func;
+    register_snf_fail register_fail_func;
 
     //AS
     finish_auth finish_auth_func;

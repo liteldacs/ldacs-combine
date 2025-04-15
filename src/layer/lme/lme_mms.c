@@ -219,7 +219,10 @@ void M_SAPR_cb(ld_prim_t *prim) {
                 if (has_lme_as_enode(sac) == FALSE) {
                     set_lme_as_enode(init_as_man(sac, cr->UA, lme_layer_objs.GS_SAC));
                 }
-                register_snf_en(LD_GS, sac, cr->UA, lme_layer_objs.GS_SAC);
+                if(register_snf_en(LD_GS, sac, cr->UA, lme_layer_objs.GS_SAC) != LDCAUC_OK){
+                    log_warn("Can not register snf");
+                    break;
+                }
                 dls_en_data_t *dls_en_data = &(dls_en_data_t) {
                         .GS_SAC = lme_layer_objs.GS_SAC,
                         .AS_UA = cr->UA,
