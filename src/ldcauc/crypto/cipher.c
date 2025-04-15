@@ -7,7 +7,9 @@
 l_err encrypt_uint8(void *key, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len) {
     uint8_t iv[16] = {0};
 #ifdef USE_CRYCARD
-    km_encrypt(key, ALGO_ENC_AND_DEC, iv, in, in_len, out, (uint32_t *)out_len);
+//    km_encrypt(key, ALGO_ENC_AND_DEC, iv, in, in_len, out, (uint32_t *)out_len, TRUE);
+    memcpy(out, in, in_len);
+    *out_len = in_len;
 #elif
     SM4_KEY sm4_key;
     sm4_set_encrypt_key(&sm4_key, key);
@@ -22,9 +24,10 @@ l_err encrypt_uint8(void *key, uint8_t *in, size_t in_len, uint8_t *out, size_t 
 l_err decrypt_uint8(void *key, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len) {
     uint8_t iv[16] = {0};
 #ifdef USE_CRYCARD
-    km_decrypt(key, ALGO_ENC_AND_DEC, iv, in, in_len, out, (uint32_t *)out_len);
+//    km_decrypt(key, ALGO_ENC_AND_DEC, iv, in, in_len, out, (uint32_t *)out_len, TRUE);
+    memcpy(out, in, in_len);
+    *out_len = in_len;
 #elif
-
     SM4_KEY sm4_key;
     sm4_set_decrypt_key(&sm4_key, key);
     if (!sm4_cbc_padding_decrypt(&sm4_key, iv, in, in_len, out, out_len)) {
@@ -73,6 +76,8 @@ bool verify_hmac_uint(void *key_med, uint8_t *to_verify, uint8_t *udata, size_t 
     uint8_t mac_buf[32] = {0};
     calc_hmac_uint(udata, data_len, key_med, mac_buf, mac_limit);
 
+    log_buf(LOG_DEBUG, "to_veri", to_verify, mac_limit);
+    log_buf(LOG_DEBUG, "mac_buf", mac_buf, mac_limit);
     return !memcmp(to_verify, mac_buf, mac_limit);
 }
 

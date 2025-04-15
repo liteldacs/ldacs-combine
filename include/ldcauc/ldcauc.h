@@ -55,12 +55,14 @@ typedef int8_t (*finish_auth)();
 
 typedef int8_t (*trans_snp)(uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size_t buf_len);
 
+typedef int8_t (*register_snf_fail)(uint16_t AS_SAC);
+
 /**
  * \brief  AS初始化SNF层
  * @param[in] finish_auth   认证完成回调函数
  * @param[in] trans_snp     LME->SNP 回调函数
  */
-void init_as_snf_layer(finish_auth finish_auth, trans_snp trans_snp);
+void init_as_snf_layer(finish_auth finish_auth, trans_snp trans_snp, register_snf_fail register_fail);
 
 /**
  * \brief  GS初始化SNF层
@@ -68,11 +70,11 @@ void init_as_snf_layer(finish_auth finish_auth, trans_snp trans_snp);
  * @param[in] gsnf_addr     GSC/网关IPv6地址
  * @param[in] trans_snp     LME->SNP 回调函数
  */
-void init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port,
-                       trans_snp trans_snp);
+void init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port, trans_snp trans_snp,
+                       register_snf_fail register_fail);
 
-void init_gs_snf_layer_unmerged(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port,
-                                trans_snp trans_snp);
+void init_gs_snf_layer_unmerged(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_port, trans_snp trans_snp,
+                                register_snf_fail register_fail);
 
 /**
  * \brief  网关初始化SNF层

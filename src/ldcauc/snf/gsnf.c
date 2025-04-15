@@ -136,7 +136,10 @@ l_err recv_gsnf(basic_conn_t **bcp) {
             gsnf_pkt_cn_ini_t *init_pkt = calloc(1, sizeof(gsnf_pkt_cn_ini_t));
             PARSE_GSNF(&mlt_ld->bc->read_pkt, init_pkt, gsnf_pkt_cn_ini_desc, GSNF_PKT_CN_INI_HEAD_LEN, 0);
             if (has_enode_by_sac(init_pkt->AS_SAC) == FALSE && has_enode_by_ua(init_pkt->UA) == FALSE) {
-                register_snf_en(ROLE_SGW, init_pkt->AS_SAC, init_pkt->UA, init_pkt->GS_SAC);
+                if(register_snf_en(ROLE_SGW, init_pkt->AS_SAC, init_pkt->UA, init_pkt->GS_SAC) != LDCAUC_OK){
+                    log_warn("Can not register snf");
+                    return LD_ERR_INTERNAL;
+                }
             } else {
                 return LD_ERR_INTERNAL;
             }

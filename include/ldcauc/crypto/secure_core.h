@@ -29,7 +29,7 @@
 #define ROOT_KEY_LEN 16
 #define DEFAULT_VALIDATE 365
 //#define KEY_BIN_PATH  "/root/ldacs/stack_new/ldacs_stack/resources/keystore/rootkey.bin"
-#define KEY_BIN_PATH  "/root/ldacs/ldacs_sim_sgw/resources/keystore/rootkey.bin"
+#define KEY_BIN_PATH  "/root/ldacs/combine/ldacs-combine/resources/rootkey.bin"
 //
 // enum p_sec {
 //     AES_CMAC,
