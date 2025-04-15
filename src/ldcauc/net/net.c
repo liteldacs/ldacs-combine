@@ -68,8 +68,8 @@ static int make_std_tcp_connect(struct sockaddr_in *to_conn_addr, char *addr, in
     int enable = SO_REUSEADDR;
 
     struct timeval timeout = {
-            .tv_sec = 5, /* after 5 seconds connect() will timeout  */
-            .tv_usec = 0,
+        .tv_sec = 5, /* after 5 seconds connect() will timeout  */
+        .tv_usec = 0,
     };
 
     inet_pton(AF_INET, addr, &s);
@@ -106,8 +106,8 @@ static int make_std_tcpv6_connect(struct sockaddr_in6 *to_conn_addr, char *addr,
     int enable = SO_REUSEADDR;
 
     struct timeval timeout = {
-            .tv_sec = 5, /* after 5 seconds connect() will timeout  */
-            .tv_usec = 0,
+        .tv_sec = 5, /* after 5 seconds connect() will timeout  */
+        .tv_usec = 0,
     };
 
     inet_pton(AF_INET6, addr, &s);
@@ -273,11 +273,11 @@ static int init_std_tcp_accept_handler(basic_conn_t *bc) {
 
 
 const struct role_propt role_propts[] = {
-        // {LD_AS, LD_UDP_CLIENT, NULL, init_as_handler},
-        // {(LD_GS | LD_AS), LD_UDP_SERVER, make_gs_as_server, init_gs_as_handler},
-        {LD_GS,  LD_TCP_CLIENT, NULL,                  init_std_tcp_conn_handler},
-        {LD_SGW, LD_TCP_SERVER, make_std_tcpv6_server, init_std_tcp_accept_handler},
-        {0,      0,             0,                     0},
+    // {LD_AS, LD_UDP_CLIENT, NULL, init_as_handler},
+    // {(LD_GS | LD_AS), LD_UDP_SERVER, make_gs_as_server, init_gs_as_handler},
+    {LD_GS, LD_TCP_CLIENT, NULL, init_std_tcp_conn_handler},
+    {LD_SGW, LD_TCP_SERVER, make_std_tcpv6_server, init_std_tcp_accept_handler},
+    {0, 0, 0, 0},
 };
 
 const struct role_propt *get_role_propt(int role) {

@@ -195,6 +195,7 @@ void SN_SAPD(ld_prim_t *prim) {
     init_pbs(&snp_pbs, snp_buf, MAX_SNP_SDU_LEN, "SNP BUF");
     if (!out_struct(&snp_pdu, &snp_pdu_desc, &snp_pbs, NULL)) {
         prim->prim_err = LD_ERR_INTERNAL;
+        free_buffer(enc_buf);
         return;
     }
 
@@ -205,6 +206,7 @@ void SN_SAPD(ld_prim_t *prim) {
         log_warn("SNP PDU calculate HMAC failed.");
         close_output_pbs(&snp_pbs);
         clear_dup_prim_data(orient_sdu_from, free);
+        free_buffer(enc_buf);
     }
     memcpy(snp_pbs.cur, hmac, hmac_len);
     snp_pbs.cur += hmac_len;
@@ -214,6 +216,7 @@ void SN_SAPD(ld_prim_t *prim) {
     log_buf(LOG_INFO, "SNP OUT", orient_sdu_to->buf->ptr, orient_sdu_to->buf->len);
     preempt_prim(&DLS_DATA_REQ_PRIM, prim->prim_obj_typ, orient_sdu_to, free_orient_sdus, 0, 0);
 
+    free_buffer(enc_buf);
     clear_dup_prim_data(orient_sdu_from, free);
 }
 
@@ -243,6 +246,7 @@ void D_SAPD_cb(ld_prim_t *prim) {
             if (!in_struct(&pdu, &snp_pdu_desc, &pbs, NULL)) {
                 prim->prim_err = LD_ERR_INTERNAL;
                 free_buffer(o_sdu->buf);
+                free_buffer(pdu.sdu);
                 return;
             }
 
@@ -253,6 +257,7 @@ void D_SAPD_cb(ld_prim_t *prim) {
             } else {
                 log_warn("The received sqn is out of range.");
                 free_buffer(o_sdu->buf);
+                free_buffer(pdu.sdu);
                 return;
             }
 
@@ -263,12 +268,14 @@ void D_SAPD_cb(ld_prim_t *prim) {
             size_t dec_sz = 0;
             o_sdu->buf = init_buffer_unptr();
             if (snpsub_crypto(o_sdu->AS_SAC, pdu.sdu->ptr, pdu.sdu->len, dec_arr, &dec_sz, FALSE) != LDCAUC_OK) {
+                free_buffer(pdu.sdu);
                 free_buffer(o_sdu->buf);
                 prim->prim_err = LD_ERR_INTERNAL;
                 return;
             }
             CLONE_TO_CHUNK(*(o_sdu->buf), dec_arr, dec_sz);
 
+            free_buffer(pdu.sdu);
             if (pdu.ctrl == CONTROL_PLANE_PACKET) {
                 preempt_prim(&SN_DATA_IND_PRIM, VER_PASS, o_sdu, NULL, 0, 0);
             } else {

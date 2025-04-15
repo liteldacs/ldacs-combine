@@ -28,6 +28,7 @@ typedef struct basic_conn_s {
 
 typedef struct net_opt_s {
     char name[32];
+    ldacs_roles role;
     int server_fd; //for GSW
     char addr[GEN_ADDRLEN];
     int port;

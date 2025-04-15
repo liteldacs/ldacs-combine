@@ -4,6 +4,9 @@
 
 
 #include "ldcauc/net/gs_conn.h"
+
+#include <ld_config.h>
+
 #include "ldcauc/net/net.h"
 
 
@@ -57,8 +60,14 @@ void *gs_epoll_setup(void *args) {
         /* processing ready fd one by one */
         for (i = 0; i < nfds; i++) {
             struct epoll_event *curr_event = epoll_events + i;
-            int fd = *((int *) (curr_event->data.ptr));
-
+            int fd = net_opt->role == LD_SGW
+                         ? *(int *) ((void *) curr_event->data.ptr)
+                         : (*((basic_conn_t **) curr_event->data.ptr))->fd;
+            // log_error("============= %02x !!!! %d", *fd_c, net_opt->role);
+            // if (net_opt->role == LD_GS) {
+            //     basic_conn_t *bc = *((basic_conn_t **) curr_event->data.ptr);
+            //     log_error("============= %02x %02x", bc->fd, *fd_c);
+            // }
             if (fd == net_opt->server_fd) {
                 gs_conn_accept(net_opt); /* never happened in GS */
             } else {

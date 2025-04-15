@@ -9,5 +9,9 @@
       <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="SQLITE" />
       <schema-mapping />
     </data-source>
+    <data-source name="sgw_sql" uuid="5bdd0f19-6395-493b-adef-695ae9069dfe">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="SQLITE" />
+      <schema-mapping />
+    </data-source>
   </component>
 </project>

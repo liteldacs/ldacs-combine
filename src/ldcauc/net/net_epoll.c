@@ -13,6 +13,7 @@ int net_epoll_add(int e_fd, void *opt_ptr, uint32_t events,
 void net_epoll_out(int e_fd, basic_conn_t *bc) {
     epoll_disable_in(e_fd, &bc->event, bc->fd);
     epoll_enable_out(e_fd, &bc->event, bc->fd);
+    log_warn("OUT FD!! %d %d", e_fd, bc->fd);
 }
 
 void net_epoll_in(int e_fd, basic_conn_t *bc) {

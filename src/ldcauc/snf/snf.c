@@ -31,6 +31,7 @@ void init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_por
     snf_obj.register_fail_func = register_fail;
 
     memcpy(snf_obj.net_opt.addr, gsnf_addr, GEN_ADDRLEN);
+    snf_obj.net_opt.role = LD_GS;
     snf_obj.net_opt.port = gsnf_port;
     snf_obj.net_opt.recv_handler = recv_gsg;
     snf_obj.sgw_conn = init_gs_conn(LD_GS, &snf_obj.net_opt);
@@ -56,6 +57,7 @@ void init_sgw_snf_layer(uint16_t listen_port) {
     snf_obj.register_fail_func = NULL;
 
     init_heap_desc(&hd_conns);
+    snf_obj.net_opt.role = LD_SGW;
     snf_obj.net_opt.server_fd = server_entity_setup(LD_SGW, listen_port);
     snf_obj.net_opt.recv_handler = recv_gsnf;
 
@@ -87,18 +89,18 @@ static snf_entity_t *init_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, 
     UA_STR(ua_as);
     UA_STR(ua_sgw);
     if (role == ROLE_AS) {
-        if(embed_rootkey(LD_AS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw)) != LD_KM_OK ||
-        key_get_handle(LD_AS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw), ROOT_KEY,
-                       &snf_en->key_as_sgw_r_h) != LD_KM_OK){
+        if (embed_rootkey(LD_AS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw)) != LD_KM_OK ||
+            key_get_handle(LD_AS, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw), ROOT_KEY,
+                           &snf_en->key_as_sgw_r_h) != LD_KM_OK) {
             log_error("Embed or Get rootkey Error");
             free(snf_en);
             return NULL;
-                       }
+        }
     } else if (role == ROLE_SGW) {
         snf_en->key_as_gs_b = init_buffer_unptr();
-        if(embed_rootkey(LD_SGW, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw)) != LD_KM_OK ||
-        key_get_handle(LD_SGW, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw), ROOT_KEY,
-                       &snf_en->key_as_sgw_r_h)!= LD_KM_OK) {
+        if (embed_rootkey(LD_SGW, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw)) != LD_KM_OK ||
+            key_get_handle(LD_SGW, get_ua_str(snf_en->AS_UA, ua_as), get_ua_str(DFT_SGW_UA, ua_sgw), ROOT_KEY,
+                           &snf_en->key_as_sgw_r_h) != LD_KM_OK) {
             log_error("Embed or Get rootkey Error");
             free(snf_en);
             return NULL;
@@ -132,7 +134,7 @@ int8_t clear_snf_en(snf_entity_t *snf_en) {
 
 int8_t snf_LME_AUTH(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, uint16_t GS_SAC) {
     snf_obj.as_snf_en = init_snf_en(role, AS_SAC, AS_UA, GS_SAC);
-    if(!snf_obj.as_snf_en) {
+    if (!snf_obj.as_snf_en) {
         snf_obj.register_fail_func(AS_SAC);
         return LDCAUC_INTERNAL_ERROR;
     }
@@ -162,7 +164,7 @@ int8_t register_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, uint16_t G
     if (AS_SAC >= 4096 || GS_SAC >= 4096) return LDCAUC_WRONG_PARA;
     snf_entity_t *en = init_snf_en(role, AS_SAC, AS_UA, GS_SAC);
     if (en == NULL) {
-        if(snf_obj.register_fail_func){
+        if (snf_obj.register_fail_func) {
             snf_obj.register_fail_func(AS_SAC);
         }
         return LDCAUC_INTERNAL_ERROR;
