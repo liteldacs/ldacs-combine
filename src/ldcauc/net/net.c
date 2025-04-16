@@ -318,19 +318,18 @@ static int response_send_buffer(basic_conn_t *bc) {
 }
 
 
-int response_handle(basic_conn_t **bcp) {
-    basic_conn_t *bc = *bcp;
+int response_handle(basic_conn_t *bc) {
     int status;
 
     if (bc->opt->send_handler) {
-        bc->opt->send_handler(bcp);
+        bc->opt->send_handler(bc);
     }
     do {
         status = response_send_buffer(bc);
     } while (status == OK && bc->trans_done != TRUE);
     if (bc->trans_done) {
         // response done
-        if (bc->opt->reset_conn) bc->opt->reset_conn(bcp);
+        if (bc->opt->reset_conn) bc->opt->reset_conn(bc);
         net_epoll_in(epoll_fd, bc);
     }
     return status;
@@ -387,11 +386,9 @@ static int read_packet(int fd, buffer_t *but) {
 }
 
 
-int request_handle(basic_conn_t **bcp) {
-    basic_conn_t *bc = *bcp;
-
+int request_handle(basic_conn_t *bc) {
     if (read_packet(bc->fd, &bc->read_pkt) == ERROR) return ERROR;
-    bc->opt->recv_handler(bcp);
+    bc->opt->recv_handler(bc);
 
     return OK;
 }

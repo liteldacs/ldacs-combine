@@ -365,9 +365,9 @@ l_err handle_send_msg(void *args, struct_desc_t *desc, snf_entity_t *as_man, KEY
 l_err trans_gsnf(gs_tcp_propt_t *conn, void *pkg, struct_desc_t *desc, l_err (*mid_func)(buffer_t *, void *),
                  void *args);
 
-l_err recv_gsnf(basic_conn_t **bcp);
+l_err recv_gsnf(basic_conn_t *bcp);
 
-l_err recv_gsg(basic_conn_t **bcp);
+l_err recv_gsg(basic_conn_t *bcp);
 
 /* define */
 

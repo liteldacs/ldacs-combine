@@ -34,25 +34,25 @@ typedef struct net_opt_s {
     int port;
     int timeout;
 
-    void (*close_handler)(basic_conn_t **);
+    void (*close_handler)(basic_conn_t *);
 
-    bool (*reset_conn)(basic_conn_t **);
+    bool (*reset_conn)(basic_conn_t *);
 
-    l_err (*recv_handler)(basic_conn_t **);
+    l_err (*recv_handler)(basic_conn_t *);
 
-    l_err (*send_handler)(basic_conn_t **);
+    l_err (*send_handler)(basic_conn_t *);
 } net_opt_t;
 
 
-bool init_basic_conn(void *conn_opt, const net_opt_t *opt, int role);
+bool init_basic_conn(basic_conn_t *bc, const net_opt_t *opt, int role);
 
-bool connecion_is_expired(basic_conn_t **bcp, int timeout);
+bool connecion_is_expired(basic_conn_t *bcp, int timeout);
 
-void connection_close(basic_conn_t **bcp);
+void connection_close(basic_conn_t *bc);
 
-void connecion_set_reactivated(basic_conn_t **bdp);
+void connecion_set_reactivated(basic_conn_t *bdp);
 
-void connecion_set_expired(basic_conn_t **bcp);
+void connecion_set_expired(basic_conn_t *bcp);
 
 void server_connection_prune(int timeout);
 

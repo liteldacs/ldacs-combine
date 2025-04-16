@@ -33,10 +33,10 @@ int read_first_packet(basic_conn_t *bc, int pre_fd);
 
 int first_request_handle(basic_conn_t *bc, int pre_fd);
 
-extern int request_handle(basic_conn_t **bc);
+extern int request_handle(basic_conn_t *bc);
 
-extern int response_handle(basic_conn_t **bc);
+extern int response_handle(basic_conn_t *bc);
 
-int request_forward(basic_conn_t **bcp);
+int request_forward(basic_conn_t *bcp);
 
 #endif //TEST_CLIENT_CLIENT_H

@@ -4,16 +4,15 @@
 
 #include "ldcauc/net/net_epoll.h"
 
-int net_epoll_add(int e_fd, void *conn_opt, uint32_t events,
+int net_epoll_add(int e_fd, basic_conn_t *bc, uint32_t events,
                   struct epoll_event *pev) {
-    FILL_EPOLL_EVENT(pev, conn_opt, events);
-    return core_epoll_add(e_fd, (*(basic_conn_t **) conn_opt)->fd, pev);
+    FILL_EPOLL_EVENT(pev, bc, events);
+    return core_epoll_add(e_fd, bc->fd, pev);
 }
 
 void net_epoll_out(int e_fd, basic_conn_t *bc) {
     epoll_disable_in(e_fd, &bc->event, bc->fd);
     epoll_enable_out(e_fd, &bc->event, bc->fd);
-    log_warn("OUT FD!! %d %d", e_fd, bc->fd);
 }
 
 void net_epoll_in(int e_fd, basic_conn_t *bc) {
