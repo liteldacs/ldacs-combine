@@ -61,9 +61,9 @@ void *gs_epoll_setup(void *args) {
         for (i = 0; i < nfds; i++) {
             struct epoll_event *curr_event = epoll_events + i;
             int fd = net_opt->role == LD_SGW
-                         ? *(int *) ((void *) curr_event->data.ptr)
+                         ? *((int *) curr_event->data.ptr)
                          : (*((basic_conn_t **) curr_event->data.ptr))->fd;
-            log_warn("++++++++++++++++++++++= %d", fd);
+            log_warn("++++++++++++++++++++++= %d %02x", fd, curr_event->data.ptr);
             if (fd == net_opt->server_fd) {
                 gs_conn_accept(net_opt); /* never happened in GS */
             } else {
