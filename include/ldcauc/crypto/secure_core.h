@@ -18,8 +18,6 @@
 #define NCC_LEN 16
 #define NONCE_LEN 128 >> 3
 
-//#define KEY_DB_NAME "/root/ldacs/stack_new/ldacs_stack/resources/ld_sql.db"
-//#define KEY_DB_NAME "/root/ldacs/ldacs_sim_sgw/resources/ld_sql.db"
 #define AS_DB_NAME "/root/ldacs/combine/ldacs-combine/resources/as_sql.db"
 #define GS_DB_NAME "/root/ldacs/combine/ldacs-combine/resources/gs_sql.db"
 #define SGW_DB_NAME "/root/ldacs/combine/ldacs-combine/resources/sgw_sql.db"
@@ -28,21 +26,7 @@
 #define SGW_KEY_TABLE "sgw_keystore"
 #define ROOT_KEY_LEN 16
 #define DEFAULT_VALIDATE 365
-//#define KEY_BIN_PATH  "/root/ldacs/stack_new/ldacs_stack/resources/keystore/rootkey.bin"
-#define KEY_BIN_PATH  "/root/ldacs/combine/ldacs-combine/resources/rootkey.bin"
-//
-// enum p_sec {
-//     AES_CMAC,
-//     SM3_HMAC,
-// };
 
-//enum SEC_ALG_MACLEN {
-//    SEC_MACLEN_INVAILD = 0x0,
-//    SEC_MACLEN_96 = 0x1,
-//    SEC_MACLEN_128 = 0x2,
-//    SEC_MACLEN_64 = 0x3,
-//    SEC_MACLEN_256 = 0x4,
-//};
 
 #define get_sec_maclen(en)({    \
     int ret;                    \

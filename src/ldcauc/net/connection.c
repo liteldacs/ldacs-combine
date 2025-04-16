@@ -102,7 +102,6 @@ bool init_basic_conn(basic_conn_t *bc, const net_opt_t *opt, int role) {
         connection_set_nodelay(bc);
 
         zero(&bc->read_pkt);
-        // zero(&bc->write_pkt);
         bc->write_pkts = lfqueue_init();
 
         return TRUE;

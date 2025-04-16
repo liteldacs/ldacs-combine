@@ -89,6 +89,7 @@ static l_km_err key_install(buffer_t *key_ag, const char *as_ua, const char *gs_
         log_error("Query mkid failed.\n");
         return LD_ERR_KM_QUERY;
     }
+
     if ((err = get_handle_from_db(GS_DB_NAME, GS_KEY_TABLE, qr_mk->ids[0], handle)) != LD_KM_OK) {
         log_error("Can not get handle");
         return err;
@@ -128,12 +129,17 @@ l_km_err embed_rootkey(ldacs_roles role, const char *as_ua, const char *sgw_ua) 
         if ((err = km_rkey_import(db_name, table_name, "rootkey.bin") !=
                    LD_KM_OK))
         {
-            log_error("AS import rookkey failed\n");
+            log_error("AS import rootkey failed\n");
             return err;
         }
     }
     else if (role == LD_SGW) // 网关生成并导出根密钥
     {
+//        if ((err = km_init_table(db_name, table_name) != LD_KM_OK))
+//        {
+//            log_error("SGW init table failed\n");
+//            return err;
+//        }
 //        if (km_rkey_gen_export(as_ua, sgw_ua, ROOT_KEY_LEN, DEFAULT_VALIDATE, db_name, table_name,
 //                               KEY_BIN_PATH))
 //        {
@@ -177,6 +183,7 @@ l_km_err as_derive_keys(uint8_t *rand, uint32_t randlen, const char *as_ua,
         log_error("Can not get handle");
         return err;
     }
+
 #elif UNUSE_CRYCARD
     gmssl_kdf(rand, randlen, key_aw, ROOT_KEY_LEN);
     gmssl_kdf(rand, randlen, key_ag, ROOT_KEY_LEN);

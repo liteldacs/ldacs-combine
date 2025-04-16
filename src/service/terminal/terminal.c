@@ -97,6 +97,6 @@ static void handle_user_msg_terminal(user_msg_t *umsg) {
 }
 
 static void send_user_data_terminal() {
-    char *test_msg = "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC\0";
+    char *test_msg = "CCCCC";
     send_user_data((uint8_t *) test_msg, strlen(test_msg), terminal_obj.AS_SAC);
 }

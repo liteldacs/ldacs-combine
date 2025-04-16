@@ -8,10 +8,9 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 cmake_host_system_information(RESULT PRETTY_NAME QUERY DISTRIB_PRETTY_NAME)
-IF (${PRETTY_NAME} MATCHES "Ubuntu")
-    #    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=leak -fno-omit-frame-pointer -g")
+#        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -L/opt/rh/devtoolset-8/root/lib/gcc/x86_64-redhat-linux/8/ -g")
     #    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=leak -g")
-ENDIF ()
+message(${CMAKE_C_COMPILER})
 
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
@@ -32,7 +31,7 @@ add_executable(cli::test_client ALIAS ${PROJECT_NAME})
 
 
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal cli::ldacs_device
-        event event_pthreads ldcauc)
+        event event_pthreads ldcauc )
 
 find_package(SQLite3 REQUIRED)
 if (SQLite3_FOUND)

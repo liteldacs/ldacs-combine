@@ -181,6 +181,7 @@ void SN_SAPD(ld_prim_t *prim) {
         prim->prim_err = LD_ERR_INTERNAL;
         return;
     }
+    log_buf(LOG_ERROR, "TO DEC", enc_arr, enc_sz);
     CLONE_TO_CHUNK(*enc_buf, enc_arr, enc_sz);
 
     /* 如果还没有派生KAS-GS，则不验证完整性 */
@@ -208,6 +209,7 @@ void SN_SAPD(ld_prim_t *prim) {
         clear_dup_prim_data(orient_sdu_from, free);
         free_buffer(enc_buf);
     }
+    log_buf(LOG_WARN, "TO CALC MAC", snp_pbs.start, pbs_offset(&snp_pbs));
     memcpy(snp_pbs.cur, hmac, hmac_len);
     snp_pbs.cur += hmac_len;
     close_output_pbs(&snp_pbs);
@@ -237,26 +239,23 @@ void D_SAPD_cb(ld_prim_t *prim) {
                 log_warn("HMAC verify failed");
                 preempt_prim(&SN_DATA_IND_PRIM, VER_WRONG_MAC, o_sdu, NULL, 0, 0);
                 prim->prim_err = LD_ERR_INVALID_MAC;
-                free_buffer(o_sdu->buf);
                 return;
             }
 
             pdu.sdu = init_buffer_ptr(snp_in->len - get_sec_maclen(snp_layer_objs.SEC) - (SNP_HEAD_LEN >> 3));
             init_pbs(&pbs, snp_in->ptr, snp_in->len, "SNP IN");
             if (!in_struct(&pdu, &snp_pdu_desc, &pbs, NULL)) {
+                log_warn("Cant deserialize");
                 prim->prim_err = LD_ERR_INTERNAL;
-                free_buffer(o_sdu->buf);
                 free_buffer(pdu.sdu);
                 return;
             }
-
 
             uint32_t *check_sqn = get_SQN(o_sdu->AS_SAC, FALSE);
             if (abs((int) pdu.sqn - *check_sqn) < SNP_RANGE) {
                 (*check_sqn) = pdu.sqn;
             } else {
                 log_warn("The received sqn is out of range.");
-                free_buffer(o_sdu->buf);
                 free_buffer(pdu.sdu);
                 return;
             }
@@ -267,9 +266,10 @@ void D_SAPD_cb(ld_prim_t *prim) {
             uint8_t dec_arr[2048] = {0};
             size_t dec_sz = 0;
             o_sdu->buf = init_buffer_unptr();
+
+            log_buf(LOG_ERROR, "TO DEC", pdu.sdu->ptr, pdu.sdu->len);
             if (snpsub_crypto(o_sdu->AS_SAC, pdu.sdu->ptr, pdu.sdu->len, dec_arr, &dec_sz, FALSE) != LDCAUC_OK) {
                 free_buffer(pdu.sdu);
-                free_buffer(o_sdu->buf);
                 prim->prim_err = LD_ERR_INTERNAL;
                 return;
             }

@@ -93,6 +93,7 @@ l_err send_auc_resp(void *args) {
         }
     );
 
+    log_warn("????????????? %d",as_man->GS_SAC);
     if (generate_auc_kdf(snf_obj.role, as_man->shared_random, &as_man->key_as_sgw_s_h, &as_man->key_as_gs_h,
                          &as_man->key_as_gs_b, as_man->AS_UA, as_man->GS_SAC)) {
         //进入错误状态
@@ -141,8 +142,9 @@ l_err recv_auc_resp(buffer_t *buf, snf_entity_t *as_man) {
         }
     );
 
+    log_warn("????????????? %d",as_man->GS_SAC);
     if (generate_auc_kdf(snf_obj.role, as_man->shared_random, &as_man->key_as_sgw_s_h, &as_man->key_as_gs_h,
-                         &as_man->key_as_gs_b, as_man->AS_UA, 0)) {
+                         &as_man->key_as_gs_b, as_man->AS_UA, as_man->GS_SAC)) {
         //进入错误状态
         return LD_ERR_INTERNAL;
     }
