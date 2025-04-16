@@ -8,7 +8,7 @@
 #include "ldcauc/net/connection.h"
 
 
-int net_epoll_add(int e_fd, void *opt_ptr, uint32_t events,
+int net_epoll_add(int e_fd, void *conn_opt, uint32_t events,
                   struct epoll_event *pev);
 
 void net_epoll_out(int e_fd, basic_conn_t *bc);

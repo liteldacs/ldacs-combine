@@ -63,11 +63,7 @@ void *gs_epoll_setup(void *args) {
             int fd = net_opt->role == LD_SGW
                          ? *(int *) ((void *) curr_event->data.ptr)
                          : (*((basic_conn_t **) curr_event->data.ptr))->fd;
-            // log_error("============= %02x !!!! %d", *fd_c, net_opt->role);
-            // if (net_opt->role == LD_GS) {
-            //     basic_conn_t *bc = *((basic_conn_t **) curr_event->data.ptr);
-            //     log_error("============= %02x %02x", bc->fd, *fd_c);
-            // }
+            log_warn("++++++++++++++++++++++= %d", fd);
             if (fd == net_opt->server_fd) {
                 gs_conn_accept(net_opt); /* never happened in GS */
             } else {
