@@ -5,6 +5,8 @@
 #include "crypto/key.h"
 
 static char *get_db_name(ldacs_roles role) {
+    log_error("%s%s%s", get_home_dir(), BASE_PATH, ROOT_KEY_BIN_PATH);
+
     switch (role) {
         case LD_AS:
             return AS_DB_NAME;
