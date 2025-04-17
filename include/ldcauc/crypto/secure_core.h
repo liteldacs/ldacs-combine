@@ -18,12 +18,12 @@
 #define NCC_LEN 16
 #define NONCE_LEN 128 >> 3
 
-#define BASE_PATH "/.ldcauc"
+#define BASE_PATH "/.ldcauc/"
 #define ROOT_KEY_BIN_PATH "/keystore/"
 
-#define AS_DB_NAME "/root/ldacs/combine/ldacs-combine/resources/as_sql.db"
-#define GS_DB_NAME "/root/ldacs/combine/ldacs-combine/resources/gs_sql.db"
-#define SGW_DB_NAME "/root/ldacs/combine/ldacs-combine/resources/sgw_sql.db"
+#define AS_DB_NAME "as_sql.db"
+#define GS_DB_NAME "gs_sql.db"
+#define SGW_DB_NAME "sgw_sql.db"
 #define AS_KEY_TABLE "as_keystore"
 #define GS_KEY_TABLE "gs_keystore"
 #define SGW_KEY_TABLE "sgw_keystore"

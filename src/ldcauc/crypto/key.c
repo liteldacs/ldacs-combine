@@ -5,18 +5,34 @@
 #include "crypto/key.h"
 
 static char *get_db_name(ldacs_roles role) {
-    log_error("%s%s%s", get_home_dir(), BASE_PATH, ROOT_KEY_BIN_PATH);
+//    log_error("%s%s%s", get_home_dir(), BASE_PATH, ROOT_KEY_BIN_PATH);
+    char *buf_dir = calloc(PATH_MAX, sizeof (char ));
+    char *db_name = NULL;
+
+    snprintf(buf_dir, PATH_MAX, "%s%s", get_home_dir(), BASE_PATH);
+    if(check_path(buf_dir) != LD_OK) {
+        free(buf_dir);
+        return NULL;
+    }
 
     switch (role) {
         case LD_AS:
-            return AS_DB_NAME;
+            db_name = AS_DB_NAME;
+            break;
         case LD_GS:
-            return GS_DB_NAME;
+            db_name = GS_DB_NAME;
+            break;
         case LD_SGW:
-            return SGW_DB_NAME;
+            db_name = SGW_DB_NAME;
+            break;
         default:
+            free(buf_dir);
             return NULL;
     }
+    snprintf(buf_dir, PATH_MAX, "%s%s%s", get_home_dir(), BASE_PATH, db_name);
+
+
+    return buf_dir;
 }
 
 static char *get_table_name(ldacs_roles role) {
@@ -38,14 +54,16 @@ static char *get_table_name(ldacs_roles role) {
 /* for AS / SGW */
 static l_km_err key_derive_as_sgw(ldacs_roles role, uint8_t *rand, uint32_t randlen, const char *as_ua,
                            const char *gs_ua, const char *sgw_ua, KEY_HANDLE *key_aw) {
-    const char *db_name = get_db_name(role);
-    const char *table_name = get_table_name(role);
+    char *db_name = get_db_name(role);
+    char *table_name = get_table_name(role);
 
-    l_km_err err;
+    l_km_err err = LD_KM_OK;
     QueryResult_for_queryid *qr_rk = query_id(db_name, table_name, as_ua, sgw_ua, ROOT_KEY, ACTIVE);
     if (qr_rk == NULL || qr_rk->count == 0) {
         log_error("Query mkid failed.\n");
-        return LD_ERR_KM_QUERY;
+        free(db_name);
+        err = LD_ERR_KM_QUERY;
+        goto cleanup;
     }
 
     /* 派生AS_GS主密钥, derive_key中根据key id查出来的key类型进行派生，默认派生了Kas-sgw和Kas-gs */
@@ -53,28 +71,26 @@ static l_km_err key_derive_as_sgw(ldacs_roles role, uint8_t *rand, uint32_t rand
     if ((err = km_derive_key(db_name, table_name, qr_rk->ids[0], len_kassgw, gs_ua, rand, randlen)) !=
         LD_KM_OK) {
         log_error("[**Derive master key error**]\n");
-        return err;
+        goto cleanup;
     }
 
     /* 派生Kas-gs后，数据库查询 */
     QueryResult_for_queryid *qr_mk = query_id(db_name, table_name, as_ua, sgw_ua, MASTER_KEY_AS_SGW, ACTIVE);
     if (qr_mk->count == 0) {
         log_error("Query mkid failed.\n");
-        return LD_ERR_KM_QUERY;
+        free(db_name);
+        err = LD_ERR_KM_QUERY;
+        goto cleanup;
     }
-
-
-    /* 使能该密钥 */
-//    if (enable_key(KEY_DB_NAME, table_name, qr_mk->ids[0]) != LD_KM_OK) {
-//        printf("enable key failed\n");
-//    }
 
     if ((err = get_handle_from_db(db_name, table_name, qr_mk->ids[0], key_aw)) != LD_KM_OK) {
         log_error("Can not get handle");
-        return err;
+        free(db_name);
+        goto cleanup;
     }
-
-    return LD_KM_OK;
+cleanup:
+    free(db_name);
+    return err;
 }
 
 /**
@@ -82,22 +98,30 @@ static l_km_err key_derive_as_sgw(ldacs_roles role, uint8_t *rand, uint32_t rand
  */
 static l_km_err key_install(buffer_t *key_ag, const char *as_ua, const char *gs_ua, uint8_t *nonce, uint32_t nonce_len,
                      KEY_HANDLE *handle) {
-    l_km_err err;
+    l_km_err err = LD_KM_OK;
 
-    km_install_key(GS_DB_NAME, GS_KEY_TABLE, key_ag->len, key_ag->ptr, as_ua, gs_ua, nonce_len, nonce);
+    char *db_name = get_db_name(LD_GS);
+    const char *table_name = get_table_name(LD_GS);
+    if((err = km_install_key(db_name, table_name, key_ag->len, key_ag->ptr, as_ua, gs_ua, nonce_len, nonce))!= LD_KM_OK){
+        log_error("Cannot install key.\n");
+        goto cleanup;
+    }
 
-    QueryResult_for_queryid *qr_mk = query_id(GS_DB_NAME, GS_KEY_TABLE, as_ua, gs_ua, MASTER_KEY_AS_GS, ACTIVE);
+    QueryResult_for_queryid *qr_mk = query_id(db_name, table_name, as_ua, gs_ua, MASTER_KEY_AS_GS, ACTIVE);
     if (qr_mk->count == 0) {
         log_error("Query mkid failed.\n");
-        return LD_ERR_KM_QUERY;
+        err = LD_ERR_KM_QUERY;
+        goto cleanup;
     }
 
-    if ((err = get_handle_from_db(GS_DB_NAME, GS_KEY_TABLE, qr_mk->ids[0], handle)) != LD_KM_OK) {
+    if ((err = get_handle_from_db(db_name, table_name, qr_mk->ids[0], handle)) != LD_KM_OK) {
         log_error("Can not get handle");
-        return err;
+        goto cleanup;
     }
 
-    return LD_KM_OK;
+cleanup:
+    free(db_name);
+    return err;
 }
 
 #elif UNUSE_CRYCARD
@@ -121,27 +145,22 @@ static l_km_err gmssl_kdf(uint8_t *rand, size_t rand_len, KEY_HANDLE*handle, siz
 
 
 l_km_err embed_rootkey(ldacs_roles role, const char *as_ua, const char *sgw_ua) {
+    l_km_err err = LD_KM_OK;
 #ifdef USE_CRYCARD
 
-    const char *db_name = get_db_name(role);
+    char *db_name = get_db_name(role);
     const char *table_name = get_table_name(role);
-    l_km_err err;
     if (role == LD_AS || role == LD_GS) // AS从密码卡导入根密钥
     {
         if ((err = km_rkey_import(db_name, table_name, "rootkey.bin") !=
                    LD_KM_OK))
         {
             log_error("AS import rootkey failed\n");
-            return err;
+            goto cleanup;
         }
     }
     else if (role == LD_SGW) // 网关生成并导出根密钥
     {
-//        if ((err = km_init_table(db_name, table_name) != LD_KM_OK))
-//        {
-//            log_error("SGW init table failed\n");
-//            return err;
-//        }
 //        if (km_rkey_gen_export(as_ua, sgw_ua, ROOT_KEY_LEN, DEFAULT_VALIDATE, db_name, table_name,
 //                               KEY_BIN_PATH))
 //        {
@@ -151,24 +170,29 @@ l_km_err embed_rootkey(ldacs_roles role, const char *as_ua, const char *sgw_ua) 
 //        {
 //            log_error("Error writing to ccard.");
 //        }
+        goto cleanup;
     }
     // 激活as端根密钥
     QueryResult_for_queryid *query_result_as = query_id(db_name, table_name, as_ua, sgw_ua, ROOT_KEY,
                                                         PRE_ACTIVATION);
     if (query_result_as != NULL)    {
-        if (enable_key(db_name, table_name, query_result_as->ids[0]) != LD_KM_OK)
+        if ((err = enable_key(db_name, table_name, query_result_as->ids[0])) != LD_KM_OK)
         {
-            printf("enable key failed\n");
+            log_error("enable key failed\n");
+            goto cleanup;
         }
     }
     else    {
-        printf("query failed");
-        return LD_ERR_KM_QUERY; // 查询失败
+        log_error("query failed");
+        err = LD_ERR_KM_QUERY; // 查询失败
+        goto cleanup;
     }
 
+cleanup:
+    free(db_name);
 #endif
     log_info("embed OK!");
-    return LD_KM_OK;
+    return err;
 }
 
 l_km_err as_derive_keys(uint8_t *rand, uint32_t randlen, const char *as_ua,
@@ -219,24 +243,30 @@ l_km_err sgw_derive_keys(uint8_t *rand, uint32_t randlen, const char *as_ua,
     l_km_err err = LD_KM_OK;
 #ifdef USE_CRYCARD
 
+    char *db_name = get_db_name(LD_SGW);
+    const char *table_name = get_table_name(LD_SGW);
     if ((err = key_derive_as_sgw(LD_SGW, rand, randlen, as_ua, gs_ua, sgw_ua, key_aw)) != LD_KM_OK) {
         log_error("Can not derive Kas-sgw");
-        return err;
+        goto cleanup;
     }
 
-    QueryResult_for_queryid *qr_mk = query_id(SGW_DB_NAME, SGW_KEY_TABLE, as_ua, gs_ua, MASTER_KEY_AS_GS, ACTIVE);
+    QueryResult_for_queryid *qr_mk = query_id(db_name, table_name, as_ua, gs_ua, MASTER_KEY_AS_GS, ACTIVE);
     if (qr_mk->count == 0) {
         log_error("Query mkid failed.\n");
-        return LD_ERR_KM_QUERY;
+        err = LD_ERR_KM_QUERY;
+        goto cleanup;
     }
 
-    QueryResult_for_keyvalue *result = query_keyvalue(SGW_DB_NAME, SGW_KEY_TABLE, qr_mk->ids[0]);
+    QueryResult_for_keyvalue *result = query_keyvalue(db_name, table_name, qr_mk->ids[0]);
     if (!result) {
         log_error("Key not found or error occurred.\n");
-        return LD_ERR_KM_QUERY;
+        err = LD_ERR_KM_QUERY;
+        goto cleanup;
     }
     CLONE_TO_CHUNK(**kbuf, result->key, result->key_len);
 
+cleanup:
+    free(db_name);
 #elif UNUSE_CRYCARD
 
     err = gmssl_kdf(rand, randlen, key_aw, ROOT_KEY_LEN);
@@ -248,28 +278,31 @@ l_km_err sgw_derive_keys(uint8_t *rand, uint32_t randlen, const char *as_ua,
 
 l_km_err key_get_handle(ldacs_roles role, const char *owner1, const char *owner2, enum KEY_TYPE key_type,
                         KEY_HANDLE*handle) {
+    l_km_err err = LD_KM_OK;
 #ifdef USE_CRYCARD
-    const char *db_name = get_db_name(role);
+    char *db_name = get_db_name(role);
     const char *table_name = get_table_name(role);
-    l_km_err err;
     QueryResult_for_queryid *qr_mk = query_id(db_name, table_name, owner1, owner2, key_type, ACTIVE);
     if (qr_mk->count == 0) {
         log_error("Query mkid failed. %s %s %s\n", table_name, owner1, owner2);
-        return LD_ERR_KM_QUERY;
+        err = LD_ERR_KM_QUERY;
+        goto cleanup;
     }
 
 
     if ((err = get_handle_from_db(db_name, table_name, qr_mk->ids[0], handle)) != LD_KM_OK) {
         log_error("err:%08x", err);
-        return err;
+        goto cleanup;
     }
 
     QueryResult_for_keyvalue *result = query_keyvalue(db_name, table_name, qr_mk->ids[0]);
     if (!result) {
         log_error("Key not found or error occurred.\n");
-        return LD_ERR_KM_QUERY;
+        err = LD_ERR_KM_QUERY;
+        goto cleanup;
     }
-
+cleanup:
+    free(db_name);
 #elif UNUSE_CRYCARD
 
     *handle = init_buffer_unptr();
@@ -280,17 +313,21 @@ l_km_err key_get_handle(ldacs_roles role, const char *owner1, const char *owner2
     CLONE_TO_CHUNK(*key_buf, kdf_str, ROOT_KEY_LEN);
 #endif
 
-    return LD_KM_OK;
+    return err;
 }
 
 l_km_err as_update_mkey(const char *sgw_ua, const char *gs_s_ua, const char *gs_t_ua, const char *as_ua,
                         buffer_t *nonce, KEY_HANDLE*key_as_gs) {
+    l_km_err err = LD_KM_OK;
 #ifdef USE_CRYCARD
-    if(km_update_masterkey(AS_DB_NAME, AS_KEY_TABLE, sgw_ua, gs_s_ua, gs_t_ua, as_ua, nonce->len, nonce->ptr) != LD_KM_OK){
+    char *db_name = get_db_name(LD_AS);
+    const char *table_name = get_table_name(LD_AS);
+    if(km_update_masterkey(db_name, table_name, sgw_ua, gs_s_ua, gs_t_ua, as_ua, nonce->len, nonce->ptr) != LD_KM_OK){
         log_error("Cannot update masterkey");
-        return LD_ERR_KM_UPDATE_SESSIONKEY;
+        err = LD_ERR_KM_UPDATE_SESSIONKEY;
     }
+    free(db_name);
 #elif UNUSE_CRYCARD
 #endif
-    return LD_KM_OK;
+    return err;
 }
