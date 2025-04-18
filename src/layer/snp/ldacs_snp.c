@@ -3,7 +3,8 @@
 //
 
 #include "ldacs_snp.h"
-#include "ldcauc/ldcauc.h"
+// #include "ldcauc/ldcauc.h"
+#include "ldcauc.h"
 
 #include <layer_interface.h>
 #include <ldacs_def.h>

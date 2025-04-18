@@ -2,8 +2,10 @@
 // Created by jiaxv on 2023/12/5.
 //
 
-#include <ldcauc/crypto/cipher.h>
-#include <ldcauc/crypto/key.h>
+// #include <ldcauc/crypto/cipher.h>
+// #include <ldcauc/crypto/key.h>
+#include <crypto/cipher.h>
+#include <crypto/key.h>
 
 #include "ldacs_mac.h"
 
@@ -613,7 +615,7 @@ BC_Cal_Mac: {
                 free_sdu_s(sdus);
                 return LD_ERR_NULL;
             }
-            bc_mac_bd_t *mac_n = node->n_data;
+            const bc_mac_bd_t *mac_n = node->n_data;
 
             calc_hmac_buffer(sdus->blks[i], mac_layer_objs.sm3_key, mac_n->mac, get_sec_maclen(mac_n->mac_len));
 

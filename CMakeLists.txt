@@ -30,8 +30,11 @@ add_executable(${PROJECT_NAME} main.c)
 add_executable(cli::test_client ALIAS ${PROJECT_NAME})
 
 
+#target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal cli::ldacs_device
+#        event event_pthreads ldcauc )
+
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal cli::ldacs_device
-        event event_pthreads ldcauc )
+        event event_pthreads )
 
 find_package(SQLite3 REQUIRED)
 if (SQLite3_FOUND)
@@ -40,9 +43,16 @@ if (SQLite3_FOUND)
     message(${SQLite3_VERSION})
 endif (SQLite3_FOUND)
 
+find_package(Ldcauc REQUIRED)
+if (Ldcauc_FOUND)
+    include_directories(${Ldcauc_INCLUDE_DIRS})
+    link_libraries(ldcauc::ldcauc)
+endif ()
+
 find_package(LiteLdacsSdk REQUIRED)
 if (LiteLdacsSdk_FOUND)
     include_directories(${LiteLdacsSdk_INCLUDE_DIRS})
+    include_directories(${LiteLdacsSdk_INCLUDE_GLOBAL_DIRS})
     link_libraries(liteldacssdk::liteldacssdk)
 endif ()
 
@@ -52,12 +62,6 @@ if (Ldacscrypto_FOUND)
     link_libraries(ldacscrypto::ldacscrypto)
 endif ()
 
-#find_package(Ldcauc REQUIRED)
-#if (Ldcauc_FOUND)
-#    include_directories(${Ldcauc_INCLUDE_DIRS})
-#    link_libraries(ldcauc::ldcauc)
-#endif ()
-
 add_subdirectory(src)
 
 # 生成 config.h 头文件
@@ -66,39 +70,40 @@ configure_file(
         ${CMAKE_SOURCE_DIR}/include/cconfig.h
 )
 
-message(${CMAKE_INSTALL_PREFIX})
-INSTALL(CODE "
-    # 创建目录（包含父目录）
-    file(MAKE_DIRECTORY \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/log\")
-    # 设置目录权限：所有者读写执行，组和其他人读执行
-    file(CHMOD \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}\"
-        DIRECTORY_PERMISSIONS
-        OWNER_READ OWNER_WRITE OWNER_EXECUTE
-        GROUP_READ GROUP_EXECUTE
-        WORLD_READ WORLD_EXECUTE
-    )
-    file(CHMOD \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/log\"
-        DIRECTORY_PERMISSIONS
-        OWNER_READ OWNER_WRITE OWNER_EXECUTE
-        GROUP_READ GROUP_EXECUTE GROUP_WRITE
-        WORLD_READ WORLD_EXECUTE WORLD_WRITE
-    )
 
-    file(COPY \"${CMAKE_SOURCE_DIR}/config\"
-    DESTINATION \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}\"
-    FILE_PERMISSIONS
-        OWNER_READ OWNER_WRITE
-        GROUP_READ
-        WORLD_READ
-    )
-    file(CHMOD \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/config\"
-        DIRECTORY_PERMISSIONS
-        OWNER_READ OWNER_WRITE OWNER_EXECUTE
-        GROUP_READ GROUP_EXECUTE
-        WORLD_READ WORLD_EXECUTE
-    )
-")
-
+#message(${CMAKE_INSTALL_PREFIX})
+#INSTALL(CODE "
+#    # 创建目录（包含父目录）
+#    file(MAKE_DIRECTORY \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/log\")
+#    # 设置目录权限：所有者读写执行，组和其他人读执行
+#    file(CHMOD \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}\"
+#        DIRECTORY_PERMISSIONS
+#        OWNER_READ OWNER_WRITE OWNER_EXECUTE
+#        GROUP_READ GROUP_EXECUTE
+#        WORLD_READ WORLD_EXECUTE
+#    )
+#    file(CHMOD \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/log\"
+#        DIRECTORY_PERMISSIONS
+#        OWNER_READ OWNER_WRITE OWNER_EXECUTE
+#        GROUP_READ GROUP_EXECUTE GROUP_WRITE
+#        WORLD_READ WORLD_EXECUTE WORLD_WRITE
+#    )
+#
+#    file(COPY \"${CMAKE_SOURCE_DIR}/config\"
+#    DESTINATION \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}\"
+#    FILE_PERMISSIONS
+#        OWNER_READ OWNER_WRITE
+#        GROUP_READ
+#        WORLD_READ
+#    )
+#    file(CHMOD \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/config\"
+#        DIRECTORY_PERMISSIONS
+#        OWNER_READ OWNER_WRITE OWNER_EXECUTE
+#        GROUP_READ GROUP_EXECUTE
+#        WORLD_READ WORLD_EXECUTE
+#    )
+#")
+#
 
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "/usr/local/ldacs-cauc" CACHE PATH "Default install path" FORCE)
