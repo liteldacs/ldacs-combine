@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.20)
 project(ldacstermial)
 
 set(CMAKE_C_STANDARD 11)
