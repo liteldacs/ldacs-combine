@@ -143,8 +143,8 @@ int opt_parse(int argc, char *const *argv) {
 }
 
 static void usage(const char *executable) {
-    printf("Usage: %s -r html_root_dir [-p port] "
-           "[-t timeout] [-w worker_num] [-d (debug mode)]\n",
+    printf("Usage: [-c config path] "
+           "[-H (http mode)] [-M (Merge mode)]\n",
            executable);
 }
 

@@ -262,13 +262,11 @@ void M_SAPC_D_cb(ld_prim_t *prim) {
             switch (prim->prim_obj_typ) {
                 case DC_TYP_ACK: {
                     dc_ack_t *ack = data_struct;
-                    log_fatal("?????????????????????? %d %d", ack->bitmap, ack->PID);
                     recv_ack(dls_en, ack->PID, ack->bitmap);
                     break;
                 }
                 case DC_TYP_ACK_FRAG: {
                     dc_frag_ack_t *f_ack = data_struct;
-                    // log_fatal("?????????????????????? %d %d", f_ack->PID, f_ack->SEQ1);
                     recv_frag_ack(dls_en, f_ack->PID, f_ack->SEQ1);
                     break;
                 }

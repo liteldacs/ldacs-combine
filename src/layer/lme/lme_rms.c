@@ -402,8 +402,6 @@ static void resource_fl_alloc_cb(ld_drr_t *drr, size_t *map, void *args) {
                 .BL = map[i],
         };
 
-        log_warn("########## %d", rl_alloc.SAC);
-
         *BO += map[i];
 
         if (preempt_prim(&LME_R_IND_PRIM, E_TYP_ANY, &(cc_rsc_t) {.SAC = i, .resource = map[i]}, NULL, 0, 0) != LD_OK) {
