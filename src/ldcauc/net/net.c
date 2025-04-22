@@ -82,7 +82,20 @@ static int make_std_tcp_connect(struct sockaddr_in *to_conn_addr, char *addr, in
     zero(to_conn_addr);
     to_conn_addr->sin_family = AF_INET;
     to_conn_addr->sin_port = htons(port);
-    to_conn_addr->sin_addr = s;
+    // to_conn_addr->sin_addr = s;
+    memcpy(&to_conn_addr->sin_addr, &s, sizeof(s));
+
+    /* 绑定本地端口 */
+    struct sockaddr_in local_addr;
+    local_addr.sin_family = AF_INET6;
+    local_addr.sin_port = htons(55559); // 转换为网络字节序
+    local_addr.sin_addr.s_addr = htonl(INADDR_ANY); // 允许任意本地地址绑定
+
+    if (bind(fd, (struct sockaddr *) &local_addr, sizeof(local_addr)) == -1) {
+        perror("bind failed");
+        close(fd);
+        return -1;
+    }
 
     //TODO: 改成死循环，持续1min
     int i = RECONNECT;
