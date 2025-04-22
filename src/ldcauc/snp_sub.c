@@ -2,9 +2,9 @@
 // Created by 邹嘉旭 on 2025/3/28.
 //
 #include <ld_log.h>
-#include "ldcauc/snf.h"
-#include "ldcauc/crypto/authc.h"
-#include "ldcauc/snp_sub.h"
+#include "snf.h"
+#include "crypto/authc.h"
+#include "snp_sub.h"
 #include "crypto/cipher.h"
 
 static bool is_finish_auth(uint16_t AS_SAC) {
@@ -67,7 +67,6 @@ int8_t snpsub_calc_hmac(uint16_t AS_SAC, uint8_t SEC, uint8_t *in, size_t in_len
         return LDCAUC_OK;
     }
     calc_hmac_uint(in, in_len, get_hmac_key(AS_SAC), out, *out_len);
-    log_buf(LOG_DEBUG, "HMAC", out, *out_len);
 
     return LDCAUC_OK;
 }
@@ -79,7 +78,6 @@ int8_t snpsub_vfy_hmac(uint16_t AS_SAC, uint8_t SEC, uint8_t *snp_pdu, size_t pd
     size_t mac_len = get_sec_maclen(SEC);
     size_t to_vfy_len = pdu_len - get_sec_maclen(SEC);
 
-    log_buf(LOG_ERROR, "TO VFY MAC", snp_pdu, to_vfy_len);
     if (verify_hmac_uint(get_hmac_key(AS_SAC), snp_pdu + to_vfy_len, snp_pdu, to_vfy_len, mac_len)) {
         return LDCAUC_OK;
     } else {

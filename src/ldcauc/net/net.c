@@ -3,7 +3,7 @@
 //
 #include <netinet/tcp.h>
 
-#include "ldcauc/net/net_core.h"
+#include "net/net_core.h"
 
 #define BACKLOG 1024
 #define RECONNECT 20

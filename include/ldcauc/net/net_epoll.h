@@ -5,7 +5,7 @@
 #ifndef TEST_CLIENT_CLIENT_EPOLL_H
 #define TEST_CLIENT_CLIENT_EPOLL_H
 
-#include "ldcauc/net/connection.h"
+#include "net/connection.h"
 
 
 int net_epoll_add(int e_fd, basic_conn_t *conn_opt, uint32_t events,

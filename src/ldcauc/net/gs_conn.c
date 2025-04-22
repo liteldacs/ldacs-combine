@@ -3,11 +3,11 @@
 //
 
 
-#include "ldcauc/net/gs_conn.h"
+#include "net/gs_conn.h"
 
 #include <ld_config.h>
 
-#include "ldcauc/net/net.h"
+#include "net/net.h"
 
 
 gs_tcp_propt_t *init_gs_conn(int role, net_opt_t *net_opt) {

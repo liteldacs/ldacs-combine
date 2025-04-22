@@ -10,10 +10,10 @@
 #include <ld_statemachine.h>
 #include <ld_buffer.h>
 #include <ld_santilizer.h>
-#include "ldcauc/crypto/authc.h"
-#include "ldcauc/crypto/key.h"
-#include "ldcauc/snp_sub.h"
-#include "ldcauc/snf.h"
+#include "crypto/authc.h"
+#include "crypto/key.h"
+#include "snp_sub.h"
+#include "snf.h"
 
 
 struct sm_state_s ld_authc_states[] = {

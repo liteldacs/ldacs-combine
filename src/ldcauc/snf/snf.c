@@ -1,10 +1,9 @@
 //
 // Created by 邹嘉旭 on 2025/3/30.
 //
-#include "ldcauc/snf.h"
-
-#include "ldcauc/crypto/authc.h"
-#include "ldcauc/crypto/key.h"
+#include "snf.h"
+#include "crypto/authc.h"
+#include "crypto/key.h"
 
 
 snf_obj_t snf_obj = {

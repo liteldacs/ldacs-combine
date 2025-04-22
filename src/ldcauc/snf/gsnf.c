@@ -2,10 +2,10 @@
 // Created by 邹嘉旭 on 2025/4/3.
 //
 
-#include "ldcauc/snf.h"
-#include "ldcauc/crypto/secure_core.h"
-#include "ldcauc/crypto/authc.h"
-#include "ldcauc/crypto/key.h"
+#include "snf.h"
+#include "crypto/secure_core.h"
+#include "crypto/authc.h"
+#include "crypto/key.h"
 
 #define GSG_PKT_HEAD_LEN 2
 #define GSG_SAC_HEAD_LEN 4

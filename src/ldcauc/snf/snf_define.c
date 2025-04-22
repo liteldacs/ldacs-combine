@@ -2,9 +2,9 @@
 // Created by 邹嘉旭 on 2025/4/3.
 //
 
-#include "ldcauc/snf.h"
-#include "ldcauc/crypto/authc.h"
-#include "ldcauc/net/net_core.h"
+#include "snf.h"
+#include "crypto/authc.h"
+#include "net/net_core.h"
 
 fsm_event_t ld_authc_fsm_events[] = {
     {"LD_AUTHC_A0", NULL, NULL},

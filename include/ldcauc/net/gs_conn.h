@@ -4,7 +4,7 @@
 
 #ifndef GS_CONN_H
 #define GS_CONN_H
-#include "ldcauc/net/connection.h"
+#include "net/connection.h"
 
 typedef struct gs_tcp_propt_s {
     basic_conn_t bc;

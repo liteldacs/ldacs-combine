@@ -10,7 +10,7 @@
 #include <ld_epoll.h>
 #include <passert.h>
 #include <ld_mqueue.h>
-#include "ldcauc/net/net_core.h"
+#include "net/net_core.h"
 
 extern heap_desc_t hd_conns;
 
