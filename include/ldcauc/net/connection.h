@@ -23,7 +23,7 @@ typedef struct basic_conn_s {
     lfqueue_t *write_pkts;
     bool trans_done;
     const struct role_propt *rp;
-    const struct net_opt_s *opt;
+    struct net_opt_s *opt;
 } basic_conn_t;
 
 typedef struct net_opt_s {
@@ -44,7 +44,7 @@ typedef struct net_opt_s {
 } net_opt_t;
 
 
-bool init_basic_conn(basic_conn_t *bc, const net_opt_t *opt, int role);
+bool init_basic_conn(basic_conn_t *bc, net_opt_t *opt, int role);
 
 bool connecion_is_expired(basic_conn_t *bcp, int timeout);
 

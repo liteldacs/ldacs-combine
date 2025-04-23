@@ -87,7 +87,7 @@ static int make_std_tcp_connect(struct sockaddr_in *to_conn_addr, char *addr, in
 
     /* 绑定本地端口 */
     struct sockaddr_in local_addr;
-    local_addr.sin_family = AF_INET6;
+    local_addr.sin_family = AF_INET;
     local_addr.sin_port = htons(55559); // 转换为网络字节序
     local_addr.sin_addr.s_addr = htonl(INADDR_ANY); // 允许任意本地地址绑定
 
@@ -264,23 +264,15 @@ static int add_listen_fd(int server_fd) {
 }
 
 
-// static int init_as_handler(basic_conn_t *bc) {
-//     //if(first_request_handle(bc, broadcast_recv()) == ERROR) return ERROR;
-//     return make_gs_as_connect((struct sockaddr_in *) &bc->saddr);
-// }
-//
-// static int init_gs_as_handler(basic_conn_t *bc) {
-//     if (bc->server_fd != DEFAULT_FD) if (first_request_handle(bc, bc->server_fd) == ERROR) return ERROR;
-//     return make_gs_as_connect((struct sockaddr_in *) &bc->saddr);
-// }
-
 static int init_std_tcp_conn_handler(basic_conn_t *bc) {
-    // return make_std_tcp_connect((struct sockaddr_in *) &bc->saddr, config.gsnf_addr, config.gsnf_port);
+    return make_std_tcp_connect((struct sockaddr_in *) &bc->saddr, bc->opt->addr, bc->opt->port);
+}
+
+static int init_std_tcpv6_conn_handler(basic_conn_t *bc) {
     return make_std_tcpv6_connect((struct sockaddr_in6 *) &bc->saddr, bc->opt->addr, bc->opt->port);
 }
 
 static int init_std_tcp_accept_handler(basic_conn_t *bc) {
-    // return make_std_tcpv6_accept((struct sockaddr_in6 *) &bc->saddr);
     return make_std_tcp_accept(bc);
 }
 
@@ -289,7 +281,8 @@ const struct role_propt role_propts[] = {
     // {LD_AS, LD_UDP_CLIENT, NULL, init_as_handler},
     // {(LD_GS | LD_AS), LD_UDP_SERVER, make_gs_as_server, init_gs_as_handler},
     {LD_GS, LD_TCP_CLIENT, NULL, init_std_tcp_conn_handler},
-    {LD_SGW, LD_TCP_SERVER, make_std_tcpv6_server, init_std_tcp_accept_handler},
+    // {LD_SGW, LD_TCP_SERVER, make_std_tcpv6_server, init_std_tcp_accept_handler},
+    {LD_SGW, LD_TCP_SERVER, make_std_tcp_server, init_std_tcp_accept_handler},
     {0, 0, 0, 0},
 };
 

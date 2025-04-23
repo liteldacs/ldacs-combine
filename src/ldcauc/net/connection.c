@@ -80,10 +80,7 @@ static void set_basic_conn_addr(uint8_t *start, void *addr) {
  * @param role
  * @return
  */
-bool init_basic_conn(basic_conn_t *bc, const net_opt_t *opt, int role) {
-    // basic_conn_t *bc = malloc(sizeof(basic_conn_t));
-    // set_basic_conn_addr(conn_opt, bc);
-
+bool init_basic_conn(basic_conn_t *bc, net_opt_t *opt, int role) {
     do {
         bc->fd = 0;
         bc->opt = opt;
@@ -107,7 +104,6 @@ bool init_basic_conn(basic_conn_t *bc, const net_opt_t *opt, int role) {
         return TRUE;
     } while (0);
 
-    // opt->close_conn(conn_opt);
     connection_close(bc);
     return FALSE;
 }
