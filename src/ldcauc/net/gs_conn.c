@@ -80,8 +80,9 @@ void *gs_epoll_setup(void *args) {
                     status = response_handle(bc);
                 }
 
-                if (status == ERROR)
+                if (status == ERROR) {
                     connecion_set_expired(bc);
+                }
                 else {
                     connecion_set_reactivated(bc);
                 }

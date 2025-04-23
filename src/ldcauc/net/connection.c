@@ -34,6 +34,7 @@ void connecion_set_expired(basic_conn_t *bc) {
     if (!conn_hp) return;
     conn_hp->factor = 0; // very old time
     if (bc->rp->s_r & 1) heap_bubble_up(&hd_conns, conn_hp->heap_idx);
+    connection_close(bc);
 }
 
 int connection_register(basic_conn_t *bcp, int64_t factor) {

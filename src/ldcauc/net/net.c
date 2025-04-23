@@ -9,59 +9,6 @@
 #define RECONNECT 20
 
 
-// static int make_gs_as_connect(struct sockaddr_in *to_conn_addr) {
-//     struct sockaddr_in my_addr;
-//     int fd;
-//     if ((fd = socket(PF_INET, SOCK_DGRAM, 0)) == ERROR) return ERROR;
-//
-//     /*设置socket属性，端口可以重用*/
-//     int opt = SO_REUSEADDR;
-//     setsockopt(fd,SOL_SOCKET,SO_REUSEADDR, &opt, sizeof(opt));
-//
-//     zero(&my_addr);
-//     my_addr.sin_family = AF_INET;
-//     my_addr.sin_port = htons(config.port);
-//     my_addr.sin_addr.s_addr = INADDR_ANY;
-//
-//     if (bind(fd, (struct sockaddr *) &my_addr, sizeof(struct sockaddr)) == ERROR) {
-//         perror("bind");
-//         return ERROR;
-//     }
-//
-//     if (config.role == LD_AS) {
-//         to_conn_addr->sin_port = htons(8080); //TODO: any better ways to replace 8080?
-//     }
-//
-//     if (connect(fd, (struct sockaddr *) to_conn_addr, sizeof(struct sockaddr_in)) == ERROR) return ERROR;
-//
-//     return fd;
-// }
-//
-//
-// static int make_gs_as_server(uint16_t port) {
-//     struct sockaddr_in saddr;
-//
-//     if ((net_fd = socket(AF_INET, SOCK_DGRAM, 0)) == ERROR)
-//         return ERROR;
-//
-//     int enable = SO_REUSEADDR;
-//     setsockopt(net_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
-//     if (config.worker > 1) {
-//         /* since linux 3.9 */
-//         setsockopt(net_fd, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(enable));
-//     }
-//
-//     zero(&saddr);
-//     saddr.sin_family = AF_INET;
-//     saddr.sin_port = htons(config.port);
-//     saddr.sin_addr.s_addr = htonl(INADDR_ANY);
-//
-//     if (bind(net_fd, (struct sockaddr *) &saddr, sizeof(saddr)) != OK)
-//         return ERROR;
-//
-//     return net_fd;
-// }
-//
 static int make_std_tcp_connect(struct sockaddr_in *to_conn_addr, char *addr, int port) {
     struct in_addr s;
     int fd;
@@ -231,8 +178,7 @@ static int make_std_tcp_accept(basic_conn_t *bc) {
     int fd;
     socklen_t saddrlen = sizeof(struct sockaddr_in);
     if (bc->opt->server_fd == DEFAULT_FD) return DEFAULT_FD;
-    while ((fd = accept(bc->opt->server_fd, (struct sockaddr *) to_conn_addr, &saddrlen)) == ERROR);
-    // fprintf(stderr, "%d\n", fd);
+    while ((fd = accept(bc->opt->server_fd, (struct sockaddr *) to_conn_addr, &saddrlen)) == ERROR) {}
     return fd;
 }
 
@@ -278,10 +224,7 @@ static int init_std_tcp_accept_handler(basic_conn_t *bc) {
 
 
 const struct role_propt role_propts[] = {
-    // {LD_AS, LD_UDP_CLIENT, NULL, init_as_handler},
-    // {(LD_GS | LD_AS), LD_UDP_SERVER, make_gs_as_server, init_gs_as_handler},
     {LD_GS, LD_TCP_CLIENT, NULL, init_std_tcp_conn_handler},
-    // {LD_SGW, LD_TCP_SERVER, make_std_tcpv6_server, init_std_tcp_accept_handler},
     {LD_SGW, LD_TCP_SERVER, make_std_tcp_server, init_std_tcp_accept_handler},
     {0, 0, 0, 0},
 };
