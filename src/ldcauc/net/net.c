@@ -178,7 +178,8 @@ static int make_std_tcp_accept(basic_conn_t *bc) {
     int fd;
     socklen_t saddrlen = sizeof(struct sockaddr_in);
     if (bc->opt->server_fd == DEFAULT_FD) return DEFAULT_FD;
-    while ((fd = accept(bc->opt->server_fd, (struct sockaddr *) to_conn_addr, &saddrlen)) == ERROR) {}
+    while ((fd = accept(bc->opt->server_fd, (struct sockaddr *) to_conn_addr, &saddrlen)) == ERROR) {
+    }
     return fd;
 }
 
@@ -195,20 +196,8 @@ static int make_std_tcpv6_accept(basic_conn_t *bc) {
         }
     }
 
-    // fprintf(stderr, "%d\n", fd);
     return fd;
 }
-
-static int add_listen_fd(int server_fd) {
-    set_fd_nonblocking(server_fd);
-    struct epoll_event ev;
-    int *fd_ptr = calloc(1, sizeof(int));
-    memcpy(fd_ptr, &server_fd, sizeof(int));
-    ev.data.ptr = fd_ptr;
-    ev.events = EPOLLIN | EPOLLET;
-    return core_epoll_add(epoll_fd, server_fd, &ev);
-}
-
 
 static int init_std_tcp_conn_handler(basic_conn_t *bc) {
     return make_std_tcp_connect((struct sockaddr_in *) &bc->saddr, bc->opt->addr, bc->opt->port);
@@ -224,22 +213,32 @@ static int init_std_tcp_accept_handler(basic_conn_t *bc) {
 
 
 const struct role_propt role_propts[] = {
-    {LD_GS, LD_TCP_CLIENT, NULL, init_std_tcp_conn_handler},
-    {LD_SGW, LD_TCP_SERVER, make_std_tcp_server, init_std_tcp_accept_handler},
-    {0, 0, 0, 0},
+    {LD_TCP_CLIENT, NULL, init_std_tcp_conn_handler},
+    {LD_TCP_SERVER, make_std_tcp_server, init_std_tcp_accept_handler},
+    {0, 0, 0},
 };
 
-const struct role_propt *get_role_propt(int role) {
-    for (int i = 0; role_propts[i].l_r != 0; i++) {
-        if (role_propts[i].l_r == role)
+const struct role_propt *get_role_propt(int s_r) {
+    for (int i = 0; role_propts[i].s_r != 0; i++) {
+        if (role_propts[i].s_r == s_r)
             return role_propts + i;
     }
     return NULL;
 }
 
 
-int server_entity_setup(ldacs_roles role, uint16_t port) {
-    const struct role_propt *rp = get_role_propt(role);
+static int add_listen_fd(int server_fd) {
+    set_fd_nonblocking(server_fd);
+    struct epoll_event ev;
+    int *fd_ptr = calloc(1, sizeof(int));
+    memcpy(fd_ptr, &server_fd, sizeof(int));
+    ev.data.ptr = fd_ptr;
+    ev.events = EPOLLIN | EPOLLET;
+    return core_epoll_add(epoll_fd, server_fd, &ev);
+}
+
+int server_entity_setup(uint16_t port) {
+    const struct role_propt *rp = get_role_propt(LD_TCP_SERVER);
 
     int server_fd = rp->server_make(port);
 
@@ -252,36 +251,6 @@ int server_entity_setup(ldacs_roles role, uint16_t port) {
 
 int server_shutdown(int server_fd) {
     return close(server_fd);
-}
-
-
-static int response_send_buffer(basic_conn_t *bc) {
-    int status;
-    status = write_packet(bc);
-    if (status != OK) {
-        return status;
-    } else {
-        bc->trans_done = TRUE;
-        return OK;
-    }
-}
-
-
-int response_handle(basic_conn_t *bc) {
-    int status;
-
-    if (bc->opt->send_handler) {
-        bc->opt->send_handler(bc);
-    }
-    do {
-        status = response_send_buffer(bc);
-    } while (status == OK && bc->trans_done != TRUE);
-    if (bc->trans_done) {
-        // response done
-        if (bc->opt->reset_conn) bc->opt->reset_conn(bc);
-        net_epoll_in(epoll_fd, bc);
-    }
-    return status;
 }
 
 /**
@@ -342,14 +311,13 @@ int request_handle(basic_conn_t *bc) {
     return OK;
 }
 
-
 /**
  * Return:
  * OK: all data sent
  * AGAIN: haven't sent all data
  * ERROR: error
  */
-int write_packet(basic_conn_t *bc) {
+static int write_packet(basic_conn_t *bc) {
     size_t len;
     buffer_t *b;
 
@@ -368,3 +336,82 @@ int write_packet(basic_conn_t *bc) {
     }
     return OK;
 }
+
+static int response_send_buffer(basic_conn_t *bc) {
+    int status;
+    status = write_packet(bc);
+    if (status != OK) {
+        return status;
+    } else {
+        bc->trans_done = TRUE;
+        return OK;
+    }
+}
+
+
+int response_handle(basic_conn_t *bc) {
+    int status;
+
+    if (bc->opt->send_handler) {
+        bc->opt->send_handler(bc);
+    }
+    do {
+        status = response_send_buffer(bc);
+    } while (status == OK && bc->trans_done != TRUE);
+    if (bc->trans_done) {
+        // response done
+        if (bc->opt->reset_conn) bc->opt->reset_conn(bc);
+        net_epoll_in(epoll_fd, bc);
+    }
+    return status;
+}
+
+void *net_setup(void *args) {
+    int nfds;
+    int i;
+    net_opt_t *net_opt = args;
+    while (TRUE) {
+        nfds = core_epoll_wait(epoll_fd, epoll_events, MAX_EVENTS, 20);
+
+        if (nfds == ERROR) {
+            // if not caused by signal, cannot recover
+            ERR_ON(errno != EINTR, "core_epoll_wait");
+        }
+
+        /* processing ready fd one by one */
+        for (i = 0; i < nfds; i++) {
+            struct epoll_event *curr_event = epoll_events + i;
+            int fd = *((int *) curr_event->data.ptr);
+            if (fd == net_opt->server_fd) {
+                // gs_conn_accept(net_opt); /* never happened in GS */
+                net_opt->accept_handler(net_opt);
+            } else {
+                basic_conn_t *bc = curr_event->data.ptr;
+                int status;
+                assert(bc != NULL);
+
+                if (connecion_is_expired(bc, net_opt->timeout))
+                    continue;
+
+                if (curr_event->events & EPOLLIN) {
+                    //recv
+                    status = request_handle(bc);
+                }
+                if (curr_event->events & EPOLLOUT) {
+                    //send
+                    status = response_handle(bc);
+                }
+
+                if (status == ERROR) {
+                    connecion_set_expired(bc);
+                } else {
+                    connecion_set_reactivated(bc);
+                }
+            }
+        }
+        server_connection_prune(net_opt->timeout);
+    }
+    close(epoll_fd);
+    server_shutdown(net_opt->server_fd);
+}
+

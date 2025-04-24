@@ -28,7 +28,8 @@ typedef struct basic_conn_s {
 
 typedef struct net_opt_s {
     char name[32];
-    ldacs_roles role;
+    // ldacs_roles role;
+    sock_roles s_r;
     int server_fd; //for GSW
     char addr[GEN_ADDRLEN];
     int port;
@@ -41,10 +42,12 @@ typedef struct net_opt_s {
     l_err (*recv_handler)(basic_conn_t *);
 
     l_err (*send_handler)(basic_conn_t *);
+
+    l_err (*accept_handler)(struct net_opt_s *);
 } net_opt_t;
 
 
-bool init_basic_conn(basic_conn_t *bc, net_opt_t *opt, int role);
+bool init_basic_conn(basic_conn_t *bc, net_opt_t *opt);
 
 bool connecion_is_expired(basic_conn_t *bcp, int timeout);
 

@@ -30,12 +30,13 @@ void init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_por
     snf_obj.register_fail_func = register_fail;
 
     memcpy(snf_obj.net_opt.addr, gsnf_addr, GEN_ADDRLEN);
-    snf_obj.net_opt.role = LD_GS;
+    snf_obj.net_opt.s_r = LD_TCP_CLIENT;
     snf_obj.net_opt.port = gsnf_port;
     snf_obj.net_opt.recv_handler = recv_gsg;
-    snf_obj.sgw_conn = init_gs_conn(LD_GS, &snf_obj.net_opt);
+    snf_obj.net_opt.close_handler = close_gs_conn;
+    snf_obj.sgw_conn = init_gs_conn(&snf_obj.net_opt);
 
-    pthread_create(&snf_obj.client_th, NULL, gs_epoll_setup, &snf_obj.net_opt);
+    pthread_create(&snf_obj.client_th, NULL, net_setup, &snf_obj.net_opt);
     pthread_detach(snf_obj.client_th);
 
     snf_obj.is_merged = TRUE;
@@ -56,12 +57,14 @@ void init_sgw_snf_layer(uint16_t listen_port) {
     snf_obj.register_fail_func = NULL;
 
     init_heap_desc(&hd_conns);
-    snf_obj.net_opt.role = LD_SGW;
-    snf_obj.net_opt.server_fd = server_entity_setup(LD_SGW, listen_port);
+    snf_obj.net_opt.s_r = LD_TCP_SERVER;
+    snf_obj.net_opt.server_fd = server_entity_setup(listen_port);
     snf_obj.net_opt.recv_handler = recv_gsnf;
+    snf_obj.net_opt.close_handler = close_gs_conn;
+    snf_obj.net_opt.accept_handler = gs_conn_accept;
 
     log_info("SGW server successfully started.");
-    gs_epoll_setup(&snf_obj.net_opt);
+    net_setup(&snf_obj.net_opt);
 }
 
 
