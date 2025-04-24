@@ -12,7 +12,6 @@
 #include <ld_mqueue.h>
 #include "net/net_core.h"
 
-extern heap_desc_t hd_conns;
 
 typedef struct basic_conn_s {
     int fd; /* connection_s fd */
@@ -38,7 +37,7 @@ void connecion_set_reactivated(basic_conn_t *bdp);
 
 void connecion_set_expired(basic_conn_t *bcp);
 
-void server_connection_prune(int timeout);
+void server_connection_prune(net_opt_t *opt);
 
 
 #endif //TEST_CLIENT_CONNECTION_H

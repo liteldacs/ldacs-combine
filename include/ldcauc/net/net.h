@@ -26,6 +26,7 @@ typedef struct net_opt_s {
     int local_port;
     int timeout;
 
+    heap_desc_t hd_conns;
 
     void (*close_handler)(basic_conn_t *);
 

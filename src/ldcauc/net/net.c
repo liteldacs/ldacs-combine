@@ -420,7 +420,7 @@ void *net_setup(void *args) {
                 }
             }
         }
-        server_connection_prune(net_opt->timeout);
+        server_connection_prune(net_opt);
     }
     close(net_opt->epoll_fd);
     server_shutdown(net_opt->server_fd);

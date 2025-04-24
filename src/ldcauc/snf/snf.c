@@ -39,7 +39,7 @@ void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_po
         .local_port = gsnf_local_port,
         .recv_handler = recv_gsg,
         .close_handler = close_gs_conn,
-        .epoll_fd = -1
+        .epoll_fd = -1,
     };
 
     snf_obj.sgw_conn = client_entity_setup(&snf_obj.client_th, &snf_obj.net_opt);
@@ -61,7 +61,6 @@ void init_sgw_snf_layer(uint16_t listen_port) {
 
     snf_obj.register_fail_func = NULL;
 
-    init_heap_desc(&hd_conns);
     snf_obj.net_opt = (net_opt_t){
         .s_r = LD_TCP_SERVER,
         .recv_handler = recv_gsnf,
@@ -69,6 +68,7 @@ void init_sgw_snf_layer(uint16_t listen_port) {
         .accept_handler = gs_conn_accept,
         .epoll_fd = -1
     };
+    init_heap_desc(&snf_obj.net_opt.hd_conns);
     server_entity_setup(listen_port, &snf_obj.net_opt);
 
 }

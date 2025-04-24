@@ -8,9 +8,8 @@
 #include "net/net_core.h"
 #include <netinet/tcp.h>
 
-heap_desc_t hd_conns;
 
-static int connection_register(basic_conn_t *bcp, int64_t factor);
+static int connection_register(basic_conn_t *bc, int64_t factor);
 
 static void connection_set_nodelay(basic_conn_t *bc);
 
@@ -62,44 +61,44 @@ static void connection_set_nodelay(basic_conn_t *bc) {
 }
 
 bool connecion_is_expired(basic_conn_t *bc, int timeout) {
-    heap_t *conn_hp = get_heap(&hd_conns, bc);
+    heap_t *conn_hp = get_heap(&bc->opt->hd_conns, bc);
     int64_t active_time = conn_hp->factor;
     return timeout ? (time(NULL) - active_time > timeout) : FALSE;
 }
 
 void connecion_set_reactivated(basic_conn_t *bc) {
-    heap_t *conn_hp = get_heap(&hd_conns, bc);
+    heap_t *conn_hp = get_heap(&bc->opt->hd_conns, bc);
     if (!conn_hp) return;
     conn_hp->factor = time(NULL); /* active_time */
-    if (bc->rp->s_r & 1) heap_bubble_down(&hd_conns, conn_hp->heap_idx);
+    if (bc->rp->s_r & 1) heap_bubble_down(&bc->opt->hd_conns, conn_hp->heap_idx);
 }
 
 void connecion_set_expired(basic_conn_t *bc) {
-    heap_t *conn_hp = get_heap(&hd_conns, bc);
+    heap_t *conn_hp = get_heap(&bc->opt->hd_conns, bc);
     if (!conn_hp) return;
     conn_hp->factor = 0; // very old time
-    if (bc->rp->s_r & 1) heap_bubble_up(&hd_conns, conn_hp->heap_idx);
+    if (bc->rp->s_r & 1) heap_bubble_up(&bc->opt->hd_conns, conn_hp->heap_idx);
     connection_close(bc);
 }
 
-static int connection_register(basic_conn_t *bcp, int64_t factor) {
-    if (hd_conns.heap_size >= MAX_HEAP) {
+static int connection_register(basic_conn_t *bc, int64_t factor) {
+    if (bc->opt->hd_conns.heap_size >= MAX_HEAP) {
         return ERROR;
     }
-    return heap_insert(&hd_conns, bcp, factor);
+    return heap_insert(&bc->opt->hd_conns, bc, factor);
 }
 
 void connection_unregister(basic_conn_t *bc) {
-    assert(hd_conns.heap_size >= 1);
+    assert(bc->opt->hd_conns.heap_size >= 1);
 
-    heap_t *conn_hp = get_heap(&hd_conns, bc);
+    heap_t *conn_hp = get_heap(&bc->opt->hd_conns, bc);
     int heap_idx = conn_hp->heap_idx;
-    hd_conns.hps[heap_idx] = hd_conns.hps[hd_conns.heap_size - 1];
-    hd_conns.hps[heap_idx]->heap_idx = heap_idx;
-    hd_conns.heap_size--;
+    bc->opt->hd_conns.hps[heap_idx] = bc->opt->hd_conns.hps[bc->opt->hd_conns.heap_size - 1];
+    bc->opt->hd_conns.hps[heap_idx]->heap_idx = heap_idx;
+    bc->opt->hd_conns.heap_size--;
 
-    fprintf(stderr, "HEAP SIZE: %d\n", hd_conns.heap_size);
-    heap_bubble_down(&hd_conns, heap_idx);
+    fprintf(stderr, "HEAP SIZE: %d\n", bc->opt->hd_conns.heap_size);
+    heap_bubble_down(&bc->opt->hd_conns, heap_idx);
     if (bc->opt->close_handler) bc->opt->close_handler(bc);
 }
 
@@ -119,12 +118,12 @@ void connection_close(basic_conn_t *bc) {
     connection_unregister(bc);
 }
 
-void server_connection_prune(int timeout) {
-    while (hd_conns.heap_size > 0 && timeout) {
-        basic_conn_t *bc = hd_conns.hps[0]->obj;
-        int64_t active_time = hd_conns.hps[0]->factor;
-        if (time(NULL) - active_time >= timeout) {
-            log_info("prune %p %d\n", bc, hd_conns.heap_size);
+void server_connection_prune(net_opt_t *opt) {
+    while (opt->hd_conns.heap_size > 0 && opt->timeout) {
+        basic_conn_t *bc = opt->hd_conns.hps[0]->obj;
+        int64_t active_time = opt->hd_conns.hps[0]->factor;
+        if (time(NULL) - active_time >= opt->timeout) {
+            log_info("prune %p %d\n", bc, opt->hd_conns.heap_size);
             connection_close(bc);
         } else
             break;
