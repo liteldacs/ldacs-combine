@@ -56,12 +56,10 @@ bool init_basic_conn(basic_conn_t *bc, net_opt_t *opt) {
     return FALSE;
 }
 
-
 static void connection_set_nodelay(basic_conn_t *bc) {
     static int enable = 1;
     setsockopt(bc->fd, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(enable));
 }
-
 
 bool connecion_is_expired(basic_conn_t *bc, int timeout) {
     heap_t *conn_hp = get_heap(&hd_conns, bc);

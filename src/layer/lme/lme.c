@@ -138,7 +138,7 @@ l_err make_lme_layer() {
                 case LD_GS: {
 
                     config.is_merged == TRUE ?
-                    init_gs_snf_layer(get_gs_sac(), config.gsnf_addr_v6, config.gsnf_remote_port, config.gsnf_local_port, trans_snp_data,NULL) :
+                    init_gs_snf_layer(get_gs_sac(), config.gsnf_addr_v6, config.gsnf_remote_port, config.gsnf_local_port, trans_snp_data, NULL) :
                     init_gs_snf_layer_unmerged(get_gs_sac(), config.gsnf_addr_v6, config.gsnf_remote_port, config.gsnf_local_port,
                                                trans_snp_data, register_snf_failed);
 

@@ -20,7 +20,7 @@ void init_as_snf_layer(finish_auth finish_auth, trans_snp trans_snp, register_sn
     snf_obj.register_fail_func = register_fail;
 }
 
-void init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
+void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
                        trans_snp trans_snp, register_snf_fail register_fail) {
     snf_obj.snf_emap = init_enode_map();
     snf_obj.role = LD_GS;
@@ -29,21 +29,25 @@ void init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_rem
     snf_obj.trans_snp_func = trans_snp;
     snf_obj.register_fail_func = register_fail;
 
-    memcpy(snf_obj.net_opt.addr, gsnf_addr, GEN_ADDRLEN);
-    snf_obj.net_opt.s_r = LD_TCP_CLIENT;
-    snf_obj.net_opt.remote_port = gsnf_remote_port;
-    snf_obj.net_opt.local_port = gsnf_local_port;
-    snf_obj.net_opt.recv_handler = recv_gsg;
-    snf_obj.net_opt.close_handler = close_gs_conn;
-    snf_obj.sgw_conn = init_gs_conn(&snf_obj.net_opt);
+    // memcpy(snf_obj.net_opt.addr, gsnf_addr, GEN_ADDRLEN);
 
-    client_entity_setup(&snf_obj.client_th, &snf_obj.net_opt);
+    snf_obj.net_opt = (net_opt_t){
+        .s_r = LD_TCP_CLIENT,
+        .addr = gsnf_addr,
+        .init_handler = init_gs_conn,
+        .remote_port = gsnf_remote_port,
+        .local_port = gsnf_local_port,
+        .recv_handler = recv_gsg,
+        .close_handler = close_gs_conn,
+    };
+
+    snf_obj.sgw_conn = client_entity_setup(&snf_obj.client_th, &snf_obj.net_opt);
 
     snf_obj.is_merged = TRUE;
 }
 
 
-void init_gs_snf_layer_unmerged(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
+void init_gs_snf_layer_unmerged(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
                                 trans_snp trans_snp, register_snf_fail register_fail) {
     init_gs_snf_layer(GS_SAC, gsnf_addr, gsnf_remote_port, gsnf_local_port, trans_snp, register_fail);
     snf_obj.net_opt.recv_handler = recv_gsnf;
@@ -57,10 +61,12 @@ void init_sgw_snf_layer(uint16_t listen_port) {
     snf_obj.register_fail_func = NULL;
 
     init_heap_desc(&hd_conns);
-    snf_obj.net_opt.s_r = LD_TCP_SERVER;
-    snf_obj.net_opt.recv_handler = recv_gsnf;
-    snf_obj.net_opt.close_handler = close_gs_conn;
-    snf_obj.net_opt.accept_handler = gs_conn_accept;
+    snf_obj.net_opt = (net_opt_t){
+        .s_r = LD_TCP_SERVER,
+        .recv_handler = recv_gsnf,
+        .close_handler = close_gs_conn,
+        .accept_handler = gs_conn_accept,
+    };
     server_entity_setup(listen_port, &snf_obj.net_opt);
 
 }

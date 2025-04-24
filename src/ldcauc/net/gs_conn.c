@@ -10,7 +10,7 @@
 #include "net/net.h"
 
 
-gs_tcp_propt_t *init_gs_conn(net_opt_t *net_opt) {
+void *init_gs_conn(net_opt_t *net_opt) {
     gs_tcp_propt_t *gs_conn = malloc(sizeof(gs_tcp_propt_t));
 
     if (init_basic_conn(&gs_conn->bc, net_opt) == FALSE) {

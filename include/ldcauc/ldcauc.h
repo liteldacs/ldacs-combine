@@ -72,10 +72,10 @@ void init_as_snf_layer(finish_auth finish_auth, trans_snp trans_snp, register_sn
  * @param[in] trans_snp     LME->SNP 回调函数
  * @param[in] register_fail 注册失败回调
  */
-void init_gs_snf_layer(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
+void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
                        trans_snp trans_snp, register_snf_fail register_fail);
 
-void init_gs_snf_layer_unmerged(uint16_t GS_SAC, const char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
+void init_gs_snf_layer_unmerged(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
                                 trans_snp trans_snp, register_snf_fail register_fail);
 
 /**

@@ -251,9 +251,12 @@ void server_entity_setup(uint16_t port, net_opt_t *opt) {
     net_setup(opt);
 }
 
-void client_entity_setup(pthread_t *th, net_opt_t *opt) {
+void *client_entity_setup(pthread_t *th, net_opt_t *opt) {
+    void *conn = opt->init_handler(opt);
+    if (!conn)  return NULL;
     pthread_create(th, NULL, net_setup, opt);
     pthread_detach(*th);
+    return conn;
 }
 
 int server_shutdown(int server_fd) {

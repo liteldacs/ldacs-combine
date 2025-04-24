@@ -19,10 +19,12 @@ typedef struct net_opt_s {
     // ldacs_roles role;
     sock_roles s_r;
     int server_fd; //for GSW
-    char addr[GEN_ADDRLEN];
+    // char addr[GEN_ADDRLEN];
+    char *addr;
     int remote_port;
     int local_port;
     int timeout;
+
 
     void (*close_handler)(basic_conn_t *);
 
@@ -31,6 +33,8 @@ typedef struct net_opt_s {
     l_err (*recv_handler)(basic_conn_t *);
 
     l_err (*send_handler)(basic_conn_t *);
+
+    void *(*init_handler)(struct net_opt_s *);
 
     l_err (*accept_handler)(struct net_opt_s *);
 } net_opt_t;
@@ -42,7 +46,7 @@ void server_entity_setup(uint16_t port, net_opt_t *opt);
 
 int server_shutdown(int server_fd);
 
-void client_entity_setup(pthread_t *th, net_opt_t *opt);
+void *client_entity_setup(pthread_t *th, net_opt_t *opt);
 
 int read_first_packet(basic_conn_t *bc, int pre_fd);
 
