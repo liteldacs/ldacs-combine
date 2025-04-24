@@ -18,16 +18,12 @@ struct role_propt {
 
 typedef struct net_opt_s {
     char name[32];
-    // ldacs_roles role;
     int epoll_fd;
-    sock_roles socket_role;
     int server_fd; //for GSW
-    // char addr[GEN_ADDRLEN];
     char *addr;
     int remote_port;
     int local_port;
     int timeout;
-
     heap_desc_t hd_conns;
 
     void (*close_handler)(basic_conn_t *);
@@ -38,7 +34,7 @@ typedef struct net_opt_s {
 
     l_err (*send_handler)(basic_conn_t *);
 
-    void *(*init_handler)(struct net_opt_s *);
+    void *(*init_handler)(struct net_opt_s *, sock_roles);
 
     l_err (*accept_handler)(struct net_opt_s *);
 } net_opt_t;

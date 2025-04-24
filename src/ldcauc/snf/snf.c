@@ -8,7 +8,7 @@
 
 snf_obj_t snf_obj = {
     .PROTOCOL_VER = PROTECT_VERSION,
-    .is_merged = TRUE
+    .is_merged = TRUE,
 };
 
 void init_as_snf_layer(finish_auth finish_auth, trans_snp trans_snp, register_snf_fail register_fail) {
@@ -32,7 +32,6 @@ void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_po
     // memcpy(snf_obj.net_opt.addr, gsnf_addr, GEN_ADDRLEN);
 
     snf_obj.net_opt = (net_opt_t){
-        .socket_role = LD_TCP_CLIENT,
         .addr = gsnf_addr,
         .init_handler = init_gs_conn,
         .remote_port = gsnf_remote_port,
@@ -64,7 +63,6 @@ void init_sgw_snf_layer(uint16_t listen_port) {
     snf_obj.register_fail_func = NULL;
 
     snf_obj.net_opt = (net_opt_t){
-        .socket_role = LD_TCP_SERVER,
         .recv_handler = recv_gsnf,
         .close_handler = close_gs_conn,
         .accept_handler = gs_conn_accept,

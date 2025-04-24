@@ -27,18 +27,18 @@ static void set_basic_conn_addr(uint8_t *start, void *addr) {
     }
 }
 
-bool init_basic_conn(basic_conn_t *bc, net_opt_t *opt) {
+bool init_basic_conn(basic_conn_t *bc, net_opt_t *opt, sock_roles socket_role) {
     do {
         bc->fd = 0;
         bc->opt = opt;
-        bc->rp = get_role_propt(opt->socket_role);
+        bc->rp = get_role_propt(socket_role);
         bc->fd = bc->rp->init_handler(bc);
 
         if (bc->fd == ERROR) {
             break;
         }
 
-        if (opt->socket_role == LD_TCP_SERVER) {
+        if (socket_role == LD_TCP_SERVER) {
             ABORT_ON(bc->opt->epoll_fd == 0 || bc->opt->epoll_fd == ERROR, "illegal epoll fd");
         } else {
             ABORT_ON((bc->opt->epoll_fd = core_epoll_create(0, bc->opt->epoll_fd)) == ERROR, "core_epoll_create");

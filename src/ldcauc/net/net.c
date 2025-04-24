@@ -254,7 +254,7 @@ void server_entity_setup(uint16_t port, net_opt_t *opt) {
 }
 
 void *client_entity_setup(net_opt_t *opt) {
-    void *conn = opt->init_handler(opt);
+    void *conn = opt->init_handler(opt, LD_TCP_CLIENT);
     if (!conn) return NULL;
     // pthread_create(th, NULL, net_setup, opt);
     return conn;

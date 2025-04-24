@@ -19,7 +19,7 @@ extern const struct shared_key_temp shared_keys[];
 
 
 // gs_tcp_propt_t *init_gs_conn(int role);
-void *init_gs_conn(net_opt_t *net_opt);
+void *init_gs_conn(net_opt_t *net_opt, sock_roles socket_role);
 
 bool recv_gs_pkt(basic_conn_t *bc);
 

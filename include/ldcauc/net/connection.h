@@ -26,8 +26,7 @@ typedef struct basic_conn_s {
 } basic_conn_t;
 
 
-
-bool init_basic_conn(basic_conn_t *bc, net_opt_t *opt);
+bool init_basic_conn(basic_conn_t *bc, net_opt_t *opt, sock_roles socket_role);
 
 bool connecion_is_expired(basic_conn_t *bcp, int timeout);
 

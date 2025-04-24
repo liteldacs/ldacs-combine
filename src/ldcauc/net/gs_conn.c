@@ -10,10 +10,10 @@
 #include "net/net.h"
 
 
-void *init_gs_conn(net_opt_t *net_opt) {
+void *init_gs_conn(net_opt_t *net_opt, sock_roles socket_role) {
     gs_tcp_propt_t *gs_conn = malloc(sizeof(gs_tcp_propt_t));
 
-    if (init_basic_conn(&gs_conn->bc, net_opt) == FALSE) {
+    if (init_basic_conn(&gs_conn->bc, net_opt, socket_role) == FALSE) {
         return NULL;
     }
     return gs_conn;
@@ -24,7 +24,7 @@ bool send_gs_pkt(basic_conn_t *bcp) {
 }
 
 l_err gs_conn_accept(net_opt_t *net_opt) {
-    if (init_gs_conn(net_opt) == NULL) {
+    if (init_gs_conn(net_opt, LD_TCP_SERVER) == NULL) {
         log_error("Cannot initialize connection!");
         return LD_ERR_INTERNAL;
     }

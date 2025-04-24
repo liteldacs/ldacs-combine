@@ -8,13 +8,12 @@
 #include "ldacs_def.h"
 #include "connection.h"
 
-typedef struct p2p_propt_s {
+typedef struct peer_propt_s {
     basic_conn_t bc;
-} p2p_propt_t;
+} peer_propt_t;
 
-typedef struct p2p_service_s {
-    p2p_propt_t *prop;
-
-}p2p_service_t;
+typedef struct peer_service_s {
+    // p2p_propt_t *prop;
+} peer_service_t;
 
 #endif //P2P_H
