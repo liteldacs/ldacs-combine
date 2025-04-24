@@ -10,7 +10,7 @@
 #define RECONNECT 20
 
 
-static int make_std_tcp_connect(struct sockaddr_in *to_conn_addr, char *addr, int port) {
+static int make_std_tcp_connect(struct sockaddr_in *to_conn_addr, char *addr, int remote_port, int local_port) {
     struct in_addr s;
     int fd;
     int enable = SO_REUSEADDR;
@@ -29,14 +29,14 @@ static int make_std_tcp_connect(struct sockaddr_in *to_conn_addr, char *addr, in
 
     zero(to_conn_addr);
     to_conn_addr->sin_family = AF_INET;
-    to_conn_addr->sin_port = htons(port);
+    to_conn_addr->sin_port = htons(remote_port);
     // to_conn_addr->sin_addr = s;
     memcpy(&to_conn_addr->sin_addr, &s, sizeof(s));
 
     /* 绑定本地端口 */
     struct sockaddr_in local_addr;
     local_addr.sin_family = AF_INET;
-    local_addr.sin_port = htons(55559); // 转换为网络字节序
+    local_addr.sin_port = htons(local_port); // 转换为网络字节序
     local_addr.sin_addr.s_addr = htonl(INADDR_ANY); // 允许任意本地地址绑定
 
     if (bind(fd, (struct sockaddr *) &local_addr, sizeof(local_addr)) == -1) {
@@ -48,7 +48,7 @@ static int make_std_tcp_connect(struct sockaddr_in *to_conn_addr, char *addr, in
     //TODO: 改成死循环，持续1min
     int i = RECONNECT;
     while (i--) {
-        log_info("Trying to connect to GSC %s:%d  for %d time(s).", addr, port, RECONNECT - i);
+        log_info("Trying to connect to GSC %s:%d  for %d time(s).", addr, remote_port, RECONNECT - i);
         if (connect(fd, (struct sockaddr *) to_conn_addr, sizeof(struct sockaddr_in)) >= 0) {
             log_info("Connected");
             return fd;
@@ -61,7 +61,7 @@ static int make_std_tcp_connect(struct sockaddr_in *to_conn_addr, char *addr, in
     return ERROR;
 }
 
-static int make_std_tcpv6_connect(struct sockaddr_in6 *to_conn_addr, char *addr, int port) {
+static int make_std_tcpv6_connect(struct sockaddr_in6 *to_conn_addr, char *addr, int remote_port, int local_port) {
     struct in6_addr s;
     int fd;
     int enable = SO_REUSEADDR;
@@ -80,7 +80,7 @@ static int make_std_tcpv6_connect(struct sockaddr_in6 *to_conn_addr, char *addr,
 
     zero(to_conn_addr);
     to_conn_addr->sin6_family = AF_INET6;
-    to_conn_addr->sin6_port = htons(port);
+    to_conn_addr->sin6_port = htons(remote_port);
     // to_conn_addr->sin_addr = s;
     memcpy(&to_conn_addr->sin6_addr, &s, sizeof(s));
 
@@ -88,7 +88,7 @@ static int make_std_tcpv6_connect(struct sockaddr_in6 *to_conn_addr, char *addr,
     /* 绑定本地端口 */
     struct sockaddr_in6 local_addr;
     local_addr.sin6_family = AF_INET6;
-    local_addr.sin6_port = htons(55559); // 转换为网络字节序
+    local_addr.sin6_port = htons(local_port); // 转换为网络字节序
     local_addr.sin6_addr = in6addr_any; // 允许任意本地地址绑定
 
     if (bind(fd, (struct sockaddr *) &local_addr, sizeof(local_addr)) == -1) {
@@ -99,7 +99,7 @@ static int make_std_tcpv6_connect(struct sockaddr_in6 *to_conn_addr, char *addr,
     //TODO: 改成死循环，持续1min
     int i = RECONNECT;
     while (i--) {
-        log_info("Trying to connect to GSC  %s:%d  for %d time(s).", addr, port, RECONNECT - i);
+        log_info("Trying to connect to GSC  %s:%d  for %d time(s).", addr, remote_port, RECONNECT - i);
         if (connect(fd, (struct sockaddr *) to_conn_addr, sizeof(struct sockaddr_in6)) >= 0) {
             log_info("Connected");
             return fd;
@@ -201,11 +201,11 @@ static int make_std_tcpv6_accept(basic_conn_t *bc) {
 }
 
 static int init_std_tcp_conn_handler(basic_conn_t *bc) {
-    return make_std_tcp_connect((struct sockaddr_in *) &bc->saddr, bc->opt->addr, bc->opt->port);
+    return make_std_tcp_connect((struct sockaddr_in *) &bc->saddr, bc->opt->addr, bc->opt->remote_port, bc->opt->local_port);
 }
 
 static int init_std_tcpv6_conn_handler(basic_conn_t *bc) {
-    return make_std_tcpv6_connect((struct sockaddr_in6 *) &bc->saddr, bc->opt->addr, bc->opt->port);
+    return make_std_tcpv6_connect((struct sockaddr_in6 *) &bc->saddr, bc->opt->addr, bc->opt->remote_port, bc->opt->local_port);
 }
 
 static int init_std_tcp_accept_handler(basic_conn_t *bc) {
@@ -249,6 +249,11 @@ void server_entity_setup(uint16_t port, net_opt_t *opt) {
 
     log_info("SGW server successfully started.");
     net_setup(opt);
+}
+
+void client_entity_setup(pthread_t *th, net_opt_t *opt) {
+    pthread_create(th, NULL, net_setup, opt);
+    pthread_detach(*th);
 }
 
 int server_shutdown(int server_fd) {

@@ -143,7 +143,7 @@ int opt_parse(int argc, char *const *argv) {
 }
 
 static void usage(const char *executable) {
-    printf("Usage: [-c config path] "
+    printf("Usage: %s [-c config path] "
            "[-H (http mode)] [-M (Merge mode)]\n",
            executable);
 }

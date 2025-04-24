@@ -10,12 +10,9 @@
 
 struct role_propt {
     sock_roles s_r;
-
     int (*server_make)(uint16_t port);
-
     int (*init_handler)(basic_conn_t *);
 };
-
 
 typedef struct net_opt_s {
     char name[32];
@@ -23,7 +20,8 @@ typedef struct net_opt_s {
     sock_roles s_r;
     int server_fd; //for GSW
     char addr[GEN_ADDRLEN];
-    int port;
+    int remote_port;
+    int local_port;
     int timeout;
 
     void (*close_handler)(basic_conn_t *);
@@ -42,12 +40,11 @@ const struct role_propt *get_role_propt(int s_r);
 
 void server_entity_setup(uint16_t port, net_opt_t *opt);
 
-
 int server_shutdown(int server_fd);
 
+void client_entity_setup(pthread_t *th, net_opt_t *opt);
 
 int read_first_packet(basic_conn_t *bc, int pre_fd);
-
 
 int first_request_handle(basic_conn_t *bc, int pre_fd);
 
