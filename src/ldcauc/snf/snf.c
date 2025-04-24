@@ -32,7 +32,7 @@ void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_po
     // memcpy(snf_obj.net_opt.addr, gsnf_addr, GEN_ADDRLEN);
 
     snf_obj.net_opt = (net_opt_t){
-        .s_r = LD_TCP_CLIENT,
+        .socket_role = LD_TCP_CLIENT,
         .addr = gsnf_addr,
         .init_handler = init_gs_conn,
         .remote_port = gsnf_remote_port,
@@ -42,7 +42,9 @@ void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_po
         .epoll_fd = -1,
     };
 
-    snf_obj.sgw_conn = client_entity_setup(&snf_obj.client_th, &snf_obj.net_opt);
+    snf_obj.sgw_conn = client_entity_setup(&snf_obj.net_opt);
+    pthread_create(&snf_obj.service_th, NULL, net_setup, &snf_obj.net_opt);
+    pthread_detach(snf_obj.service_th);
 
     snf_obj.is_merged = TRUE;
 }
@@ -62,7 +64,7 @@ void init_sgw_snf_layer(uint16_t listen_port) {
     snf_obj.register_fail_func = NULL;
 
     snf_obj.net_opt = (net_opt_t){
-        .s_r = LD_TCP_SERVER,
+        .socket_role = LD_TCP_SERVER,
         .recv_handler = recv_gsnf,
         .close_handler = close_gs_conn,
         .accept_handler = gs_conn_accept,
@@ -70,7 +72,8 @@ void init_sgw_snf_layer(uint16_t listen_port) {
     };
     init_heap_desc(&snf_obj.net_opt.hd_conns);
     server_entity_setup(listen_port, &snf_obj.net_opt);
-
+    pthread_create(&snf_obj.service_th, NULL, net_setup, &snf_obj.net_opt);
+    pthread_join(snf_obj.service_th, NULL);
 }
 
 

@@ -127,7 +127,7 @@ typedef struct snf_obj_s {
     finish_auth finish_auth_func;
 
     //SGW
-    pthread_t client_th;
+    pthread_t service_th;
     gs_tcp_propt_t *sgw_conn; // GS -> SGW
 
     bool is_merged;

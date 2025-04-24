@@ -10,7 +10,9 @@
 
 struct role_propt {
     sock_roles s_r;
+
     int (*server_make)(uint16_t port);
+
     int (*init_handler)(basic_conn_t *);
 };
 
@@ -18,7 +20,7 @@ typedef struct net_opt_s {
     char name[32];
     // ldacs_roles role;
     int epoll_fd;
-    sock_roles s_r;
+    sock_roles socket_role;
     int server_fd; //for GSW
     // char addr[GEN_ADDRLEN];
     char *addr;
@@ -48,7 +50,7 @@ void server_entity_setup(uint16_t port, net_opt_t *opt);
 
 int server_shutdown(int server_fd);
 
-void *client_entity_setup(pthread_t *th, net_opt_t *opt);
+void *client_entity_setup(net_opt_t *opt);
 
 int read_first_packet(basic_conn_t *bc, int pre_fd);
 

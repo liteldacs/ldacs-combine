@@ -201,11 +201,13 @@ static int make_std_tcpv6_accept(basic_conn_t *bc) {
 }
 
 static int init_std_tcp_conn_handler(basic_conn_t *bc) {
-    return make_std_tcp_connect((struct sockaddr_in *) &bc->saddr, bc->opt->addr, bc->opt->remote_port, bc->opt->local_port);
+    return make_std_tcp_connect((struct sockaddr_in *) &bc->saddr, bc->opt->addr, bc->opt->remote_port,
+                                bc->opt->local_port);
 }
 
 static int init_std_tcpv6_conn_handler(basic_conn_t *bc) {
-    return make_std_tcpv6_connect((struct sockaddr_in6 *) &bc->saddr, bc->opt->addr, bc->opt->remote_port, bc->opt->local_port);
+    return make_std_tcpv6_connect((struct sockaddr_in6 *) &bc->saddr, bc->opt->addr, bc->opt->remote_port,
+                                  bc->opt->local_port);
 }
 
 static int init_std_tcp_accept_handler(basic_conn_t *bc) {
@@ -243,20 +245,18 @@ void server_entity_setup(uint16_t port, net_opt_t *opt) {
 
     opt->server_fd = rp->server_make(port);
 
+    ABORT_ON(opt->accept_handler == NULL, "Accept handler is NULL");
     ABORT_ON(opt->server_fd == ERROR, "make_server");
     ABORT_ON((opt->epoll_fd = core_epoll_create(0, opt->epoll_fd)) == ERROR, "core_epoll_create");
-    log_warn("!!!!!! %d", opt->epoll_fd);
     ABORT_ON(add_listen_fd(opt->epoll_fd, opt->server_fd) == ERROR, "add_listen_fd");
 
     log_info("SGW server successfully started.");
-    net_setup(opt);
 }
 
-void *client_entity_setup(pthread_t *th, net_opt_t *opt) {
+void *client_entity_setup(net_opt_t *opt) {
     void *conn = opt->init_handler(opt);
-    if (!conn)  return NULL;
-    pthread_create(th, NULL, net_setup, opt);
-    pthread_detach(*th);
+    if (!conn) return NULL;
+    // pthread_create(th, NULL, net_setup, opt);
     return conn;
 }
 
