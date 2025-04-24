@@ -3,6 +3,7 @@
 //
 #include <netinet/tcp.h>
 
+#include "net/gs_conn.h"
 #include "net/net_core.h"
 
 #define BACKLOG 1024
@@ -237,16 +238,17 @@ static int add_listen_fd(int server_fd) {
     return core_epoll_add(epoll_fd, server_fd, &ev);
 }
 
-int server_entity_setup(uint16_t port) {
+void server_entity_setup(uint16_t port, net_opt_t *opt) {
     const struct role_propt *rp = get_role_propt(LD_TCP_SERVER);
 
-    int server_fd = rp->server_make(port);
+    opt->server_fd = rp->server_make(port);
 
-    ABORT_ON(server_fd == ERROR, "make_server");
+    ABORT_ON(opt->server_fd == ERROR, "make_server");
     ABORT_ON((epoll_fd = core_epoll_create(0, epoll_fd)) == ERROR, "core_epoll_create");
-    ABORT_ON(add_listen_fd(server_fd) == ERROR, "add_listen_fd");
+    ABORT_ON(add_listen_fd(opt->server_fd) == ERROR, "add_listen_fd");
 
-    return server_fd;
+    log_info("SGW server successfully started.");
+    net_setup(opt);
 }
 
 int server_shutdown(int server_fd) {

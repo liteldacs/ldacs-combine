@@ -58,13 +58,11 @@ void init_sgw_snf_layer(uint16_t listen_port) {
 
     init_heap_desc(&hd_conns);
     snf_obj.net_opt.s_r = LD_TCP_SERVER;
-    snf_obj.net_opt.server_fd = server_entity_setup(listen_port);
     snf_obj.net_opt.recv_handler = recv_gsnf;
     snf_obj.net_opt.close_handler = close_gs_conn;
     snf_obj.net_opt.accept_handler = gs_conn_accept;
+    server_entity_setup(listen_port, &snf_obj.net_opt);
 
-    log_info("SGW server successfully started.");
-    net_setup(&snf_obj.net_opt);
 }
 
 
