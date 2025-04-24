@@ -228,7 +228,7 @@ const struct role_propt *get_role_propt(int s_r) {
 }
 
 
-static int add_listen_fd(int server_fd) {
+static int add_listen_fd(int epoll_fd, int server_fd) {
     set_fd_nonblocking(server_fd);
     struct epoll_event ev;
     int *fd_ptr = calloc(1, sizeof(int));
@@ -244,8 +244,9 @@ void server_entity_setup(uint16_t port, net_opt_t *opt) {
     opt->server_fd = rp->server_make(port);
 
     ABORT_ON(opt->server_fd == ERROR, "make_server");
-    ABORT_ON((epoll_fd = core_epoll_create(0, epoll_fd)) == ERROR, "core_epoll_create");
-    ABORT_ON(add_listen_fd(opt->server_fd) == ERROR, "add_listen_fd");
+    ABORT_ON((opt->epoll_fd = core_epoll_create(0, opt->epoll_fd)) == ERROR, "core_epoll_create");
+    log_warn("!!!!!! %d", opt->epoll_fd);
+    ABORT_ON(add_listen_fd(opt->epoll_fd, opt->server_fd) == ERROR, "add_listen_fd");
 
     log_info("SGW server successfully started.");
     net_setup(opt);
@@ -371,7 +372,7 @@ int response_handle(basic_conn_t *bc) {
     if (bc->trans_done) {
         // response done
         if (bc->opt->reset_conn) bc->opt->reset_conn(bc);
-        net_epoll_in(epoll_fd, bc);
+        net_epoll_in(bc->opt->epoll_fd, bc);
     }
     return status;
 }
@@ -381,7 +382,7 @@ void *net_setup(void *args) {
     int i;
     net_opt_t *net_opt = args;
     while (TRUE) {
-        nfds = core_epoll_wait(epoll_fd, epoll_events, MAX_EVENTS, 20);
+        nfds = core_epoll_wait(net_opt->epoll_fd, epoll_events, MAX_EVENTS, 20);
 
         if (nfds == ERROR) {
             // if not caused by signal, cannot recover
@@ -421,7 +422,7 @@ void *net_setup(void *args) {
         }
         server_connection_prune(net_opt->timeout);
     }
-    close(epoll_fd);
+    close(net_opt->epoll_fd);
     server_shutdown(net_opt->server_fd);
 }
 

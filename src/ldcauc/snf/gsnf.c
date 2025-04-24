@@ -67,7 +67,7 @@ l_err trans_gsnf(gs_tcp_propt_t *conn, void *pkg, struct_desc_t *desc, l_err (*m
 
     lfqueue_put(conn->bc.write_pkts, gsnf_buf);
 
-    net_epoll_out(epoll_fd, &conn->bc);
+    net_epoll_out(conn->bc.opt->epoll_fd, &conn->bc);
 
     return LD_OK;
 }

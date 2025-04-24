@@ -17,6 +17,7 @@ struct role_propt {
 typedef struct net_opt_s {
     char name[32];
     // ldacs_roles role;
+    int epoll_fd;
     sock_roles s_r;
     int server_fd; //for GSW
     // char addr[GEN_ADDRLEN];

@@ -39,10 +39,10 @@ bool init_basic_conn(basic_conn_t *bc, net_opt_t *opt) {
             break;
         }
 
-        ABORT_ON((epoll_fd = core_epoll_create(0, epoll_fd)) == ERROR, "core_epoll_create");
+        ABORT_ON((bc->opt->epoll_fd = core_epoll_create(0, bc->opt->epoll_fd)) == ERROR, "core_epoll_create");
 
         if (connection_register(bc, time(NULL)) == ERROR) break;
-        net_epoll_add(epoll_fd, bc, EPOLLIN | EPOLLET, &bc->event);
+        net_epoll_add(bc->opt->epoll_fd, bc, EPOLLIN | EPOLLET, &bc->event);
         set_fd_nonblocking(bc->fd);
         connection_set_nodelay(bc);
 
@@ -110,7 +110,7 @@ void connection_close(basic_conn_t *bc) {
     ABORT_ON(bc->fd == ERROR, "FD ERROR");
 
 
-    core_epoll_del(epoll_fd, bc->fd, 0, NULL);
+    core_epoll_del(bc->opt->epoll_fd, bc->fd, 0, NULL);
     if (close(bc->fd) == ERROR) {
         log_info("The remote has closed, EXIT!");
         //raise(SIGINT); /* terminal, send signal */
