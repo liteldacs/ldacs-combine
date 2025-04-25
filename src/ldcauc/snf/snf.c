@@ -285,3 +285,6 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
 }
 
 
+int8_t hand_over_trigger() {
+}
+
