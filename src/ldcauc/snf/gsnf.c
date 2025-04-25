@@ -170,7 +170,6 @@ l_err recv_gsnf(basic_conn_t *bc) {
             switch (gsnf_pkt->G_TYP) {
                 case GSNF_SNF_UPLOAD: {
                     /* 构造具有指向性的传递结构，根据源和目的SAC指示下层向对应实体传输 */
-
                     snf_obj.trans_snp_func(as_man->AS_SAC, snf_obj.GS_SAC, gsnf_pkt->sdu->ptr, gsnf_pkt->sdu->len);
                     break;
                 }
@@ -178,7 +177,6 @@ l_err recv_gsnf(basic_conn_t *bc) {
                     handle_recv_msg(gsnf_pkt->sdu, as_man);
                     break;
                 }
-
                 case GSNF_KEY_TRANS: {
                     pb_stream pbs;
                     gs_key_trans_t key_trans = {
@@ -240,7 +238,12 @@ l_err recv_gsnf(basic_conn_t *bc) {
                 break;
             }
 
-            log_warn("!!!! %d %d", gsnf_pkt->GSS_SAC, gsnf_pkt->GST_SAC);
+            if ((as_man = (snf_entity_t *) get_enode(gsnf_pkt->AS_SAC)) == NULL) {
+                log_warn("AS MAN is NULL");
+                return LD_ERR_NULL;
+            }
+
+            send_key_update_rqst(as_man, gsnf_pkt->GST_SAC);
 
             free(gsnf_pkt);
             break;

@@ -16,6 +16,9 @@ void *init_gs_conn(net_opt_t *net_opt, sock_roles socket_role) {
     if (init_basic_conn(&gs_conn->bc, net_opt, socket_role) == FALSE) {
         return NULL;
     }
+
+
+
     return gs_conn;
 }
 

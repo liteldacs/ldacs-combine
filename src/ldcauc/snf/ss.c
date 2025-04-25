@@ -269,8 +269,7 @@ l_err finish_auc(void *args) {
     return LD_OK;
 }
 
-l_err send_key_update_rqst(void *args) {
-    snf_entity_t *as_man = args;
+l_err send_key_update_rqst(snf_entity_t *en, uint16_t GST_SAC) {
 
     /* 生成随机数NONCE */
     buffer_t *nonce = init_buffer_ptr(32);
@@ -282,15 +281,15 @@ l_err send_key_update_rqst(void *args) {
         .S_TYP = KEY_UPD_RQST,
         .VER = snf_obj.PROTOCOL_VER,
         .PID = PID_MAC,
-        .AS_SAC = as_man->AS_SAC,
+        .AS_SAC = en->AS_SAC,
         .KEY_TYPE = MASTER_KEY_AS_SGW,
-        .SAC_src = as_man->GS_SAC,
-        .SAC_dst = as_man->GS_SAC, /* 假设GS没变 */
+        .SAC_src = en->GS_SAC,
+        .SAC_dst = GST_SAC, /* 假设GS没变 */
         .NCC = 10086,
         .NONCE = nonce,
     };
 
-    handle_send_msg(key_upd_rqst, &key_upd_rqst_desc, as_man, as_man->key_as_sgw_s_h);
+    handle_send_msg(key_upd_rqst, &key_upd_rqst_desc, en, en->key_as_sgw_s_h);
 
     free_buffer(nonce);
     return LD_OK;
@@ -349,6 +348,21 @@ l_err recv_key_update_resp(buffer_t *buf, snf_entity_t *as_man) {
     if (!pb_in_mac(&pbs, get_sec_maclen(as_man->AUTHC_MACLEN), as_man->key_as_sgw_s_h, verify_hmac_uint)) {
         return LD_ERR_INVALID_MAC;
     }
+
+
+
+    // buffer_t *sdu = gen_pdu(&(gs_key_trans_t){
+    //                             . key = as_man->key_as_gs_b,
+    //                             . nonce = as_man->shared_random
+    //                         }, &gs_key_trans_desc, "GS KEY"
+    // );
+    // if (trans_gsnf(as_man->gs_conn, &(gsnf_pkt_cn_t){
+    //                    GSNF_KEY_TRANS, DEFAULT_GSNF_VERSION, as_man->AS_SAC, ELE_TYP_8, sdu
+    //                }, &gsnf_pkt_cn_desc, generate_auz_info, &as_man->AS_SAC
+    // )) {
+    //     log_warn("SGW send GS key failed");
+    //     free_buffer(sdu);
+    // }
 
     return LD_OK;
 }

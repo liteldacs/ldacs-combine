@@ -356,9 +356,9 @@ l_err recv_auc_key_exec(buffer_t *buf, snf_entity_t *as_man);
 
 l_err finish_auc(void *args);
 
-l_err send_key_update_rqst(void *args);
+l_err send_key_update_rqst(snf_entity_t *en, uint16_t GST_SAC);
 
-l_err send_key_update_rqst(void *args);
+l_err send_key_update_rqst(snf_entity_t *en, uint16_t GST_SAC);
 
 l_err recv_key_update_rqst(buffer_t *buf, snf_entity_t *as_man);
 
