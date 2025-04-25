@@ -15,7 +15,7 @@ typedef struct terminal_obj_s {
 
 extern ld_service_t terminal_service;
 
-typedef void (*terminal_func)(void *);
+typedef void (*terminal_func)(int argc, char **argv);
 
 
 #endif //TERMINAL_H

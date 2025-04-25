@@ -129,6 +129,13 @@ int8_t unregister_snf_en(uint16_t AS_SAC);
 int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_buf, size_t buf_len);
 
 /**
+ *
+ * @param AS_SAC
+ * @return
+ */
+int8_t handover_trigger(uint16_t AS_SAC);
+
+/**
  * \brief 产生至多64位随机数
  * @param rand_bits_sz  随机数比特长度
  * @return  返回随机数

@@ -118,6 +118,7 @@ enum ELE_TYP {
     /* RCU */
     RC_TYP_OPEN = 0x0,
     RC_TYP_CLOSE = 0x1,
+    RC_TYP_HANDOVER = 0x2,
 
     /* Verify */
     VER_PASS = 0xE0,

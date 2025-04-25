@@ -1,5 +1,5 @@
 role: gs
-UA: 10086
+UA: 10087
 port: 8080
 debug: 1
 gsnf_addr: 127.0.0.1

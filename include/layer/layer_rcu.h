@@ -47,6 +47,11 @@ typedef struct rcu_layer_obj_s {
 
 extern rcu_layer_obj_t rcu_layer_obj;
 
+typedef struct handover_opt_s {
+    uint32_t UA;
+    uint32_t SAC;
+}handover_opt_t;
+
 #pragma pack(1)
 
 struct lme_state_chg_s {
@@ -121,6 +126,8 @@ l_rcu_err rcu_power_on(uint8_t role);
 l_rcu_err rcu_power_off();
 
 l_rcu_err rcu_start_auth();
+
+l_rcu_err rcu_handover(uint32_t UA, uint16_t GST_SAC);
 
 enum RCU_STATUS_E rcu_get_rcu_state();
 

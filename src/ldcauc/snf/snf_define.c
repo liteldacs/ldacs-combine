@@ -221,6 +221,18 @@ static field_desc gsnf_st_chg_fields[] = {
 };
 struct_desc_t gsnf_st_chg_desc = {"GSNF STATE CHANGE", gsnf_st_chg_fields};
 
+static field_desc gsnf_key_upd_remind_fields[] = {
+    {ft_set, 8, "G_TYP", NULL},
+    {ft_set, 4, "VER", NULL},
+    {ft_set, 12, "AS SAC", NULL},
+    {ft_set, 4, "KEY_TYPE", NULL},
+    {ft_set, 12, "GSS SAC", NULL},
+    {ft_set, 12, "GST SAC", NULL},
+    {ft_pad, 0, "PAD", NULL},
+    {ft_end, 0, NULL, NULL},
+};
+struct_desc_t gsnf_key_upd_remind_desc = {"GSNF KEY UPDATE REMIND", gsnf_key_upd_remind_fields};
+
 
 static field_desc gs_sac_resp_fields[] = {
     {ft_set, 12, "SAC", NULL},

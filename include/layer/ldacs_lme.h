@@ -529,6 +529,17 @@ static const bool has_lme_as_enode(const uint16_t as_sac) {
     return hashmap_get(lme_layer_objs.LME_GS_AUTH_AS, &(lme_as_man_t) {.AS_SAC = as_sac}) != NULL;
 }
 
+static lme_as_man_t * get_lme_as_enode_by_ua(const uint32_t UA) {
+    size_t iter = 0;
+    void *item;
+    while (hashmap_iter(lme_layer_objs.LME_GS_AUTH_AS, &iter, &item)) {
+        const lme_as_man_t *as_man = item;
+        if (as_man->AS_UA == UA)
+            return item;
+    }
+    return NULL;
+}
+
 static struct hashmap *init_lme_sac_map() {
     return hashmap_new(sizeof(lme_as_man_t), 0, 0, 0,
                        hash_lme_as_enode, NULL, NULL, NULL);

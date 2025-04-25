@@ -4,6 +4,7 @@
 
 
 #include "ldacs_lme.h"
+#include "snf.h"
 
 static lyr_desc_t *sn_upper_lyr[] = {
 };
@@ -231,6 +232,19 @@ void L_SAPC(ld_prim_t *prim) {
             /* 等待接收到AUTH完成信号 */
             while (lme_layer_objs.finish_status != LME_AUTH_FINISHED) usleep(100000);
 
+
+            break;
+        }
+        case LME_CONF_REQ: {
+            if (prim->prim_obj_typ == RC_TYP_HANDOVER) {
+                handover_opt_t *handover_opt = prim->prim_objs;
+                lme_as_man_t *as_man = get_lme_as_enode_by_ua(handover_opt->UA);
+                if (!as_man) {
+                    log_warn("No such AS with UA `%d`", handover_opt->UA);
+                    break;
+                }
+                handover_trigger(as_man->AS_SAC);
+            }
 
             break;
         }

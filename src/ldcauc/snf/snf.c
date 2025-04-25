@@ -285,6 +285,14 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
 }
 
 
-int8_t hand_over_trigger() {
+
+int8_t handover_trigger(uint16_t AS_SAC) {
+    if (snf_obj.is_merged) {
+    }else {
+        trans_gsnf(snf_obj.sgw_conn, &(gsnf_key_upd_remind_t){
+                       GSNF_KEY_UPD_REMIND, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_C, 10086, 10087
+                   }, &gsnf_key_upd_remind_desc, NULL, NULL);
+    }
+    return LDCAUC_OK;
 }
 

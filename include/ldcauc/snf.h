@@ -41,6 +41,7 @@ typedef enum {
     GSNF_INITIAL_AS = 0xD1,
     GSNF_SNF_UPLOAD = 0x72,
     GSNF_SNF_DOWNLOAD = 0xD3,
+    GSNF_KEY_UPD_REMIND = 0x51,
     GSNF_KEY_TRANS = 0x75,
     GSNF_AS_AUZ_INFO = 0xB4,
     GSNF_STATE_CHANGE = 0xEE,
@@ -282,6 +283,15 @@ typedef struct gsnf_st_chg_s {
     uint16_t GS_SAC;
 } gsnf_st_chg_t;
 
+typedef struct gsnf_key_upd_remind_s {
+    uint8_t G_TYP;
+    uint8_t VER;
+    uint16_t AS_SAC;
+    uint8_t KEY_TYPE;
+    uint16_t GSS_SAC;
+    uint16_t GST_SAC;
+}gsnf_key_upd_remind_t;
+
 typedef struct gs_key_trans_s {
     buffer_t *key;
     buffer_t *nonce;
@@ -290,6 +300,7 @@ typedef struct gs_key_trans_s {
 typedef struct gs_sac_resp_sdu_s {
     uint16_t SAC;
 } gs_sac_resp_sdu_t;
+
 
 #pragma pack()
 
@@ -309,6 +320,7 @@ extern struct_desc_t gsnf_pkt_cn_desc;
 extern struct_desc_t gsnf_pkt_cn_ini_desc;
 extern struct_desc_t gsnf_as_auz_info_desc;
 extern struct_desc_t gsnf_st_chg_desc;
+extern struct_desc_t gsnf_key_upd_remind_desc;
 extern struct_desc_t gs_sac_resp_desc;
 extern struct_desc_t gs_key_trans_desc;
 

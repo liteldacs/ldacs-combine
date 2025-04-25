@@ -229,6 +229,22 @@ l_err recv_gsnf(basic_conn_t *bc) {
             free(gsnf_pkt);
             break;
         }
+        case GSNF_KEY_UPD_REMIND: {
+            gsnf_key_upd_remind_t *gsnf_pkt = calloc(1, sizeof(gsnf_key_upd_remind_t));
+            pb_stream gsnf_pbs;
+            zero(&gsnf_pbs);
+            init_pbs(&gsnf_pbs, mlt_ld->bc.read_pkt.ptr, mlt_ld->bc.read_pkt.len, "GSNF IN");
+            if (!in_struct(gsnf_pkt, &gsnf_key_upd_remind_desc, &gsnf_pbs, NULL)) {
+                log_error("Cannot parse gsnf pdu");
+                free(gsnf_pkt);
+                break;
+            }
+
+            log_warn("!!!! %d %d", gsnf_pkt->GSS_SAC, gsnf_pkt->GST_SAC);
+
+            free(gsnf_pkt);
+            break;
+        }
         default: {
             return LD_ERR_WRONG_PARA;
         }

@@ -129,6 +129,19 @@ l_rcu_err rcu_start_auth() {
     return LD_RCU_OK;
 }
 
+
+
+l_rcu_err rcu_handover(uint32_t UA, uint16_t GST_SAC) {
+
+
+    handover_opt_t opt = {UA, GST_SAC};
+    if (preempt_prim(&LME_CONF_REQ_PRIM, RC_TYP_HANDOVER, &opt, NULL, 0, 0)) {
+        log_error("Can not start Auth correctly");
+        return LD_RCU_FAILED;
+    }
+    return LD_RCU_OK;
+}
+
 enum RCU_STATUS_E rcu_get_rcu_state() {
     if (config.role == LD_AS && rcu_layer_obj.rcu_status == RCU_OPEN) {
         lme_as_man_t *as_man = lme_layer_objs.lme_as_man;
