@@ -38,11 +38,7 @@ bool init_basic_conn(basic_conn_t *bc, net_opt_t *opt, sock_roles socket_role) {
             break;
         }
 
-        if (socket_role == LD_TCP_SERVER) {
-            ABORT_ON(bc->opt->epoll_fd == 0 || bc->opt->epoll_fd == ERROR, "illegal epoll fd");
-        } else {
-            ABORT_ON((bc->opt->epoll_fd = core_epoll_create(0, bc->opt->epoll_fd)) == ERROR, "core_epoll_create");
-        }
+        ABORT_ON(bc->opt->epoll_fd == 0 || bc->opt->epoll_fd == ERROR, "illegal epoll fd");
 
         if (connection_register(bc, time(NULL)) == ERROR) break;
         net_epoll_add(bc->opt->epoll_fd, bc, EPOLLIN | EPOLLET, &bc->event);

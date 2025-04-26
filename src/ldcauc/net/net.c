@@ -247,7 +247,7 @@ void server_entity_setup(uint16_t port, net_opt_t *opt) {
 
     ABORT_ON(opt->accept_handler == NULL, "Accept handler is NULL");
     ABORT_ON(opt->server_fd == ERROR, "make_server");
-    ABORT_ON((opt->epoll_fd = core_epoll_create(0, opt->epoll_fd)) == ERROR, "core_epoll_create");
+    // ABORT_ON((opt->epoll_fd = core_epoll_create(0, opt->epoll_fd)) == ERROR, "core_epoll_create");
     ABORT_ON(add_listen_fd(opt->epoll_fd, opt->server_fd) == ERROR, "add_listen_fd");
 
     log_info("SGW server successfully started.");
@@ -256,7 +256,6 @@ void server_entity_setup(uint16_t port, net_opt_t *opt) {
 void *client_entity_setup(net_opt_t *opt) {
     void *conn = opt->init_handler(opt, LD_TCP_CLIENT);
     if (!conn) return NULL;
-    // pthread_create(th, NULL, net_setup, opt);
     return conn;
 }
 

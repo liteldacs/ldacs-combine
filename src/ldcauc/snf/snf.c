@@ -38,7 +38,7 @@ void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_po
         .local_port = gsnf_local_port,
         .recv_handler = recv_gsg,
         .close_handler = close_gs_conn,
-        .epoll_fd = -1,
+        .epoll_fd = core_epoll_create(0, -1),
     };
 
     snf_obj.sgw_conn = client_entity_setup(&snf_obj.net_opt);
@@ -66,7 +66,7 @@ void init_sgw_snf_layer(uint16_t listen_port) {
         .recv_handler = recv_gsnf,
         .close_handler = close_gs_conn,
         .accept_handler = gs_conn_accept,
-        .epoll_fd = -1
+        .epoll_fd = core_epoll_create(0, -1),
     };
     init_heap_desc(&snf_obj.net_opt.hd_conns);
     server_entity_setup(listen_port, &snf_obj.net_opt);
@@ -285,10 +285,9 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
 }
 
 
-
 int8_t handover_trigger(uint16_t AS_SAC) {
     if (snf_obj.is_merged) {
-    }else {
+    } else {
         trans_gsnf(snf_obj.sgw_conn, &(gsnf_key_upd_remind_t){
                        GSNF_KEY_UPD_REMIND, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_C, 10086, 10087
                    }, &gsnf_key_upd_remind_desc, NULL, NULL);
