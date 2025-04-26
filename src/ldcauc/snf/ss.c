@@ -257,20 +257,10 @@ l_err finish_auc(void *args) {
         free_buffer(sdu);
     }
     free_buffer(sdu);
-
-    // if (config.role == LD_AS || config.role == LD_GS) {
-    //     if (preempt_prim(&LME_STATE_IND_PRIM, LME_AS_UPDATE, as_man, NULL, 0, 0)) {
-    //     }
-    // }
-
-    /* TODO: 临时，用于测试密钥更新 */
-    // send_key_update_rqst(as_man);
-
     return LD_OK;
 }
 
 l_err send_key_update_rqst(snf_entity_t *en, uint16_t GST_SAC) {
-
     /* 生成随机数NONCE */
     buffer_t *nonce = init_buffer_ptr(32);
     uint8_t NONCE_str[NONCE_LEN] = {0};
@@ -348,7 +338,6 @@ l_err recv_key_update_resp(buffer_t *buf, snf_entity_t *as_man) {
     if (!pb_in_mac(&pbs, get_sec_maclen(as_man->AUTHC_MACLEN), as_man->key_as_sgw_s_h, verify_hmac_uint)) {
         return LD_ERR_INVALID_MAC;
     }
-
 
 
     // buffer_t *sdu = gen_pdu(&(gs_key_trans_t){

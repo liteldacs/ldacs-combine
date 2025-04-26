@@ -149,7 +149,7 @@ l_err make_lme_layer() {
                     lme_layer_objs.GS_SAC = get_gs_sac();
                     lme_layer_objs.LME_GS_AUTH_AS = init_lme_sac_map();
 
-                    init_p2p_service(config.peers, config.peer_count);
+                    init_p2p_service(config.peer_server_port, config.peers, config.peer_count);
                     break;
                 }
                 default:

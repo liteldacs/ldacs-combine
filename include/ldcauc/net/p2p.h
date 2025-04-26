@@ -10,7 +10,6 @@
 #include "ld_config.h"
 
 
-
 typedef struct peer_propt_s {
     basic_conn_t bc;
 } peer_propt_t;
@@ -19,6 +18,6 @@ typedef struct peer_service_s {
     // p2p_propt_t *prop;
 } peer_service_t;
 
-l_err init_p2p_service(peer_gs_t **peers, size_t peer_count);
+l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_count);
 
 #endif //P2P_H
