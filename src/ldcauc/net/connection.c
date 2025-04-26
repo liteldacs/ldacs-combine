@@ -11,7 +11,7 @@
 
 static int connection_register(basic_conn_t *bc, int64_t factor);
 
-static void connection_set_nodelay(basic_conn_t *bc);
+static void connection_set_nodelay(int fd);
 
 #define ADDR_LEN (64/BITS_PER_BYTE)
 
@@ -39,13 +39,13 @@ bool init_basic_conn(basic_conn_t *bc, net_ctx_t *ctx, sock_roles socket_role) {
         ABORT_ON(bc->opt->epoll_fd == 0 || bc->opt->epoll_fd == ERROR, "illegal epoll fd");
 
         if (connection_register(bc, time(NULL)) == ERROR) break;
-        net_epoll_add(bc->opt->epoll_fd, bc, EPOLLIN | EPOLLET, &bc->event);
         set_fd_nonblocking(bc->fd);
-        connection_set_nodelay(bc);
+        connection_set_nodelay(bc->fd);
 
         zero(&bc->read_pkt);
         bc->write_pkts = lfqueue_init();
 
+        net_epoll_add(bc->opt->epoll_fd, bc, EPOLLIN | EPOLLET, &bc->event);
         return TRUE;
     } while (0);
 
@@ -53,9 +53,9 @@ bool init_basic_conn(basic_conn_t *bc, net_ctx_t *ctx, sock_roles socket_role) {
     return FALSE;
 }
 
-static void connection_set_nodelay(basic_conn_t *bc) {
+static void connection_set_nodelay(int fd) {
     static int enable = 1;
-    setsockopt(bc->fd, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(enable));
+    setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(enable));
 }
 
 bool connecion_is_expired(basic_conn_t *bc, int timeout) {

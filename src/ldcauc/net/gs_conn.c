@@ -9,7 +9,6 @@
 
 #include "net/net.h"
 
-
 bool send_gs_pkt(basic_conn_t *bcp) {
     return TRUE;
 }
@@ -24,6 +23,14 @@ void *gs_conn_connect(net_ctx_t *ctx, char *remote_addr, int remote_port, int lo
     if (init_basic_conn(&gs_conn->bc, ctx, LD_TCP_CLIENT) == FALSE) {
         return NULL;
     }
+
+    // char *msg = "AAAAAAAACCCCCCC\0";
+    // buffer_t *msg_buf = init_buffer_unptr();
+    // CLONE_TO_CHUNK(*msg_buf, msg, strlen(msg));
+    // lfqueue_put(gs_conn->bc.write_pkts, msg_buf);
+    // net_epoll_out(gs_conn->bc.opt->epoll_fd, &gs_conn->bc);
+
+
     return gs_conn;
 }
 
@@ -35,6 +42,9 @@ l_err gs_conn_accept(net_ctx_t *ctx) {
         free(gs_conn);
         return LD_ERR_INTERNAL;
     }
+
+    log_warn("!!!! %d", ntohs(((struct sockaddr_in *)&gs_conn->bc.saddr)->sin_port));
+
     return LD_OK;
 }
 
