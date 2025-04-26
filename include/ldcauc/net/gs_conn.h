@@ -17,10 +17,6 @@ struct shared_key_temp {
 
 extern const struct shared_key_temp shared_keys[];
 
-
-// gs_tcp_propt_t *init_gs_conn(int role);
-void *init_gs_conn(net_opt_t *net_opt, sock_roles socket_role);
-
 bool recv_gs_pkt(basic_conn_t *bc);
 
 bool send_gs_pkt(basic_conn_t *bc);
@@ -31,7 +27,9 @@ bool reset_gs_conn(basic_conn_t *bc);
 
 void close_gs_conn(basic_conn_t *bc);
 
-l_err gs_conn_accept(net_opt_t *net_opt);
+l_err gs_conn_accept(net_ctx_t *ctx);
+
+void *gs_conn_connect(net_ctx_t *ctx, char *remote_addr, int remote_port, int local_port);
 
 void *net_setup(void *args);
 #endif //GS_CONN_H

@@ -119,7 +119,7 @@ typedef struct snf_obj_s {
     uint8_t PROTOCOL_VER;
     ldacs_roles role;
     uint16_t GS_SAC;
-    net_opt_t net_opt;
+    net_ctx_t net_ctx;
 
     trans_snp trans_snp_func;
     register_snf_fail register_fail_func;

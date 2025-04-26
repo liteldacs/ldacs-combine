@@ -201,13 +201,11 @@ static int make_std_tcpv6_accept(basic_conn_t *bc) {
 }
 
 static int init_std_tcp_conn_handler(basic_conn_t *bc) {
-    return make_std_tcp_connect((struct sockaddr_in *) &bc->saddr, bc->opt->addr, bc->opt->remote_port,
-                                bc->opt->local_port);
+    return make_std_tcp_connect((struct sockaddr_in *) &bc->saddr, bc->remote_addr, bc->remote_port, bc->local_port);
 }
 
 static int init_std_tcpv6_conn_handler(basic_conn_t *bc) {
-    return make_std_tcpv6_connect((struct sockaddr_in6 *) &bc->saddr, bc->opt->addr, bc->opt->remote_port,
-                                  bc->opt->local_port);
+    return make_std_tcpv6_connect((struct sockaddr_in6 *) &bc->saddr, bc->remote_addr, bc->remote_port, bc->local_port);
 }
 
 static int init_std_tcp_accept_handler(basic_conn_t *bc) {
@@ -240,7 +238,7 @@ static int add_listen_fd(int epoll_fd, int server_fd) {
     return core_epoll_add(epoll_fd, server_fd, &ev);
 }
 
-void server_entity_setup(uint16_t port, net_opt_t *opt) {
+void server_entity_setup(uint16_t port, net_ctx_t *opt) {
     const struct role_propt *rp = get_role_propt(LD_TCP_SERVER);
 
     opt->server_fd = rp->server_make(port);
@@ -253,8 +251,8 @@ void server_entity_setup(uint16_t port, net_opt_t *opt) {
     log_info("SGW server successfully started.");
 }
 
-void *client_entity_setup(net_opt_t *opt) {
-    void *conn = opt->init_handler(opt, LD_TCP_CLIENT);
+void *client_entity_setup(net_ctx_t *opt, char *remote_addr, int remote_port, int local_port) {
+    void *conn = opt->conn_handler(opt, remote_addr, remote_port, local_port);
     if (!conn) return NULL;
     return conn;
 }
@@ -379,9 +377,9 @@ int response_handle(basic_conn_t *bc) {
 void *net_setup(void *args) {
     int nfds;
     int i;
-    net_opt_t *net_opt = args;
+    net_ctx_t *net_ctx = args;
     while (TRUE) {
-        nfds = core_epoll_wait(net_opt->epoll_fd, epoll_events, MAX_EVENTS, 20);
+        nfds = core_epoll_wait(net_ctx->epoll_fd, epoll_events, MAX_EVENTS, 20);
 
         if (nfds == ERROR) {
             // if not caused by signal, cannot recover
@@ -392,15 +390,15 @@ void *net_setup(void *args) {
         for (i = 0; i < nfds; i++) {
             struct epoll_event *curr_event = epoll_events + i;
             int fd = *((int *) curr_event->data.ptr);
-            if (fd == net_opt->server_fd) {
+            if (fd == net_ctx->server_fd) {
                 // gs_conn_accept(net_opt); /* never happened in GS */
-                net_opt->accept_handler(net_opt);
+                net_ctx->accept_handler(net_ctx);
             } else {
                 basic_conn_t *bc = curr_event->data.ptr;
                 int status;
                 assert(bc != NULL);
 
-                if (connecion_is_expired(bc, net_opt->timeout))
+                if (connecion_is_expired(bc, net_ctx->timeout))
                     continue;
 
                 if (curr_event->events & EPOLLIN) {
@@ -419,9 +417,9 @@ void *net_setup(void *args) {
                 }
             }
         }
-        server_connection_prune(net_opt);
+        server_connection_prune(net_ctx);
     }
-    close(net_opt->epoll_fd);
-    server_shutdown(net_opt->server_fd);
+    close(net_ctx->epoll_fd);
+    server_shutdown(net_ctx->server_fd);
 }
 

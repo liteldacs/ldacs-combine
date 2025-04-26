@@ -27,16 +27,14 @@ static void set_basic_conn_addr(uint8_t *start, void *addr) {
     }
 }
 
-bool init_basic_conn(basic_conn_t *bc, net_opt_t *opt, sock_roles socket_role) {
+bool init_basic_conn(basic_conn_t *bc, net_ctx_t *ctx, sock_roles socket_role) {
     do {
         bc->fd = 0;
-        bc->opt = opt;
+        bc->opt = ctx;
         bc->rp = get_role_propt(socket_role);
-        bc->fd = bc->rp->init_handler(bc);
+        bc->fd = bc->rp->handler(bc);
 
-        if (bc->fd == ERROR) {
-            break;
-        }
+        if (bc->fd == ERROR) break;
 
         ABORT_ON(bc->opt->epoll_fd == 0 || bc->opt->epoll_fd == ERROR, "illegal epoll fd");
 
@@ -118,7 +116,7 @@ void connection_close(basic_conn_t *bc) {
     connection_unregister(bc);
 }
 
-void server_connection_prune(net_opt_t *opt) {
+void server_connection_prune(net_ctx_t *opt) {
     while (opt->hd_conns.heap_size > 0 && opt->timeout) {
         basic_conn_t *bc = opt->hd_conns.hps[0]->obj;
         int64_t active_time = opt->hd_conns.hps[0]->factor;

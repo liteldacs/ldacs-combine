@@ -10,22 +10,29 @@
 #include "net/net.h"
 
 
-void *init_gs_conn(net_opt_t *net_opt, sock_roles socket_role) {
+bool send_gs_pkt(basic_conn_t *bcp) {
+    return TRUE;
+}
+
+void *gs_conn_connect(net_ctx_t *ctx, char *remote_addr, int remote_port, int local_port) {
     gs_tcp_propt_t *gs_conn = malloc(sizeof(gs_tcp_propt_t));
 
-    if (init_basic_conn(&gs_conn->bc, net_opt, socket_role) == FALSE) {
+    gs_conn->bc.remote_addr = strdup(remote_addr);
+    gs_conn->bc.remote_port = remote_port;
+    gs_conn->bc.local_port = local_port;
+
+    if (init_basic_conn(&gs_conn->bc, ctx, LD_TCP_CLIENT) == FALSE) {
         return NULL;
     }
     return gs_conn;
 }
 
-bool send_gs_pkt(basic_conn_t *bcp) {
-    return TRUE;
-}
+l_err gs_conn_accept(net_ctx_t *ctx) {
+    gs_tcp_propt_t *gs_conn = malloc(sizeof(gs_tcp_propt_t));
 
-l_err gs_conn_accept(net_opt_t *net_opt) {
-    if (init_gs_conn(net_opt, LD_TCP_SERVER) == NULL) {
+    if (init_basic_conn(&gs_conn->bc, ctx, LD_TCP_SERVER) == FALSE) {
         log_error("Cannot initialize connection!");
+        free(gs_conn);
         return LD_ERR_INTERNAL;
     }
     return LD_OK;

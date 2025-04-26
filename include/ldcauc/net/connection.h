@@ -18,15 +18,19 @@ typedef struct basic_conn_s {
     struct epoll_event event; /* epoll event */
     struct sockaddr_storage saddr; /* IP socket address */
     buffer_t read_pkt; /* Receive packet */
-    // buffer_t write_pkt; /* Transmit packet */
     lfqueue_t *write_pkts;
     bool trans_done;
     const struct role_propt *rp;
-    struct net_opt_s *opt;
+    struct net_ctx_s *opt;
+
+    //client
+    char *remote_addr;
+    int remote_port;
+    int local_port;
 } basic_conn_t;
 
 
-bool init_basic_conn(basic_conn_t *bc, net_opt_t *opt, sock_roles socket_role);
+bool init_basic_conn(basic_conn_t *bc, net_ctx_t *ctx, sock_roles socket_role);
 
 bool connecion_is_expired(basic_conn_t *bcp, int timeout);
 
@@ -36,7 +40,7 @@ void connecion_set_reactivated(basic_conn_t *bdp);
 
 void connecion_set_expired(basic_conn_t *bcp);
 
-void server_connection_prune(net_opt_t *opt);
+void server_connection_prune(net_ctx_t *opt);
 
 
 #endif //TEST_CLIENT_CONNECTION_H

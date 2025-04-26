@@ -13,18 +13,20 @@ struct role_propt {
 
     int (*server_make)(uint16_t port);
 
-    int (*init_handler)(basic_conn_t *);
+    int (*handler)(basic_conn_t *);
 };
 
-typedef struct net_opt_s {
+
+typedef struct net_ctx_s {
     char name[32];
     int epoll_fd;
     int server_fd; //for GSW
-    char *addr;
-    int remote_port;
-    int local_port;
     int timeout;
     heap_desc_t hd_conns;
+
+    // char *addr;
+    // int remote_port;
+    // int local_port;
 
     void (*close_handler)(basic_conn_t *);
 
@@ -34,19 +36,19 @@ typedef struct net_opt_s {
 
     l_err (*send_handler)(basic_conn_t *);
 
-    void *(*init_handler)(struct net_opt_s *, sock_roles);
+    void *(*conn_handler)(struct net_ctx_s *ctx, char *remote_addr, int remote_port, int local_port);
 
-    l_err (*accept_handler)(struct net_opt_s *);
-} net_opt_t;
+    l_err (*accept_handler)(struct net_ctx_s *);
+} net_ctx_t;
 
 
 const struct role_propt *get_role_propt(int s_r);
 
-void server_entity_setup(uint16_t port, net_opt_t *opt);
+void server_entity_setup(uint16_t port, net_ctx_t *opt);
 
 int server_shutdown(int server_fd);
 
-void *client_entity_setup(net_opt_t *opt);
+void *client_entity_setup(net_ctx_t *opt, char *remote_addr, int remote_port, int local_port);
 
 int read_first_packet(basic_conn_t *bc, int pre_fd);
 

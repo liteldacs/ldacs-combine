@@ -29,20 +29,15 @@ void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_po
     snf_obj.trans_snp_func = trans_snp;
     snf_obj.register_fail_func = register_fail;
 
-    // memcpy(snf_obj.net_opt.addr, gsnf_addr, GEN_ADDRLEN);
-
-    snf_obj.net_opt = (net_opt_t){
-        .addr = gsnf_addr,
-        .init_handler = init_gs_conn,
-        .remote_port = gsnf_remote_port,
-        .local_port = gsnf_local_port,
+    snf_obj.net_ctx = (net_ctx_t){
+        .conn_handler = gs_conn_connect,
         .recv_handler = recv_gsg,
         .close_handler = close_gs_conn,
         .epoll_fd = core_epoll_create(0, -1),
     };
 
-    snf_obj.sgw_conn = client_entity_setup(&snf_obj.net_opt);
-    pthread_create(&snf_obj.service_th, NULL, net_setup, &snf_obj.net_opt);
+    snf_obj.sgw_conn = client_entity_setup(&snf_obj.net_ctx, gsnf_addr, gsnf_remote_port, gsnf_local_port);
+    pthread_create(&snf_obj.service_th, NULL, net_setup, &snf_obj.net_ctx);
     pthread_detach(snf_obj.service_th);
 
     snf_obj.is_merged = TRUE;
@@ -52,7 +47,7 @@ void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_po
 void init_gs_snf_layer_unmerged(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
                                 trans_snp trans_snp, register_snf_fail register_fail) {
     init_gs_snf_layer(GS_SAC, gsnf_addr, gsnf_remote_port, gsnf_local_port, trans_snp, register_fail);
-    snf_obj.net_opt.recv_handler = recv_gsnf;
+    snf_obj.net_ctx.recv_handler = recv_gsnf;
     snf_obj.is_merged = FALSE;
 }
 
@@ -62,15 +57,15 @@ void init_sgw_snf_layer(uint16_t listen_port) {
 
     snf_obj.register_fail_func = NULL;
 
-    snf_obj.net_opt = (net_opt_t){
+    snf_obj.net_ctx = (net_ctx_t){
         .recv_handler = recv_gsnf,
         .close_handler = close_gs_conn,
         .accept_handler = gs_conn_accept,
         .epoll_fd = core_epoll_create(0, -1),
     };
-    init_heap_desc(&snf_obj.net_opt.hd_conns);
-    server_entity_setup(listen_port, &snf_obj.net_opt);
-    pthread_create(&snf_obj.service_th, NULL, net_setup, &snf_obj.net_opt);
+    init_heap_desc(&snf_obj.net_ctx.hd_conns);
+    server_entity_setup(listen_port, &snf_obj.net_ctx);
+    pthread_create(&snf_obj.service_th, NULL, net_setup, &snf_obj.net_ctx);
     pthread_join(snf_obj.service_th, NULL);
 }
 
