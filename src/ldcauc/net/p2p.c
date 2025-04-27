@@ -5,10 +5,13 @@
 #include "ldacs_def.h"
 #include "net/p2p.h"
 
+#include "net/gs_conn.h"
+
 peer_service_t peer_service = {};
 
 
 struct hashmap *init_peer_enode_map();
+
 const void *set_peer_enode(peer_propt_t *en);
 
 void *p2p_conn_connect(net_ctx_t *ctx, char *remote_addr, int remote_port, int local_port) {
@@ -33,10 +36,9 @@ l_err p2p_conn_accept(net_ctx_t *ctx) {
         return LD_ERR_INTERNAL;
     }
 
-    log_warn("!!!! %d %d", ntohs(((struct sockaddr_in *)&peer_propt->bc.saddr)->sin_port));
-
     return LD_OK;
 }
+
 
 l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_count) {
     peer_service.p2p_ctx = (net_ctx_t){
@@ -48,18 +50,21 @@ l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_coun
     };
 
     peer_service.peer_map = init_peer_enode_map();
-
+    server_entity_setup(server_port, &peer_service.p2p_ctx);
     for (int i = 0; i < peer_count; i++) {
         peer_gs_t *peer = peers[i];
-        log_warn("Peer[%d] %s:%d UA: %d, listening on port: %d", i, peer->peer_addr, peer->peer_port, peer->peer_UA,
+        log_warn("Peer[%d] `%s:%d` SAC: %d, listening on port: %d", i, peer->peer_addr, peer->peer_port, peer->peer_SAC,
                  server_port);
         peer_propt_t *propt = client_entity_setup(&peer_service.p2p_ctx, peer->peer_addr, peer->peer_port, 0);
-        propt->SAC = peer->peer_UA;
+        if (!propt)
+            propt->SAC = peer->peer_SAC;
 
         set_peer_enode(propt);
     }
 
-    server_entity_setup(server_port, &peer_service.p2p_ctx);
+
+    pthread_create(&peer_service.p2p_thread, NULL, net_setup, &peer_service.p2p_ctx);
+    pthread_detach(peer_service.p2p_thread);
 
     return LD_OK;
 }

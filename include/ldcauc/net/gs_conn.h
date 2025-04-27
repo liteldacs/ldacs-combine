@@ -31,5 +31,4 @@ l_err gs_conn_accept(net_ctx_t *ctx);
 
 void *gs_conn_connect(net_ctx_t *ctx, char *remote_addr, int remote_port, int local_port);
 
-void *net_setup(void *args);
 #endif //GS_CONN_H

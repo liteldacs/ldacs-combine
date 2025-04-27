@@ -60,4 +60,6 @@ extern int response_handle(basic_conn_t *bc);
 
 int request_forward(basic_conn_t *bcp);
 
+void *net_setup(void *args);
+
 #endif //TEST_CLIENT_CLIENT_H

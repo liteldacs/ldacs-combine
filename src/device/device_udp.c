@@ -50,7 +50,7 @@ static int init_udp_bd_recv(int recv_port) {
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if (bind(bd_fd, (struct sockaddr *) &addr, sizeof(addr)) == ERROR) {
-        fprintf(stderr, "bind failed !\n");
+        log_warn("bind failed !\n");
         return ERROR;
     }
 

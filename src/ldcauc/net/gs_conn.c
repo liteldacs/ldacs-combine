@@ -4,9 +4,7 @@
 
 
 #include "net/gs_conn.h"
-
 #include <ld_config.h>
-
 #include "net/net.h"
 
 bool send_gs_pkt(basic_conn_t *bcp) {

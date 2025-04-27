@@ -95,7 +95,7 @@ void connection_unregister(basic_conn_t *bc) {
     bc->opt->hd_conns.hps[heap_idx]->heap_idx = heap_idx;
     bc->opt->hd_conns.heap_size--;
 
-    fprintf(stderr, "HEAP SIZE: %d\n", bc->opt->hd_conns.heap_size);
+    log_info("HEAP SIZE: %d", bc->opt->hd_conns.heap_size);
     heap_bubble_down(&bc->opt->hd_conns, heap_idx);
     if (bc->opt->close_handler) bc->opt->close_handler(bc);
 }

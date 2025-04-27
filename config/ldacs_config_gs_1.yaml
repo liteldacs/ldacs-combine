@@ -1,5 +1,5 @@
 role: gs
-UA: 10086
+GS-SAC: 4000
 port: 8080
 debug: 1
 

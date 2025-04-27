@@ -4,11 +4,3 @@ UA: 10000
 port: 55558  #sgw使用 -M 参数，port自动改为55551
 debug: 1
 
-unmerged:
-  direct-gs:
-    - dir-gs-addr: 127.0.0.1
-      dir-gs-port: 55559
-      dir-gs-UA: 10086
-    - dir-gs-addr: 127.0.0.1
-      dir-gs-port: 55560
-      dir-gs-UA: 10087

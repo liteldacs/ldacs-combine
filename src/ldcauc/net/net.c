@@ -50,7 +50,7 @@ static int make_std_tcp_connect(struct sockaddr_in *to_conn_addr, char *addr, in
     //TODO: 改成死循环，持续1min
     int i = RECONNECT;
     while (i--) {
-        log_info("Trying to connect to GSC %s:%d  for %d time(s).", addr, remote_port, RECONNECT - i);
+        log_info("Trying to connect to remote `%s:%d` for %d time(s).", addr, remote_port, RECONNECT - i);
         if (connect(fd, (struct sockaddr *) to_conn_addr, sizeof(struct sockaddr_in)) >= 0) {
             log_info("Connected");
             return fd;
@@ -101,7 +101,7 @@ static int make_std_tcpv6_connect(struct sockaddr_in6 *to_conn_addr, char *addr,
     //TODO: 改成死循环，持续1min
     int i = RECONNECT;
     while (i--) {
-        log_info("Trying to connect to GSC  %s:%d  for %d time(s).", addr, remote_port, RECONNECT - i);
+        log_info("Trying to connect to remote `%s:%d` for %d time(s).", addr, remote_port, RECONNECT - i);
         if (connect(fd, (struct sockaddr *) to_conn_addr, sizeof(struct sockaddr_in6)) >= 0) {
             log_info("Connected");
             return fd;
@@ -287,7 +287,6 @@ int read_first_packet(basic_conn_t *bc, int pre_fd) {
     in = sock->sin_addr;
     inet_ntop(AF_INET, &in, str, sizeof(str));
     port = ntohs(sock->sin_port);
-    fprintf(stderr, "%s %d\n", str, port);
 
     if (len) {
         CLONE_TO_CHUNK(bc->read_pkt, buf, len)

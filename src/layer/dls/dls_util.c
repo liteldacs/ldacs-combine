@@ -5,11 +5,6 @@
 #include "ldacs_dls.h"
 
 
-void dls_enode_print_func(void *item) {
-    const dls_entity_t *node = item;
-    fprintf(stderr, "{%u}\n", node->AS_SAC);
-}
-
 fsm_event_t dls_fsm_events[] = {
     {"DLS_CLOSED", NULL, NULL},
     {"DLS_OPEN", NULL, NULL},

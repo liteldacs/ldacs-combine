@@ -21,6 +21,7 @@ typedef struct peer_service_s {
     // p2p_propt_t *prop;
     struct hashmap *peer_map;
     net_ctx_t p2p_ctx;
+    pthread_t p2p_thread;
 } peer_service_t;
 
 l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_count);
