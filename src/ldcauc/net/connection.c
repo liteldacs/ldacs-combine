@@ -3,7 +3,7 @@
 //
 
 #include <netdb.h>
-#include <net/gs_conn.h>
+#include <../../../include/ldcauc/gs_conn.h>
 
 #include "net/net_core.h"
 #include <netinet/tcp.h>

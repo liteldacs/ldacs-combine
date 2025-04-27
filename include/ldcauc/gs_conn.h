@@ -6,16 +6,21 @@
 #define GS_CONN_H
 #include "net/connection.h"
 
-typedef struct gs_tcp_propt_s {
+typedef struct gs_propt_s {
     basic_conn_t bc;
-} gs_tcp_propt_t;
+    uint16_t GS_SAC;
+} gs_propt_t;
 
-struct shared_key_temp {
-    int32_t uas;
-    uint8_t key[4];
-};
+typedef struct gs_conn_define_s {
+    char *addr;
+    int port;
+    uint16_t GS_SAC;
+} gs_conn_define_t;
 
-extern const struct shared_key_temp shared_keys[];
+typedef struct gs_conn_service_s {
+    gs_conn_define_t conn_defines[10];
+} gs_conn_service_t;
+
 
 bool recv_gs_pkt(basic_conn_t *bc);
 

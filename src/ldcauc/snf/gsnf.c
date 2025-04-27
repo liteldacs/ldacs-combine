@@ -42,7 +42,7 @@ static void free_gsg_sac_pkg(gsg_sac_pkt_t *gsnf_sac) {
 }
 
 
-l_err trans_gsnf(gs_tcp_propt_t *conn, void *pkg, struct_desc_t *desc, l_err (*mid_func)(buffer_t *, void *),
+l_err trans_gsnf(gs_propt_t *conn, void *pkg, struct_desc_t *desc, l_err (*mid_func)(buffer_t *, void *),
                  void *args) {
     if (conn == NULL) return LD_ERR_INTERNAL;
     pb_stream gsnf_pbs;
@@ -126,7 +126,7 @@ static l_err parse_gsg_pkt(buffer_t *pdu, gsg_pkt_t **gsnf_pkg_ptr, snf_entity_t
 }
 
 l_err recv_gsnf(basic_conn_t *bc) {
-    gs_tcp_propt_t *gs_propt = (gs_tcp_propt_t *) bc;
+    gs_propt_t *gs_propt = (gs_propt_t *) bc;
     log_buf(LOG_INFO, "RECV GSNF", gs_propt->bc.read_pkt.ptr, gs_propt->bc.read_pkt.len);
     snf_entity_t *as_man;
     uint8_t gsnf_type = *gs_propt->bc.read_pkt.ptr;
@@ -256,7 +256,7 @@ l_err recv_gsnf(basic_conn_t *bc) {
 }
 
 l_err recv_gsg(basic_conn_t *bc) {
-    gs_tcp_propt_t *mlt_ld = (gs_tcp_propt_t *) bc;
+    gs_propt_t *mlt_ld = (gs_propt_t *) bc;
     log_buf(LOG_INFO, "RECV GSG", mlt_ld->bc.read_pkt.ptr, mlt_ld->bc.read_pkt.len);
     switch ((*mlt_ld->bc.read_pkt.ptr >> (BITS_PER_BYTE - GTYP_LEN)) & (0xFF >> (BITS_PER_BYTE - GTYP_LEN))) {
         //        case GS_SAC_RQST:

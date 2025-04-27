@@ -13,7 +13,7 @@
 #include <ld_heap.h>
 #include "ldcauc.h"
 #include "snp_sub.h"
-#include "net/gs_conn.h"
+#include "gs_conn.h"
 #include "net/net_epoll.h"
 
 #define DEFAULT_GSNF_VERSION 0x01
@@ -107,7 +107,7 @@ typedef struct snf_entity_s {
     //for GS
     bool gs_finish_auth;
     /* for SGW */
-    gs_tcp_propt_t *gs_conn; // SGW -> GS
+    gs_propt_t *gs_conn; // SGW -> GS
 
     /* for GSC */
     uint32_t gsnf_count;
@@ -129,7 +129,7 @@ typedef struct snf_obj_s {
 
     //SGW
     pthread_t service_th;
-    gs_tcp_propt_t *sgw_conn; // GS -> SGW
+    gs_propt_t *sgw_conn; // GS -> SGW
 
     bool is_merged;
 } snf_obj_t;
@@ -290,7 +290,7 @@ typedef struct gsnf_key_upd_remind_s {
     uint8_t KEY_TYPE;
     uint16_t GSS_SAC;
     uint16_t GST_SAC;
-}gsnf_key_upd_remind_t;
+} gsnf_key_upd_remind_t;
 
 typedef struct gs_key_trans_s {
     buffer_t *key;
@@ -375,7 +375,7 @@ l_err handle_recv_msg(buffer_t *buf, const snf_entity_t *as_man);
 l_err handle_send_msg(void *args, struct_desc_t *desc, snf_entity_t *as_man, KEY_HANDLE key_med);
 
 /* gsnf */
-l_err trans_gsnf(gs_tcp_propt_t *conn, void *pkg, struct_desc_t *desc, l_err (*mid_func)(buffer_t *, void *),
+l_err trans_gsnf(gs_propt_t *conn, void *pkg, struct_desc_t *desc, l_err (*mid_func)(buffer_t *, void *),
                  void *args);
 
 l_err recv_gsnf(basic_conn_t *bcp);

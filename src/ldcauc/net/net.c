@@ -3,7 +3,7 @@
 //
 #include <netinet/tcp.h>
 
-#include "net/gs_conn.h"
+#include "../../../include/ldcauc/gs_conn.h"
 #include "net/net_core.h"
 
 #define BACKLOG 1024
@@ -247,7 +247,6 @@ void server_entity_setup(uint16_t port, net_ctx_t *opt) {
 
     ABORT_ON(opt->accept_handler == NULL, "Accept handler is NULL");
     ABORT_ON(opt->server_fd == ERROR, "make_server");
-    // ABORT_ON((opt->epoll_fd = core_epoll_create(0, opt->epoll_fd)) == ERROR, "core_epoll_create");
     ABORT_ON(add_listen_fd(opt->epoll_fd, opt->server_fd) == ERROR, "add_listen_fd");
 
     log_info("SGW server successfully started.");

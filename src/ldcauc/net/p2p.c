@@ -5,7 +5,7 @@
 #include "ldacs_def.h"
 #include "net/p2p.h"
 
-#include "net/gs_conn.h"
+#include "../../../include/ldcauc/gs_conn.h"
 
 peer_service_t peer_service = {};
 

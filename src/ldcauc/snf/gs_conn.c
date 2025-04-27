@@ -2,17 +2,24 @@
 // Created by 邹嘉旭 on 2024/11/9.
 //
 
-
-#include "net/gs_conn.h"
+#include "gs_conn.h"
 #include <ld_config.h>
 #include "net/net.h"
+
+gs_conn_service_t conn_service = {
+    .conn_defines = {
+        {"127.0.0.1", 55559, 4000},
+        {"127.0.0.1", 55560, 4001},
+        {NULL, 0, 0}
+    },
+};
 
 bool send_gs_pkt(basic_conn_t *bcp) {
     return TRUE;
 }
 
 void *gs_conn_connect(net_ctx_t *ctx, char *remote_addr, int remote_port, int local_port) {
-    gs_tcp_propt_t *gs_conn = malloc(sizeof(gs_tcp_propt_t));
+    gs_propt_t *gs_conn = malloc(sizeof(gs_propt_t));
 
     gs_conn->bc.remote_addr = strdup(remote_addr);
     gs_conn->bc.remote_port = remote_port;
@@ -26,7 +33,7 @@ void *gs_conn_connect(net_ctx_t *ctx, char *remote_addr, int remote_port, int lo
 }
 
 l_err gs_conn_accept(net_ctx_t *ctx) {
-    gs_tcp_propt_t *gs_conn = malloc(sizeof(gs_tcp_propt_t));
+    gs_propt_t *gs_conn = malloc(sizeof(gs_propt_t));
 
     if (init_basic_conn(&gs_conn->bc, ctx, LD_TCP_SERVER) == FALSE) {
         log_error("Cannot initialize connection!");
@@ -34,18 +41,28 @@ l_err gs_conn_accept(net_ctx_t *ctx) {
         return LD_ERR_INTERNAL;
     }
 
-    log_warn("!!!! %d %d", ntohs(((struct sockaddr_in *)&gs_conn->bc.saddr)->sin_port));
+    int client_port = ntohs(((struct sockaddr_in *) &gs_conn->bc.saddr)->sin_port);
 
-    return LD_OK;
+    for (int i = 0; conn_service.conn_defines[i].addr != NULL; i++) {
+        if (client_port == conn_service.conn_defines[i].port) {
+            log_warn("!!!!!!!!!!!!!!!!!!");
+            gs_conn->GS_SAC = conn_service.conn_defines[i].GS_SAC;
+            //TODO: hashmap
+            return LD_OK;
+        }
+    }
+
+    log_warn("Not available GS connection from port `%d`!", client_port);
+    return LD_ERR_INTERNAL;
 }
 
 bool reset_gs_conn(basic_conn_t *bc) {
-    gs_tcp_propt_t *mlt_ld = (gs_tcp_propt_t *) bc;
+    gs_propt_t *mlt_ld = (gs_propt_t *) bc;
     return TRUE;
 }
 
 void close_gs_conn(basic_conn_t *bc) {
-    gs_tcp_propt_t *gs_conn = (gs_tcp_propt_t *) bc;
+    gs_propt_t *gs_conn = (gs_propt_t *) bc;
     free(gs_conn);
     log_warn("Closing connection!");
 }

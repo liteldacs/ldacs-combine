@@ -18,7 +18,6 @@ typedef struct peer_propt_s {
 } peer_propt_t;
 
 typedef struct peer_service_s {
-    // p2p_propt_t *prop;
     struct hashmap *peer_map;
     net_ctx_t p2p_ctx;
     pthread_t p2p_thread;
