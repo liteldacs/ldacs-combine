@@ -9,13 +9,18 @@
 #include "connection.h"
 #include "ld_config.h"
 
+#include <ld_hashmap.h>
+
 
 typedef struct peer_propt_s {
     basic_conn_t bc;
+    uint16_t SAC;
 } peer_propt_t;
 
 typedef struct peer_service_s {
     // p2p_propt_t *prop;
+    struct hashmap *peer_map;
+    net_ctx_t p2p_ctx;
 } peer_service_t;
 
 l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_count);

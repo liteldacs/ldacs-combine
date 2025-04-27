@@ -316,7 +316,9 @@ static int read_packet(int fd, buffer_t *but) {
 
 int request_handle(basic_conn_t *bc) {
     if (read_packet(bc->fd, &bc->read_pkt) == ERROR) return ERROR;
-    bc->opt->recv_handler(bc);
+    if (bc->opt->recv_handler) {
+        bc->opt->recv_handler(bc);
+    }
 
     return OK;
 }

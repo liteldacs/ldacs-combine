@@ -386,7 +386,7 @@ l_err recv_gsg(basic_conn_t *bcp);
 
 struct hashmap *init_enode_map();
 
-bool has_enode_by_sac(const uint16_t as_sac);
+bool has_enode_by_sac(const uint16_t gs_sac);
 
 bool has_enode_by_ua(uint32_t target_UA);
 
