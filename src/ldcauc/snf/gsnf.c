@@ -6,6 +6,7 @@
 #include "crypto/secure_core.h"
 #include "crypto/authc.h"
 #include "crypto/key.h"
+#include "gs_conn.h"
 
 #define GSG_PKT_HEAD_LEN 2
 #define GSG_SAC_HEAD_LEN 4
@@ -148,6 +149,7 @@ l_err recv_gsnf(basic_conn_t *bc) {
                 log_warn("AS MAN is NULL");
                 return LD_ERR_NULL;
             }
+
             as_man->gs_conn = gs_propt;
 
             handle_recv_msg(init_pkt->sdu, as_man);

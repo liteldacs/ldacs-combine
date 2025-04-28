@@ -30,19 +30,9 @@ void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_po
     snf_obj.register_fail_func = register_fail;
 
 
-    if (init_gs_conn_service()) {
+    if (init_client_gs_conn_service(gsnf_addr, gsnf_remote_port, gsnf_local_port, recv_gsg) != LD_OK) {
         log_warn("Cannot init GS connection service");
     }
-    snf_obj.net_ctx = (net_ctx_t){
-        .conn_handler = gs_conn_connect,
-        .recv_handler = recv_gsg,
-        .close_handler = gs_conn_close,
-        .epoll_fd = core_epoll_create(0, -1),
-    };
-
-    snf_obj.sgw_conn = client_entity_setup(&snf_obj.net_ctx, gsnf_addr, gsnf_remote_port, gsnf_local_port);
-    pthread_create(&snf_obj.service_th, NULL, net_setup, &snf_obj.net_ctx);
-    pthread_detach(snf_obj.service_th);
 
     snf_obj.is_merged = TRUE;
 }
@@ -50,8 +40,15 @@ void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_po
 
 void init_gs_snf_layer_unmerged(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
                                 trans_snp trans_snp, register_snf_fail register_fail) {
-    init_gs_snf_layer(GS_SAC, gsnf_addr, gsnf_remote_port, gsnf_local_port, trans_snp, register_fail);
-    snf_obj.net_ctx.recv_handler = recv_gsnf;
+    snf_obj.snf_emap = init_enode_map();
+    snf_obj.role = LD_GS;
+    snf_obj.GS_SAC = GS_SAC;
+
+    snf_obj.trans_snp_func = trans_snp;
+    snf_obj.register_fail_func = register_fail;
+    if (init_client_gs_conn_service(gsnf_addr, gsnf_remote_port, gsnf_local_port, recv_gsnf) != LD_OK) {
+        log_warn("Cannot init GS connection service");
+    }
     snf_obj.is_merged = FALSE;
 }
 
@@ -61,19 +58,9 @@ void init_sgw_snf_layer(uint16_t listen_port) {
 
     snf_obj.register_fail_func = NULL;
 
-    if (init_gs_conn_service()) {
+    if (init_server_gs_conn_service(listen_port) != LD_OK) {
         log_warn("Cannot init GS connection service");
     }
-    snf_obj.net_ctx = (net_ctx_t){
-        .recv_handler = recv_gsnf,
-        .close_handler = gs_conn_close,
-        .accept_handler = gs_conn_accept,
-        .epoll_fd = core_epoll_create(0, -1),
-    };
-    init_heap_desc(&snf_obj.net_ctx.hd_conns);
-    server_entity_setup(listen_port, &snf_obj.net_ctx);
-    pthread_create(&snf_obj.service_th, NULL, net_setup, &snf_obj.net_ctx);
-    pthread_join(snf_obj.service_th, NULL);
 }
 
 
@@ -187,14 +174,14 @@ int8_t register_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, uint16_t G
 
 int8_t unregister_snf_en(uint16_t AS_SAC) {
     snf_obj.is_merged == FALSE
-        ? trans_gsnf(snf_obj.sgw_conn, &(gsnf_st_chg_t){
+        ? trans_gsnf(conn_service.sgw_conn, &(gsnf_st_chg_t){
                          .G_TYP = GSNF_STATE_CHANGE,
                          .VER = DEFAULT_GSNF_VERSION,
                          .AS_SAC = AS_SAC,
                          .State = GSNF_EXIT,
                          .GS_SAC = snf_obj.GS_SAC
                      }, &gsnf_st_chg_desc, NULL, NULL)
-        : trans_gsnf(snf_obj.sgw_conn, &(gsg_as_exit_t){GS_AS_EXIT, AS_SAC},
+        : trans_gsnf(conn_service.sgw_conn, &(gsg_as_exit_t){GS_AS_EXIT, AS_SAC},
                      &gsg_as_exit_desc, NULL, NULL);
     return delete_enode_by_sac(AS_SAC, clear_snf_en);
 }
@@ -229,10 +216,9 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
             // send failed message to SGW
             if (!is_valid) {
                 to_trans_buf = gen_failed_pkt(0xFF, as_man->AS_SAC, in_buf);
-                trans_gsnf(snf_obj.sgw_conn, &(gsg_pkt_t){
+                trans_gsnf(conn_service.sgw_conn, &(gsg_pkt_t){
                                GS_SNF_DOWNLOAD, as_man->AS_SAC, to_trans_buf
                            }, &gsg_pkt_desc, NULL, NULL);
-                // free_buffer(to_trans_buf);
             } else {
                 uint8_t type;
                 to_trans_buf = in_buf;
@@ -249,7 +235,7 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
                         type = GS_SNF_DOWNLOAD;
                     }
                 }
-                trans_gsnf(snf_obj.sgw_conn, &(gsg_pkt_t){
+                trans_gsnf(conn_service.sgw_conn, &(gsg_pkt_t){
                                type, as_man->AS_SAC, to_trans_buf
                            }, &gsg_pkt_desc, NULL, NULL);
             }
@@ -257,18 +243,18 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
             to_trans_buf = in_buf;
             if (!is_valid) {
                 to_trans_buf = gen_failed_pkt(0xFF, as_man->AS_SAC, in_buf);
-                trans_gsnf(snf_obj.sgw_conn, &(gsnf_pkt_cn_t){
+                trans_gsnf(conn_service.sgw_conn, &(gsnf_pkt_cn_t){
                                GSNF_SNF_DOWNLOAD, DEFAULT_GSNF_VERSION, AS_SAC, 0xFF, to_trans_buf
                            }, &gsnf_pkt_cn_desc, NULL, NULL);
                 // free_buffer(to_trans_buf);
             } else {
                 if (as_man->gsnf_count++ == 0) {
-                    trans_gsnf(snf_obj.sgw_conn, &(gsnf_pkt_cn_ini_t){
+                    trans_gsnf(conn_service.sgw_conn, &(gsnf_pkt_cn_ini_t){
                                    GSNF_INITIAL_AS, DEFAULT_GSNF_VERSION, AS_SAC, GS_SAC,
                                    as_man->AS_UA, ELE_TYP_F, to_trans_buf
                                }, &gsnf_pkt_cn_ini_desc, NULL, NULL);
                 } else {
-                    trans_gsnf(snf_obj.sgw_conn, &(gsnf_pkt_cn_t){
+                    trans_gsnf(conn_service.sgw_conn, &(gsnf_pkt_cn_t){
                                    GSNF_SNF_DOWNLOAD, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_F, to_trans_buf
                                }, &gsnf_pkt_cn_desc, NULL, NULL);
                 }
@@ -290,7 +276,7 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
 int8_t handover_trigger(uint16_t AS_SAC) {
     if (snf_obj.is_merged) {
     } else {
-        trans_gsnf(snf_obj.sgw_conn, &(gsnf_key_upd_remind_t){
+        trans_gsnf(conn_service.sgw_conn, &(gsnf_key_upd_remind_t){
                        GSNF_KEY_UPD_REMIND, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_C, 10086, 10087
                    }, &gsnf_key_upd_remind_desc, NULL, NULL);
     }

@@ -5,7 +5,7 @@
 #include "ldacs_def.h"
 #include "net/p2p.h"
 
-#include "../../../include/ldcauc/gs_conn.h"
+#include "gs_conn.h"
 
 peer_service_t peer_service = {};
 
@@ -63,12 +63,11 @@ l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_coun
     server_entity_setup(server_port, &peer_service.p2p_ctx);
     for (int i = 0; i < peer_count; i++) {
         peer_gs_t *peer = peers[i];
-        log_warn("Peer[%d] `%s:%d` SAC: %d, listening on port: %d", i, peer->peer_addr, peer->peer_port, peer->peer_SAC,
+        log_info("Peer[%d] `%s:%d` SAC: %d, listening on port: %d", i, peer->peer_addr, peer->peer_port, peer->peer_SAC,
                  server_port);
         peer_propt_t *propt = client_entity_setup(&peer_service.p2p_ctx, peer->peer_addr, peer->peer_port, 0);
-        if (!propt)
-            propt->SAC = peer->peer_SAC;
-
+        if (!propt){    return LD_ERR_NULL; }
+        propt->SAC = peer->peer_SAC;
         set_peer_enode(propt);
     }
 

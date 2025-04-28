@@ -5,7 +5,6 @@
 #ifndef GS_CONN_H
 #define GS_CONN_H
 #include "net/connection.h"
-#include <ld_config.h>
 #include <ld_hashmap.h>
 
 typedef struct gs_propt_s {
@@ -22,10 +21,18 @@ typedef struct gs_conn_define_s {
 typedef struct gs_conn_service_s {
     gs_conn_define_t conn_defines[10];
     struct hashmap *conn_map;
+
+    net_ctx_t net_ctx;
+    //SGW
+    pthread_t service_th;
+    gs_propt_t *sgw_conn; // GS -> SGW
 } gs_conn_service_t;
 
+extern gs_conn_service_t conn_service;
 
-l_err init_gs_conn_service();
+l_err init_client_gs_conn_service(char *remote_addr, int remote_port, int local_port, l_err (*recv_handler)(basic_conn_t *));
+
+l_err init_server_gs_conn_service(int listen_port);
 
 bool recv_gs_pkt(basic_conn_t *bc);
 

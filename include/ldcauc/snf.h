@@ -119,7 +119,7 @@ typedef struct snf_obj_s {
     uint8_t PROTOCOL_VER;
     ldacs_roles role;
     uint16_t GS_SAC;
-    net_ctx_t net_ctx;
+    // net_ctx_t net_ctx;
 
     trans_snp trans_snp_func;
     register_snf_fail register_fail_func;
@@ -127,11 +127,8 @@ typedef struct snf_obj_s {
     //AS
     finish_auth finish_auth_func;
 
-    //SGW
-    pthread_t service_th;
-    gs_propt_t *sgw_conn; // GS -> SGW
-
     bool is_merged;
+
 } snf_obj_t;
 
 extern snf_obj_t snf_obj;

@@ -5,6 +5,7 @@
 #include "gs_conn.h"
 #include <ld_config.h>
 #include "net/net.h"
+#include "snf.h"
 l_err init_conn_enode_map(struct hashmap **map);
 const void *set_conn_enode(gs_propt_t *en);
 l_err delete_conn_enode(uint16_t gs_sac, int8_t (*clear_func)(gs_propt_t *en));
@@ -17,13 +18,51 @@ gs_conn_service_t conn_service = {
     },
 };
 
-l_err init_gs_conn_service() {
+static l_err init_basic_gs_conn_service() {
     l_err err;
     if ((err = init_conn_enode_map(&conn_service.conn_map)) != LD_OK) {
         return err;
     }
     return LD_OK;
 }
+
+l_err init_client_gs_conn_service(char *remote_addr, int remote_port, int local_port, l_err (*recv_handler)(basic_conn_t *)) {
+    l_err err;
+    if ((err = init_basic_gs_conn_service()) != LD_OK) {
+        return err;
+    }
+
+    conn_service.net_ctx = (net_ctx_t){
+        .conn_handler = gs_conn_connect,
+        .recv_handler = recv_handler,
+        .close_handler = gs_conn_close,
+        .epoll_fd = core_epoll_create(0, -1),
+    };
+
+    conn_service.sgw_conn = client_entity_setup(&conn_service.net_ctx, remote_addr, remote_port, local_port);
+    pthread_create(&conn_service.service_th, NULL, net_setup, &conn_service.net_ctx);
+    pthread_detach(conn_service.service_th);
+    return LD_OK;
+}
+
+l_err init_server_gs_conn_service(int listen_port) {
+    l_err err;
+    if ((err = init_basic_gs_conn_service()) != LD_OK) {
+        return err;
+    }
+    conn_service.net_ctx = (net_ctx_t){
+        .recv_handler = recv_gsnf,
+        .close_handler = gs_conn_close,
+        .accept_handler = gs_conn_accept,
+        .epoll_fd = core_epoll_create(0, -1),
+    };
+    init_heap_desc(&conn_service.net_ctx.hd_conns);
+    server_entity_setup(listen_port, &conn_service.net_ctx);
+    pthread_create(&conn_service.service_th, NULL, net_setup, &conn_service.net_ctx);
+    pthread_join(conn_service.service_th, NULL);
+    return LD_OK;
+}
+
 
 bool send_gs_pkt(basic_conn_t *bcp) {
     return TRUE;
