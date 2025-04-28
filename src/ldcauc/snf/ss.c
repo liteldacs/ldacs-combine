@@ -254,10 +254,7 @@ l_err finish_auc(void *args) {
                             }, &gs_key_trans_desc, "GS KEY"
     );
 
-    gs_propt_t *propt = get_conn_enode(as_man->GS_SAC);
-
-    if (trans_gsnf(propt, &(gsnf_pkt_cn_t){
-//    if (trans_gsnf(as_man->gs_conn, &(gsnf_pkt_cn_t){
+    if (trans_gsnf(get_conn_enode(as_man->GS_SAC), &(gsnf_pkt_cn_t){
                        GSNF_KEY_TRANS, DEFAULT_GSNF_VERSION, as_man->AS_SAC, ELE_TYP_8, sdu
                    }, &gsnf_pkt_cn_desc, generate_auz_info, &as_man->AS_SAC
     )) {
