@@ -146,6 +146,7 @@ l_err make_lme_layer() {
 
                     /* GS set the initial state 'OPEN' */
                     init_lme_fsm(&lme_layer_objs, LME_OPEN);
+                    log_warn("????????? %d", config.GS_SAC);
                     lme_layer_objs.GS_SAC = config.GS_SAC;
                     lme_layer_objs.LME_GS_AUTH_AS = init_lme_sac_map();
 

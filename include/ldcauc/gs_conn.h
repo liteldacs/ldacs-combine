@@ -48,4 +48,6 @@ l_err gs_conn_accept(net_ctx_t *ctx);
 
 void *gs_conn_connect(net_ctx_t *ctx, char *remote_addr, int remote_port, int local_port);
 
+gs_propt_t *get_conn_enode(const uint16_t gs_sac);
+
 #endif //GS_CONN_H
