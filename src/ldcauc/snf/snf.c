@@ -29,10 +29,14 @@ void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_po
     snf_obj.trans_snp_func = trans_snp;
     snf_obj.register_fail_func = register_fail;
 
+
+    if (init_gs_conn_service()) {
+        log_warn("Cannot init GS connection service");
+    }
     snf_obj.net_ctx = (net_ctx_t){
         .conn_handler = gs_conn_connect,
         .recv_handler = recv_gsg,
-        .close_handler = close_gs_conn,
+        .close_handler = gs_conn_close,
         .epoll_fd = core_epoll_create(0, -1),
     };
 
@@ -57,9 +61,12 @@ void init_sgw_snf_layer(uint16_t listen_port) {
 
     snf_obj.register_fail_func = NULL;
 
+    if (init_gs_conn_service()) {
+        log_warn("Cannot init GS connection service");
+    }
     snf_obj.net_ctx = (net_ctx_t){
         .recv_handler = recv_gsnf,
-        .close_handler = close_gs_conn,
+        .close_handler = gs_conn_close,
         .accept_handler = gs_conn_accept,
         .epoll_fd = core_epoll_create(0, -1),
     };

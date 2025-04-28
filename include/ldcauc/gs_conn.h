@@ -5,6 +5,8 @@
 #ifndef GS_CONN_H
 #define GS_CONN_H
 #include "net/connection.h"
+#include <ld_config.h>
+#include <ld_hashmap.h>
 
 typedef struct gs_propt_s {
     basic_conn_t bc;
@@ -19,8 +21,11 @@ typedef struct gs_conn_define_s {
 
 typedef struct gs_conn_service_s {
     gs_conn_define_t conn_defines[10];
+    struct hashmap *conn_map;
 } gs_conn_service_t;
 
+
+l_err init_gs_conn_service();
 
 bool recv_gs_pkt(basic_conn_t *bc);
 
@@ -30,7 +35,7 @@ bool forward_gs_pkt(basic_conn_t *bc);
 
 bool reset_gs_conn(basic_conn_t *bc);
 
-void close_gs_conn(basic_conn_t *bc);
+void gs_conn_close(basic_conn_t *bc);
 
 l_err gs_conn_accept(net_ctx_t *ctx);
 

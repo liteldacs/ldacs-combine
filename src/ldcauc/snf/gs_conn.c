@@ -5,6 +5,9 @@
 #include "gs_conn.h"
 #include <ld_config.h>
 #include "net/net.h"
+l_err init_conn_enode_map(struct hashmap **map);
+const void *set_conn_enode(gs_propt_t *en);
+l_err delete_conn_enode(uint16_t gs_sac, int8_t (*clear_func)(gs_propt_t *en));
 
 gs_conn_service_t conn_service = {
     .conn_defines = {
@@ -13,6 +16,14 @@ gs_conn_service_t conn_service = {
         {NULL, 0, 0}
     },
 };
+
+l_err init_gs_conn_service() {
+    l_err err;
+    if ((err = init_conn_enode_map(&conn_service.conn_map)) != LD_OK) {
+        return err;
+    }
+    return LD_OK;
+}
 
 bool send_gs_pkt(basic_conn_t *bcp) {
     return TRUE;
@@ -45,9 +56,10 @@ l_err gs_conn_accept(net_ctx_t *ctx) {
 
     for (int i = 0; conn_service.conn_defines[i].addr != NULL; i++) {
         if (client_port == conn_service.conn_defines[i].port) {
-            log_warn("!!!!!!!!!!!!!!!!!!");
             gs_conn->GS_SAC = conn_service.conn_defines[i].GS_SAC;
-            //TODO: hashmap
+            if (set_conn_enode(gs_conn) == NULL) {
+                return LD_ERR_NULL;
+            }
             return LD_OK;
         }
     }
@@ -61,9 +73,55 @@ bool reset_gs_conn(basic_conn_t *bc) {
     return TRUE;
 }
 
-void close_gs_conn(basic_conn_t *bc) {
+void gs_conn_close(basic_conn_t *bc) {
     gs_propt_t *gs_conn = (gs_propt_t *) bc;
+    if (!gs_conn) return;
+    delete_conn_enode(gs_conn->GS_SAC, NULL);
     free(gs_conn);
     log_warn("Closing connection!");
 }
 
+
+uint64_t hash_conn_enode(const void *item, uint64_t seed0, uint64_t seed1) {
+    const gs_propt_t *node = item;
+    return hashmap_sip(&node->GS_SAC, sizeof(uint16_t), seed0, seed1);
+}
+
+l_err init_conn_enode_map(struct hashmap **map) {
+    *map = hashmap_new(sizeof(gs_propt_t), 0, 0, 0,
+                       hash_conn_enode, NULL, NULL, NULL);
+    if (!*map)   return LD_ERR_NULL;
+    return LD_OK;
+}
+
+const void *set_conn_enode(gs_propt_t *en) {
+    if (!en) return NULL;
+
+    const void *ret = hashmap_set(conn_service.conn_map, en);
+    /* !!!Do not free the previous entity !!! */
+    return ret;
+}
+
+gs_propt_t *get_conn_enode(const uint16_t gs_sac) {
+    return hashmap_get(conn_service.conn_map, &(gs_propt_t){
+                           .GS_SAC = gs_sac,
+                       });
+}
+
+bool has_conn_enode(const uint16_t gs_sac) {
+    return hashmap_get(conn_service.conn_map, &(gs_propt_t){
+                           .GS_SAC = gs_sac,
+                       }) != NULL;
+}
+
+l_err delete_conn_enode(uint16_t gs_sac, int8_t (*clear_func)(gs_propt_t *en)) {
+    gs_propt_t *en = get_conn_enode(gs_sac);
+    if (en) {
+        if (clear_func) {
+            clear_func(en);
+        }
+        hashmap_delete(conn_service.conn_map, en);
+        return LD_OK;
+    }
+    return LD_ERR_INTERNAL;
+}

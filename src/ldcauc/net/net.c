@@ -249,7 +249,7 @@ void server_entity_setup(uint16_t port, net_ctx_t *opt) {
     ABORT_ON(opt->server_fd == ERROR, "make_server");
     ABORT_ON(add_listen_fd(opt->epoll_fd, opt->server_fd) == ERROR, "add_listen_fd");
 
-    log_info("SGW server successfully started.");
+    log_info("Server has started successfully.");
 }
 
 void *client_entity_setup(net_ctx_t *opt, char *remote_addr, int remote_port, int local_port) {

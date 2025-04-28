@@ -14,6 +14,8 @@ struct hashmap *init_peer_enode_map();
 
 const void *set_peer_enode(peer_propt_t *en);
 
+l_err delete_peer_enode(uint16_t gs_sac, int8_t (*clear_func)(peer_propt_t *en));
+
 void *p2p_conn_connect(net_ctx_t *ctx, char *remote_addr, int remote_port, int local_port) {
     peer_propt_t *peer_propt = malloc(sizeof(peer_propt_t));
 
@@ -39,13 +41,21 @@ l_err p2p_conn_accept(net_ctx_t *ctx) {
     return LD_OK;
 }
 
+void p2p_conn_close(basic_conn_t *bc) {
+    gs_propt_t *gs_conn = (gs_propt_t *) bc;
+    if (!gs_conn) return;
+    delete_peer_enode(gs_conn->GS_SAC, NULL);
+    free(gs_conn);
+    log_warn("Closing connection!");
+}
+
 
 l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_count) {
     peer_service.p2p_ctx = (net_ctx_t){
         .conn_handler = p2p_conn_connect,
         .accept_handler = p2p_conn_accept,
         .recv_handler = NULL,
-        .close_handler = NULL,
+        .close_handler = p2p_conn_close,
         .epoll_fd = core_epoll_create(0, -1),
     };
 
@@ -83,7 +93,7 @@ const void *set_peer_enode(peer_propt_t *en) {
     if (!en) return NULL;
 
     const void *ret = hashmap_set(peer_service.peer_map, en);
-    free(en);
+    /* !!!Do not free the previous entity !!! */
     return ret;
 }
 
@@ -110,5 +120,3 @@ l_err delete_peer_enode(uint16_t gs_sac, int8_t (*clear_func)(peer_propt_t *en))
     }
     return LD_ERR_INTERNAL;
 }
-
-
