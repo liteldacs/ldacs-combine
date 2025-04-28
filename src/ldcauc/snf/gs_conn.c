@@ -7,7 +7,8 @@
 #include "net/net.h"
 #include "snf.h"
 l_err init_conn_enode_map(struct hashmap **map);
-const void *set_conn_enode(gs_propt_t *en);
+
+l_err set_conn_enode(gs_propt_t *en);
 l_err delete_conn_enode(uint16_t gs_sac, int8_t (*clear_func)(gs_propt_t *en));
 
 gs_conn_service_t conn_service = {
@@ -96,7 +97,7 @@ l_err gs_conn_accept(net_ctx_t *ctx) {
     for (int i = 0; conn_service.conn_defines[i].addr != NULL; i++) {
         if (client_port == conn_service.conn_defines[i].port) {
             gs_conn->GS_SAC = conn_service.conn_defines[i].GS_SAC;
-            if (set_conn_enode(gs_conn) == NULL) {
+            if (set_conn_enode(gs_conn) != LD_OK) {
                 return LD_ERR_NULL;
             }
             return LD_OK;
@@ -133,12 +134,12 @@ l_err init_conn_enode_map(struct hashmap **map) {
     return LD_OK;
 }
 
-const void *set_conn_enode(gs_propt_t *en) {
-    if (!en) return NULL;
+l_err set_conn_enode(gs_propt_t *en) {
+    if (!en) return LD_ERR_NULL;
 
     const void *ret = hashmap_set(conn_service.conn_map, en);
     /* !!!Do not free the previous entity !!! */
-    return ret;
+    return LD_OK;
 }
 
 gs_propt_t *get_conn_enode(const uint16_t gs_sac) {

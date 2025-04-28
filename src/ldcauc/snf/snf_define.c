@@ -274,7 +274,6 @@ struct hashmap *init_enode_map() {
                        hash_enode, NULL, NULL, NULL);
 }
 
-
 const void *set_enode(snf_entity_t *en) {
     if (!en) return NULL;
 

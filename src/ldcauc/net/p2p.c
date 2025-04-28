@@ -12,7 +12,7 @@ peer_service_t peer_service = {};
 
 struct hashmap *init_peer_enode_map();
 
-const void *set_peer_enode(peer_propt_t *en);
+l_err set_peer_enode(peer_propt_t *en);
 
 l_err delete_peer_enode(uint16_t gs_sac, int8_t (*clear_func)(peer_propt_t *en));
 
@@ -88,12 +88,12 @@ struct hashmap *init_peer_enode_map() {
                        hash_peer_enode, NULL, NULL, NULL);
 }
 
-const void *set_peer_enode(peer_propt_t *en) {
-    if (!en) return NULL;
+l_err set_peer_enode(peer_propt_t *en) {
+    if (!en) return LD_ERR_NULL;
 
     const void *ret = hashmap_set(peer_service.peer_map, en);
     /* !!!Do not free the previous entity !!! */
-    return ret;
+    return LD_OK;
 }
 
 peer_propt_t *get_peer_enode(const uint16_t gs_sac) {
