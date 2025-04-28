@@ -335,6 +335,7 @@ static int write_packet(basic_conn_t *bc) {
         lfqueue_get(bc->write_pkts, (void **) &b);
         if (!b) return ERROR;
         len = write(bc->fd, b->ptr, b->len);
+        log_error("??? %d %d", bc->fd, bc->remote_port);
         free_buffer(b);
 
         /* delay the next transmission */
@@ -349,6 +350,7 @@ static int write_packet(basic_conn_t *bc) {
 
 static int response_send_buffer(basic_conn_t *bc) {
     int status;
+
     status = write_packet(bc);
     if (status != OK) {
         return status;

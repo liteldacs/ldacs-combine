@@ -17,6 +17,11 @@ typedef struct peer_propt_s {
     uint16_t SAC;
 } peer_propt_t;
 
+typedef struct peer_propt_node_s {
+    peer_propt_t *propt;
+    uint16_t GS_SAC;
+} peer_propt_node_t;
+
 typedef struct peer_service_s {
     struct hashmap *peer_map;
     net_ctx_t p2p_ctx;

@@ -8,7 +8,7 @@ gs:
   peers:
     - peer_addr: 127.0.0.1
       peer_port: 23456
-      peer_UA: 10086
+      peer_UA: 4000
 
 gsnf:
   gsnf_addr: 127.0.0.1
