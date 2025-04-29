@@ -295,7 +295,6 @@ int8_t handover_initiate(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GST_SAC) {
 int8_t handover_response(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_SAC, uint16_t GST_SAC) {
     if (snf_obj.is_merged) {
     } else {
-        log_warn("??????????????? %d %d %d %d", AS_SAC, AS_UA, GSS_SAC, GST_SAC);
         register_snf_en(ROLE_GS, AS_SAC, AS_UA, GST_SAC);
         conn_service.sgw_conn->bc.opt->send_handler(&conn_service.sgw_conn->bc, &(gsnf_key_upd_remind_t){
                                                         GSNF_KEY_UPD_REMIND, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_C,

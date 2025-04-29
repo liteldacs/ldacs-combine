@@ -358,7 +358,6 @@ l_err recv_key_update_resp(buffer_t *buf, snf_entity_t *as_man) {
                             }, &gs_key_trans_desc, "GS KEY"
     );
     gs_propt_node_t *save = get_conn_enode(key_upd_resp.SAC_dst);
-    log_warn("!!!!!!!!!!! %d", key_upd_resp.SAC_dst);
     if (!save || save->propt->bc.opt->send_handler(&save->propt->bc, &(gsnf_pkt_cn_t){
                                                        GSNF_KEY_TRANS, DEFAULT_GSNF_VERSION, as_man->AS_SAC, ELE_TYP_8,
                                                        sdu
