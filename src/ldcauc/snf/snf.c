@@ -132,11 +132,12 @@ int8_t clear_snf_en(snf_entity_t *snf_en) {
     return LDCAUC_OK;
 }
 
-
 int8_t snf_LME_AUTH(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, uint16_t GS_SAC) {
     snf_obj.as_snf_en = init_snf_en(role, AS_SAC, AS_UA, GS_SAC);
     if (!snf_obj.as_snf_en) {
-        snf_obj.register_fail_func(AS_SAC);
+        if (snf_obj.register_fail_func) {
+            snf_obj.register_fail_func(AS_SAC);
+        }
         return LDCAUC_INTERNAL_ERROR;
     }
     l_err err;
