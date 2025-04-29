@@ -19,7 +19,6 @@
 #define MAX_ORDER 0xFF
 
 #define RPSO_DELAY_INTVL  MF_TIMER
-#define GSNF_MSG_MAX_LEN 512
 #define GTYP_LEN 4
 
 #define DEFAULT_GSNF_VERSION 0x01

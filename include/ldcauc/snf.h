@@ -16,7 +16,6 @@
 #include "gs_conn.h"
 
 #define DEFAULT_GSNF_VERSION 0x01
-#define GSNF_MSG_MAX_LEN 512
 #define GTYP_LEN 4
 
 #define DFT_SGW_UA 10000
@@ -127,7 +126,6 @@ typedef struct snf_obj_s {
     finish_auth finish_auth_func;
 
     bool is_merged;
-
 } snf_obj_t;
 
 extern snf_obj_t snf_obj;

@@ -70,7 +70,7 @@ l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_coun
         .conn_handler = p2p_conn_connect,
         .accept_handler = p2p_conn_accept,
         .recv_handler = p2p_conn_recv,
-        .send_handler = NULL,
+        .send_handler = defalut_send_pkt,
         .close_handler = p2p_conn_close,
         .epoll_fd = core_epoll_create(0, -1),
     };

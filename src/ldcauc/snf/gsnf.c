@@ -43,34 +43,6 @@ static void free_gsg_sac_pkg(gsg_sac_pkt_t *gsnf_sac) {
 }
 
 
-l_err trans_gsnf(gs_propt_t *conn, void *pkg, struct_desc_t *desc, l_err (*mid_func)(buffer_t *, void *),
-                 void *args) {
-    if (conn == NULL) return LD_ERR_INTERNAL;
-    pb_stream gsnf_pbs;
-    uint8_t gsnf_raw[MAX_SNP_SDU_LEN] = {0};
-
-
-    init_pbs(&gsnf_pbs, gsnf_raw, GSNF_MSG_MAX_LEN, "GSNF BUF");
-    if (!out_struct(pkg, desc, &gsnf_pbs, NULL)) {
-        log_error("Cannot generate GSNF message!");
-        return LD_ERR_INTERNAL;
-    }
-
-    close_output_pbs(&gsnf_pbs);
-
-    buffer_t *gsnf_buf = init_buffer_unptr();
-    if (mid_func) {
-        mid_func(gsnf_buf, args);
-    }
-    // CLONE_TO_CHUNK(*gsnf_buf, gsnf_pbs.start, pbs_offset(&gsnf_pbs));
-    cat_to_buffer(gsnf_buf, gsnf_pbs.start, pbs_offset(&gsnf_pbs));
-    log_buf(LOG_FATAL, "GSNF OUT", gsnf_buf->ptr, gsnf_buf->len);
-
-    send_packet(&conn->bc, gsnf_buf);
-
-    return LD_OK;
-}
-
 static l_err parse_gsg_sac_pkt(buffer_t *pdu, gsg_sac_pkt_t **gsnf_pkg_ptr) {
     pb_stream gsnf_sac_pbs;
     zero(&gsnf_sac_pbs);

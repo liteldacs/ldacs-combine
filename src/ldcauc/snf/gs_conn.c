@@ -42,7 +42,7 @@ l_err init_client_gs_conn_service(char *remote_addr, int remote_port, int local_
         .conn_handler = gs_conn_connect,
         .recv_handler = recv_handler,
         .close_handler = gs_conn_close,
-        .send_handler = trans_gsnf,
+        .send_handler = defalut_send_pkt,
         .epoll_fd = core_epoll_create(0, -1),
     };
 
@@ -61,7 +61,7 @@ l_err init_server_gs_conn_service(int listen_port) {
         .recv_handler = recv_gsnf,
         .close_handler = gs_conn_close,
         .accept_handler = gs_conn_accept,
-        .send_handler = trans_gsnf,
+        .send_handler = defalut_send_pkt,
         .epoll_fd = core_epoll_create(0, -1),
     };
     init_heap_desc(&conn_service.net_ctx.hd_conns);
