@@ -87,7 +87,7 @@ typedef enum {
 typedef struct snf_entity_s {
     uint32_t AS_UA;
     uint16_t AS_SAC;
-    uint16_t GS_SAC; /* current connected/to connect GS SAC for AS */
+    uint16_t CURR_GS_SAC; /* current connected/to connect GS SAC for AS */
 
     uint8_t AUTHC_MACLEN,
             AUTHC_AUTH_ID,
@@ -121,6 +121,7 @@ typedef struct snf_obj_s {
 
     trans_snp trans_snp_func;
     register_snf_fail register_fail_func;
+    finish_handover finish_handover_func;
 
     //AS
     finish_auth finish_auth_func;

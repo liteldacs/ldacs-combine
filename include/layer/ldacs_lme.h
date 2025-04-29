@@ -175,10 +175,10 @@ typedef struct lme_as_man_s {
     uint16_t AS_SAC;
     uint16_t AS_CURR_GS_SAC; /* current connected/to connect GS SAC for AS */
 
-//    uint8_t AUTHC_MACLEN,
-//            AUTHC_AUTH_ID,
-//            AUTHC_ENC_ID,
-//            AUTHC_KLEN;
+    //    uint8_t AUTHC_MACLEN,
+    //            AUTHC_AUTH_ID,
+    //            AUTHC_ENC_ID,
+    //            AUTHC_KLEN;
     ld_co_t CO;
 
     // for GS
@@ -477,6 +477,8 @@ int8_t trans_snp_data(uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size_t buf
 
 int8_t register_snf_failed(uint16_t SAC);
 
+int8_t finish_handover_func(uint16_t AS_SAC, uint16_t GSS_SAC);
+
 /* mms */
 l_err init_lme_mms(lme_layer_objs_t *obj);
 
@@ -521,14 +523,14 @@ static uint64_t hash_lme_as_enode(const void *item, uint64_t seed0, uint64_t see
 }
 
 static lme_as_man_t *get_lme_as_enode(const uint16_t as_sac) {
-    return hashmap_get(lme_layer_objs.LME_GS_AUTH_AS, &(lme_as_man_t) {.AS_SAC = as_sac});
+    return hashmap_get(lme_layer_objs.LME_GS_AUTH_AS, &(lme_as_man_t){.AS_SAC = as_sac});
 }
 
 static const bool has_lme_as_enode(const uint16_t as_sac) {
-    return hashmap_get(lme_layer_objs.LME_GS_AUTH_AS, &(lme_as_man_t) {.AS_SAC = as_sac}) != NULL;
+    return hashmap_get(lme_layer_objs.LME_GS_AUTH_AS, &(lme_as_man_t){.AS_SAC = as_sac}) != NULL;
 }
 
-static lme_as_man_t * get_lme_as_enode_by_ua(const uint32_t UA) {
+static lme_as_man_t *get_lme_as_enode_by_ua(const uint32_t UA) {
     size_t iter = 0;
     void *item;
     while (hashmap_iter(lme_layer_objs.LME_GS_AUTH_AS, &iter, &item)) {

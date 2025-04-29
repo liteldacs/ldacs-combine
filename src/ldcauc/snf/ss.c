@@ -21,7 +21,7 @@ l_err send_auc_rqst(void *args) {
         . VER = snf_obj.PROTOCOL_VER,
         . PID = PID_MAC,
         . AS_SAC = as_man->AS_SAC,
-        . GS_SAC = as_man->GS_SAC,
+        . GS_SAC = as_man->CURR_GS_SAC,
         . MAC_LEN = as_man->AUTHC_MACLEN,
         . AUTH_ID = as_man->AUTHC_AUTH_ID,
         . ENC_ID = as_man->AUTHC_ENC_ID,
@@ -87,13 +87,13 @@ l_err send_auc_resp(void *args) {
             . ENC_ID = as_man->AUTHC_ENC_ID,
             . N_2 = n_2,
             . AS_SAC = as_man->AS_SAC,
-            . GS_SAC = as_man->GS_SAC,
+            . GS_SAC = as_man->CURR_GS_SAC,
             . K_LEN = as_man->AUTHC_KLEN,
         }
     );
 
     if (generate_auc_kdf(snf_obj.role, as_man->shared_random, &as_man->key_as_sgw_s_h, &as_man->key_as_gs_h,
-                         &as_man->key_as_gs_b, as_man->AS_UA, as_man->GS_SAC)) {
+                         &as_man->key_as_gs_b, as_man->AS_UA, as_man->CURR_GS_SAC)) {
         //进入错误状态
         return LD_ERR_INTERNAL;
     }
@@ -103,7 +103,7 @@ l_err send_auc_resp(void *args) {
         . VER = snf_obj.PROTOCOL_VER,
         . PID = PID_MAC,
         . AS_SAC = as_man->AS_SAC,
-        . GS_SAC = as_man->GS_SAC,
+        . GS_SAC = as_man->CURR_GS_SAC,
         . MAC_LEN = as_man->AUTHC_MACLEN,
         . AUTH_ID = as_man->AUTHC_AUTH_ID,
         . ENC_ID = as_man->AUTHC_ENC_ID,
@@ -141,7 +141,7 @@ l_err recv_auc_resp(buffer_t *buf, snf_entity_t *as_man) {
     );
 
     if (generate_auc_kdf(snf_obj.role, as_man->shared_random, &as_man->key_as_sgw_s_h, &as_man->key_as_gs_h,
-                         &as_man->key_as_gs_b, as_man->AS_UA, as_man->GS_SAC)) {
+                         &as_man->key_as_gs_b, as_man->AS_UA, as_man->CURR_GS_SAC)) {
         //进入错误状态
         return LD_ERR_INTERNAL;
     }
@@ -184,7 +184,7 @@ l_err send_auc_key_exec(void *args) {
         . VER = snf_obj.PROTOCOL_VER,
         . PID = PID_MAC,
         . AS_SAC = as_man->AS_SAC,
-        . GS_SAC = as_man->GS_SAC,
+        . GS_SAC = as_man->CURR_GS_SAC,
         . MAC_LEN = as_man->AUTHC_MACLEN,
         . AUTH_ID = as_man->AUTHC_AUTH_ID,
         . ENC_ID = as_man->AUTHC_ENC_ID,
@@ -250,7 +250,7 @@ l_err finish_auc(void *args) {
                             }, &gs_key_trans_desc, "GS KEY"
     );
 
-    gs_propt_node_t *save = get_conn_enode(as_man->GS_SAC);
+    gs_propt_node_t *save = get_conn_enode(as_man->CURR_GS_SAC);
     if (save && save->propt->bc.opt->send_handler(&save->propt->bc, &(gsnf_pkt_cn_t){
                                                       GSNF_KEY_TRANS, DEFAULT_GSNF_VERSION, as_man->AS_SAC, ELE_TYP_8,
                                                       sdu
@@ -286,7 +286,7 @@ l_err send_key_update_rqst(snf_entity_t *en, uint16_t GST_SAC) {
         .PID = PID_MAC,
         .AS_SAC = en->AS_SAC,
         .KEY_TYPE = MASTER_KEY_AS_SGW,
-        .SAC_src = en->GS_SAC,
+        .SAC_src = en->CURR_GS_SAC,
         .SAC_dst = GST_SAC, /* 假设GS没变 */
         .NCC = 10086,
         .NONCE = nonce,
@@ -441,7 +441,7 @@ l_err handle_send_msg(void *args, struct_desc_t *desc, snf_entity_t *as_man, KEY
                                               },
                                               &gsnf_pkt_cn_desc, NULL, NULL);
     } else if (snf_obj.role == LD_AS) {
-        snf_obj.trans_snp_func(as_man->AS_SAC, as_man->GS_SAC, lme_ss_pbs.start, pbs_offset(&lme_ss_pbs));
+        snf_obj.trans_snp_func(as_man->AS_SAC, as_man->CURR_GS_SAC, lme_ss_pbs.start, pbs_offset(&lme_ss_pbs));
     }
 
     return LD_OK;

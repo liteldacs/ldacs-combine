@@ -27,6 +27,7 @@ typedef struct peer_service_s {
 
 #pragma pack(1)
 typedef struct ho_peer_ini_s {
+    uint8_t is_ACK;
     uint16_t AS_SAC;
     uint32_t AS_UA;
     uint16_t GSS_SAC;

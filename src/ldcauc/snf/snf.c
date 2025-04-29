@@ -23,14 +23,14 @@ void init_as_snf_layer(finish_auth finish_auth, trans_snp trans_snp, register_sn
 }
 
 void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
-                       trans_snp trans_snp, register_snf_fail register_fail) {
+                       trans_snp trans_snp, register_snf_fail register_fail, finish_handover finish_ho) {
     snf_obj.snf_emap = init_enode_map();
     snf_obj.role = LD_GS;
     snf_obj.GS_SAC = GS_SAC;
 
     snf_obj.trans_snp_func = trans_snp;
     snf_obj.register_fail_func = register_fail;
-
+    snf_obj.finish_handover_func = finish_ho;
 
     if (init_client_gs_conn_service(gsnf_addr, gsnf_remote_port, gsnf_local_port, recv_gsg) != LD_OK) {
         log_warn("Cannot init GS connection service");
@@ -41,13 +41,14 @@ void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_po
 
 
 void init_gs_snf_layer_unmerged(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
-                                trans_snp trans_snp, register_snf_fail register_fail) {
+                                trans_snp trans_snp, register_snf_fail register_fail, finish_handover finish_ho) {
     snf_obj.snf_emap = init_enode_map();
     snf_obj.role = LD_GS;
     snf_obj.GS_SAC = GS_SAC;
 
     snf_obj.trans_snp_func = trans_snp;
     snf_obj.register_fail_func = register_fail;
+    snf_obj.finish_handover_func = finish_ho;
     if (init_client_gs_conn_service(gsnf_addr, gsnf_remote_port, gsnf_local_port, recv_gsnf) != LD_OK) {
         log_warn("Cannot init GS connection service");
     }
@@ -76,7 +77,7 @@ static snf_entity_t *init_snf_en(uint8_t role, uint16_t AS_SAC, uint32_t AS_UA, 
 
     snf_en->AS_SAC = AS_SAC;
     snf_en->AS_UA = AS_UA;
-    snf_en->GS_SAC = GS_SAC;
+    snf_en->CURR_GS_SAC = GS_SAC;
 
     snf_en->AUTHC_MACLEN = AUTHC_MACLEN_256; /* default mac len is 256  */
     snf_en->AUTHC_AUTH_ID = AUTHC_AUTH_SM3HMAC;
@@ -278,24 +279,11 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
 }
 
 
-int8_t handover_initiate(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GST_SAC) {
-    peer_propt_t *peer = get_peer_propt(GST_SAC);
-    if (!peer) return LD_ERR_NULL;
-
-    peer->bc.opt->send_handler(&peer->bc, &(ho_peer_ini_t){
-                                   .AS_SAC = AS_SAC,
-                                   .AS_UA = AS_UA,
-                                   .GSS_SAC = snf_obj.GS_SAC,
-                                   .GST_SAC = GST_SAC
-                               }, &handover_peer_ini_desc, NULL, NULL);
-
-    return LDCAUC_OK;
-}
-
 int8_t handover_response(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_SAC, uint16_t GST_SAC) {
     if (snf_obj.is_merged) {
     } else {
-        register_snf_en(ROLE_GS, AS_SAC, AS_UA, GST_SAC);
+        /* GS SAC for current GS (before handover) */
+        register_snf_en(ROLE_GS, AS_SAC, AS_UA, GSS_SAC);
         conn_service.sgw_conn->bc.opt->send_handler(&conn_service.sgw_conn->bc, &(gsnf_key_upd_remind_t){
                                                         GSNF_KEY_UPD_REMIND, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_C,
                                                         GSS_SAC, GST_SAC

@@ -139,10 +139,11 @@ l_err make_lme_layer() {
                 case LD_GS: {
                     config.is_merged == TRUE
                         ? init_gs_snf_layer(config.GS_SAC, config.gsnf_addr, config.gsnf_remote_port,
-                                            config.gsnf_local_port, trans_snp_data, NULL)
+                                            config.gsnf_local_port, trans_snp_data, register_snf_failed,
+                                            finish_handover_func)
                         : init_gs_snf_layer_unmerged(config.GS_SAC, config.gsnf_addr, config.gsnf_remote_port,
                                                      config.gsnf_local_port,
-                                                     trans_snp_data, register_snf_failed);
+                                                     trans_snp_data, register_snf_failed, finish_handover_func);
 
                     /* GS set the initial state 'OPEN' */
                     init_lme_fsm(&lme_layer_objs, LME_OPEN);
@@ -245,10 +246,17 @@ void L_SAPC(ld_prim_t *prim) {
                     log_warn("No such AS with UA `%d`", handover_opt->UA);
                     break;
                 }
-                if (handover_initiate(as_man->AS_SAC, as_man->AS_UA, handover_opt->GST_SAC) != LD_OK) {
-                    log_warn("No such peer connection, GST SAC:`%d` !", handover_opt->GST_SAC);
-                    return;
-                }
+
+                peer_propt_t *peer = get_peer_propt(handover_opt->GST_SAC);
+                if (!peer) return;
+
+                peer->bc.opt->send_handler(&peer->bc, &(ho_peer_ini_t){
+                                               .is_ACK = FALSE,
+                                               .AS_SAC = as_man->AS_SAC,
+                                               .AS_UA = as_man->AS_UA,
+                                               .GSS_SAC = snf_obj.GS_SAC,
+                                               .GST_SAC = handover_opt->GST_SAC
+                                           }, &handover_peer_ini_desc, NULL, NULL);
             }
 
             break;
@@ -461,5 +469,18 @@ int8_t register_snf_failed(uint16_t AS_SAC) {
     } else {
         delete_lme_as_node_by_sac(AS_SAC, clear_as_man);
     }
+    return LD_OK;
+}
+
+int8_t finish_handover_func(uint16_t AS_SAC, uint16_t GSS_SAC) {
+    peer_propt_t *peer = get_peer_propt(GSS_SAC);
+    if (!peer) return LD_ERR_INTERNAL;
+    peer->bc.opt->send_handler(&peer->bc, &(ho_peer_ini_t){
+                                   .is_ACK = TRUE,
+                                   .AS_SAC = AS_SAC,
+                                   .AS_UA = 0, //useless in ACK, set 0
+                                   .GSS_SAC = GSS_SAC,
+                                   .GST_SAC = 0,
+                               }, &handover_peer_ini_desc, NULL, NULL);
     return LD_OK;
 }

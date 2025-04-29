@@ -11,6 +11,7 @@
 peer_service_t peer_service = {};
 
 static field_desc handover_peer_ini_fields[] = {
+    {ft_set, 1, "Forward", NULL},
     {ft_set, SAC_LEN, "AS_SAC", NULL},
     {ft_set, UA_LEN, "AS_UA", NULL},
     {ft_set, SAC_LEN, "GSS_SAC", NULL},
@@ -76,7 +77,11 @@ l_err p2p_conn_recv(basic_conn_t *bc) {
         free(ini);
         return LD_ERR_INTERNAL;
     }
-    handover_response(ini->AS_SAC, ini->AS_UA, ini->GSS_SAC, ini->GST_SAC);
+    if (ini->is_ACK == FALSE) {
+        handover_response(ini->AS_SAC, ini->AS_UA, ini->GSS_SAC, ini->GST_SAC);
+    } else {
+        log_info("Handover finished! Waiting for cell exit");
+    }
     free(ini);
     return LD_OK;
 }

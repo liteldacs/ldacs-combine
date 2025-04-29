@@ -57,6 +57,8 @@ typedef int8_t (*trans_snp)(uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size
 
 typedef int8_t (*register_snf_fail)(uint16_t AS_SAC);
 
+typedef int8_t (*finish_handover)(uint16_t AS_SAC, uint16_t GSS_SAC);
+
 /**
  * \brief  AS初始化SNF层
  * @param[in] finish_auth   认证完成回调函数
@@ -71,12 +73,13 @@ void init_as_snf_layer(finish_auth finish_auth, trans_snp trans_snp, register_sn
  * @param gsnf_local_port
  * @param[in] trans_snp     LME->SNP 回调函数
  * @param[in] register_fail 注册失败回调
+ * @param finish_ho
  */
 void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
-                       trans_snp trans_snp, register_snf_fail register_fail);
+                       trans_snp trans_snp, register_snf_fail register_fail, finish_handover finish_ho);
 
 void init_gs_snf_layer_unmerged(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
-                                trans_snp trans_snp, register_snf_fail register_fail);
+                                trans_snp trans_snp, register_snf_fail register_fail, finish_handover finish_ho);
 
 /**
  * \brief  网关初始化SNF层
@@ -127,14 +130,6 @@ int8_t unregister_snf_en(uint16_t AS_SAC);
  * @param[in] buf_len   报文长度
  */
 int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_buf, size_t buf_len);
-
-/**
- *
- * @param AS_SAC
- * @param GST_SAC
- * @return
- */
-int8_t handover_initiate(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GST_SAC);
 
 /**
  *
