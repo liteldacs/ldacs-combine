@@ -4,7 +4,6 @@
 
 #include "snf.h"
 #include "crypto/authc.h"
-#include "net/net_core.h"
 
 fsm_event_t ld_authc_fsm_events[] = {
     {"LD_AUTHC_A0", NULL, NULL},
@@ -269,6 +268,7 @@ uint64_t hash_enode(const void *item, uint64_t seed0, uint64_t seed1) {
     const snf_entity_t *node = item;
     return hashmap_sip(&node->AS_SAC, sizeof(uint16_t), seed0, seed1);
 }
+
 struct hashmap *init_enode_map() {
     return hashmap_new(sizeof(snf_entity_t), 0, 0, 0,
                        hash_enode, NULL, NULL, NULL);

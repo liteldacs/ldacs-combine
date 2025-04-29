@@ -3,7 +3,7 @@
 //
 
 #include "ldacs_def.h"
-#include "net/p2p.h"
+#include "../../include/layer/layer_p2p.h"
 
 #include "gs_conn.h"
 

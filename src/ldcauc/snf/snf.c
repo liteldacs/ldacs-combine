@@ -273,11 +273,11 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
 }
 
 
-int8_t handover_initiate(uint16_t AS_SAC) {
+int8_t handover_initiate(uint16_t AS_SAC, uint16_t GST_SAC) {
     if (snf_obj.is_merged) {
     } else {
         trans_gsnf(conn_service.sgw_conn, &(gsnf_key_upd_remind_t){
-                       GSNF_KEY_UPD_REMIND, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_C, 10086, 10087
+                       GSNF_KEY_UPD_REMIND, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_C, snf_obj.GS_SAC, GST_SAC
                    }, &gsnf_key_upd_remind_desc, NULL, NULL);
     }
     return LDCAUC_OK;
@@ -286,9 +286,9 @@ int8_t handover_initiate(uint16_t AS_SAC) {
 int8_t handover_response(uint16_t AS_SAC) {
     if (snf_obj.is_merged) {
     } else {
-        trans_gsnf(conn_service.sgw_conn, &(gsnf_key_upd_remind_t){
-                       GSNF_KEY_UPD_REMIND, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_C, 10086, 10087
-                   }, &gsnf_key_upd_remind_desc, NULL, NULL);
+        // trans_gsnf(conn_service.sgw_conn, &(gsnf_key_upd_remind_t){
+        //                GSNF_KEY_UPD_REMIND, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_C, snf_obj.GS_SAC, GST_SAC
+        //            }, &gsnf_key_upd_remind_desc, NULL, NULL);
     }
     return LDCAUC_OK;
 }

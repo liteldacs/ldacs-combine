@@ -49,7 +49,7 @@ extern rcu_layer_obj_t rcu_layer_obj;
 
 typedef struct handover_opt_s {
     uint32_t UA;
-    uint32_t SAC;
+    uint32_t GST_SAC;
 }handover_opt_t;
 
 #pragma pack(1)

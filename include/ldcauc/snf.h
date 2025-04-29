@@ -14,7 +14,6 @@
 #include "ldcauc.h"
 #include "snp_sub.h"
 #include "gs_conn.h"
-#include "net/net_epoll.h"
 
 #define DEFAULT_GSNF_VERSION 0x01
 #define GSNF_MSG_MAX_LEN 512

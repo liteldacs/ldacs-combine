@@ -4,7 +4,7 @@
 
 #ifndef GS_CONN_H
 #define GS_CONN_H
-#include "net/connection.h"
+#include <ld_net.h>
 #include <ld_hashmap.h>
 
 typedef struct gs_propt_s {
@@ -40,11 +40,9 @@ l_err init_client_gs_conn_service(char *remote_addr, int remote_port, int local_
 
 l_err init_server_gs_conn_service(int listen_port);
 
-bool recv_gs_pkt(basic_conn_t *bc);
-
 bool send_gs_pkt(basic_conn_t *bc);
 
-bool forward_gs_pkt(basic_conn_t *bc);
+l_err gs_conn_send(basic_conn_t *bc, buffer_t *buf);
 
 bool reset_gs_conn(basic_conn_t *bc);
 

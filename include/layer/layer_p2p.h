@@ -5,10 +5,9 @@
 #ifndef P2P_H
 #define P2P_H
 
-#include "ldacs_def.h"
-#include "connection.h"
-#include "ld_config.h"
-
+#include <ldacs_def.h>
+#include <ld_config.h>
+#include <ld_net.h>
 #include <ld_hashmap.h>
 
 

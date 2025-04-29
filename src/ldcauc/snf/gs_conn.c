@@ -4,7 +4,6 @@
 
 #include "gs_conn.h"
 #include <ld_config.h>
-#include "net/net.h"
 #include "snf.h"
 
 l_err init_conn_enode_map(struct hashmap **map);
@@ -31,6 +30,7 @@ static l_err init_basic_gs_conn_service() {
     return LD_OK;
 }
 
+
 l_err init_client_gs_conn_service(char *remote_addr, int remote_port, int local_port,
                                   l_err (*recv_handler)(basic_conn_t *)) {
     l_err err;
@@ -42,6 +42,7 @@ l_err init_client_gs_conn_service(char *remote_addr, int remote_port, int local_
         .conn_handler = gs_conn_connect,
         .recv_handler = recv_handler,
         .close_handler = gs_conn_close,
+        .send_handler = gs_conn_send,
         .epoll_fd = core_epoll_create(0, -1),
     };
 
@@ -60,6 +61,7 @@ l_err init_server_gs_conn_service(int listen_port) {
         .recv_handler = recv_gsnf,
         .close_handler = gs_conn_close,
         .accept_handler = gs_conn_accept,
+        .send_handler = gs_conn_send,
         .epoll_fd = core_epoll_create(0, -1),
     };
     init_heap_desc(&conn_service.net_ctx.hd_conns);
@@ -102,10 +104,10 @@ l_err gs_conn_accept(net_ctx_t *ctx) {
 
     for (int i = 0; conn_service.conn_defines[i].addr != NULL; i++) {
         if (client_port == conn_service.conn_defines[i].port) {
-            gs_propt_node_t *save = calloc(1, sizeof(gs_propt_node_t));
-            save->propt = gs_conn;
-            save->GS_SAC = conn_service.conn_defines[i].GS_SAC;
-            if (set_conn_enode(save) != LD_OK) {
+            gs_propt_node_t *node = calloc(1, sizeof(gs_propt_node_t));
+            node->propt = gs_conn;
+            node->GS_SAC = conn_service.conn_defines[i].GS_SAC;
+            if (set_conn_enode(node) != LD_OK) {
                 return LD_ERR_NULL;
             }
             return LD_OK;
@@ -115,6 +117,14 @@ l_err gs_conn_accept(net_ctx_t *ctx) {
     log_warn("Not available GS connection from port `%d`!", client_port);
     return LD_ERR_INTERNAL;
 }
+
+l_err gs_conn_send(basic_conn_t *bc, buffer_t *buf) {
+    if (!bc) return LD_ERR_NULL;
+    lfqueue_put(bc->write_pkts, buf);
+    net_epoll_out(bc->opt->epoll_fd, bc);
+    return LD_OK;
+}
+
 
 bool reset_gs_conn(basic_conn_t *bc) {
     gs_propt_t *mlt_ld = (gs_propt_t *) bc;

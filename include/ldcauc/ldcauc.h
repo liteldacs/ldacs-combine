@@ -131,9 +131,10 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
 /**
  *
  * @param AS_SAC
+ * @param GST_SAC
  * @return
  */
-int8_t handover_initiate(uint16_t AS_SAC);
+int8_t handover_initiate(uint16_t AS_SAC, uint16_t GST_SAC);
 
 /**
  * \brief 产生至多64位随机数

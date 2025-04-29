@@ -5,7 +5,7 @@
 
 #include "ldacs_lme.h"
 #include "snf.h"
-#include "net/p2p.h"
+#include "../../../include/layer/layer_p2p.h"
 
 static lyr_desc_t *sn_upper_lyr[] = {
 };
@@ -246,7 +246,7 @@ void L_SAPC(ld_prim_t *prim) {
                     log_warn("No such AS with UA `%d`", handover_opt->UA);
                     break;
                 }
-                handover_initiate(as_man->AS_SAC);
+                handover_initiate(as_man->AS_SAC, handover_opt->GST_SAC);
             }
 
             break;
