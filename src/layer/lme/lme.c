@@ -245,7 +245,7 @@ void L_SAPC(ld_prim_t *prim) {
                     log_warn("No such AS with UA `%d`", handover_opt->UA);
                     break;
                 }
-                if (handover_initiate(as_man->AS_SAC, handover_opt->GST_SAC) != LD_OK) {
+                if (handover_initiate(as_man->AS_SAC, as_man->AS_UA, handover_opt->GST_SAC) != LD_OK) {
                     log_warn("No such peer connection, GST SAC:`%d` !", handover_opt->GST_SAC);
                     return;
                 }

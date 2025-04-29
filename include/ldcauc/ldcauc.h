@@ -134,14 +134,15 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
  * @param GST_SAC
  * @return
  */
-int8_t handover_initiate(uint16_t AS_SAC, uint16_t GST_SAC);
+int8_t handover_initiate(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GST_SAC);
 
 /**
  *
  * @param AS_SAC
+ * @param AS_UA
  * @return
  */
-int8_t handover_response(uint16_t AS_SAC, uint16_t GSS_SAC, uint16_t GST_SAC);
+int8_t handover_response(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_SAC, uint16_t GST_SAC);
 
 /**
  * \brief 产生至多64位随机数

@@ -12,6 +12,7 @@ peer_service_t peer_service = {};
 
 static field_desc handover_peer_ini_fields[] = {
     {ft_set, SAC_LEN, "AS_SAC", NULL},
+    {ft_set, UA_LEN, "AS_UA", NULL},
     {ft_set, SAC_LEN, "GSS_SAC", NULL},
     {ft_set, SAC_LEN, "GST_SAC", NULL},
     {ft_pad, 0, "PAD", NULL},
@@ -75,7 +76,7 @@ l_err p2p_conn_recv(basic_conn_t *bc) {
         free(ini);
         return LD_ERR_INTERNAL;
     }
-    handover_response(ini->AS_SAC, ini->GSS_SAC, ini->GST_SAC);
+    handover_response(ini->AS_SAC, ini->AS_UA, ini->GSS_SAC, ini->GST_SAC);
     free(ini);
     return LD_OK;
 }
