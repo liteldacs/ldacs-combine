@@ -14,7 +14,6 @@
 
 typedef struct peer_propt_s {
     basic_conn_t bc;
-    uint16_t SAC;
 } peer_propt_t;
 
 typedef struct peer_propt_node_s {

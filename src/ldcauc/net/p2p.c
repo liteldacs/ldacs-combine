@@ -71,7 +71,6 @@ l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_coun
                  server_port);
         peer_propt_t *propt = client_entity_setup(&peer_service.p2p_ctx, peer->peer_addr, peer->peer_port, 0);
         if (!propt) { return LD_ERR_NULL; }
-        propt->SAC = peer->peer_SAC;
         peer_propt_node_t *node = calloc(1, sizeof(peer_propt_node_t));
         node->propt = propt;
         node->GS_SAC = peer->peer_SAC;

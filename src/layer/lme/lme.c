@@ -246,7 +246,7 @@ void L_SAPC(ld_prim_t *prim) {
                     log_warn("No such AS with UA `%d`", handover_opt->UA);
                     break;
                 }
-                handover_trigger(as_man->AS_SAC);
+                handover_initiate(as_man->AS_SAC);
             }
 
             break;
