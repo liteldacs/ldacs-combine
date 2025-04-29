@@ -9,7 +9,7 @@ SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 #cmake_host_system_information(RESULT PRETTY_NAME QUERY DISTRIB_PRETTY_NAME)
 #        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -L/opt/rh/devtoolset-8/root/lib/gcc/x86_64-redhat-linux/8/ -g")
-    #    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=leak -g")
+#    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=leak -g")
 #message(${CMAKE_C_COMPILER})
 
 
@@ -31,11 +31,11 @@ add_executable(${PROJECT_NAME} main.c)
 add_executable(cli::test_client ALIAS ${PROJECT_NAME})
 
 
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal cli::ldacs_device
-        event event_pthreads ldcauc )
-
 #target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal cli::ldacs_device
-#        event event_pthreads )
+#        event event_pthreads ldcauc )
+
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal cli::ldacs_device
+        event event_pthreads)
 
 find_package(SQLite3 REQUIRED)
 if (SQLite3_FOUND)
@@ -44,11 +44,11 @@ if (SQLite3_FOUND)
     message(${SQLite3_VERSION})
 endif (SQLite3_FOUND)
 
-#find_package(Ldcauc REQUIRED)
-#if (Ldcauc_FOUND)
-#    include_directories(${Ldcauc_INCLUDE_DIRS})
-#    link_libraries(ldcauc::ldcauc)
-#endif ()
+find_package(Ldcauc REQUIRED)
+if (Ldcauc_FOUND)
+    include_directories(${Ldcauc_INCLUDE_DIRS})
+    link_libraries(ldcauc::ldcauc)
+endif ()
 
 find_package(LiteLdacsSdk REQUIRED)
 if (LiteLdacsSdk_FOUND)
@@ -78,17 +78,17 @@ INSTALL(TARGETS ${PROJECT_NAME} ARCHIVE DESTINATION lib/liteldacs LIBRARY DESTIN
 INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION include/liteldacs)
 
 set(LDCAUC_DIR "$ENV{HOME}/.ldcauc")
-if(NOT EXISTS "${LDCAUC_DIR}")
+if (NOT EXISTS "${LDCAUC_DIR}")
     message("Creating directory: ${LDCAUC_DIR}")
     file(MAKE_DIRECTORY "${LDCAUC_DIR}")
-else()
+else ()
     message("Directory already exists: ${LDCAUC_DIR}")
-endif()
+endif ()
 
 set(LDCAUC_KEYSTORE_DIR "${LDCAUC_DIR}/keystore")
-if(NOT EXISTS "${LDCAUC_KEYSTORE_DIR}")
+if (NOT EXISTS "${LDCAUC_KEYSTORE_DIR}")
     message("Creating directory: ${LDCAUC_KEYSTORE_DIR}")
     file(MAKE_DIRECTORY "${LDCAUC_KEYSTORE_DIR}")
-else()
+else ()
     message("Directory already exists: ${LDCAUC_KEYSTORE_DIR}")
-endif()
+endif ()

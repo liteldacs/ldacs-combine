@@ -3,7 +3,6 @@
 //
 #include "snf.h"
 
-#include "layer_p2p.h"
 #include "crypto/authc.h"
 #include "crypto/key.h"
 
