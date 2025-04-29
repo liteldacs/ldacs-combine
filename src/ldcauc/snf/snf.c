@@ -2,6 +2,8 @@
 // Created by 邹嘉旭 on 2025/3/30.
 //
 #include "snf.h"
+
+#include "layer_p2p.h"
 #include "crypto/authc.h"
 #include "crypto/key.h"
 
@@ -277,13 +279,24 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
 
 
 int8_t handover_initiate(uint16_t AS_SAC, uint16_t GST_SAC) {
-    if (snf_obj.is_merged) {
-    } else {
-        conn_service.sgw_conn->bc.opt->send_handler(&conn_service.sgw_conn->bc, &(gsnf_key_upd_remind_t){
-                                                        GSNF_KEY_UPD_REMIND, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_C,
-                                                        snf_obj.GS_SAC, GST_SAC
-                                                    }, &gsnf_key_upd_remind_desc, NULL, NULL);
-    }
+    peer_propt_t *peer = get_peer_propt(GST_SAC);
+    if (!peer) return LD_ERR_NULL;
+
+    log_warn("!!!!!! %d %d %d", peer->bc.fd);
+
+    peer->bc.opt->send_handler(&peer->bc, &(ho_peer_ini_t){
+                                   .AS_SAC = AS_SAC,
+                                   .GSS_SAC = snf_obj.GS_SAC,
+                                   .GST_SAC = GST_SAC
+                               }, &handover_peer_ini_desc, NULL, NULL);
+
+    // if (snf_obj.is_merged) {
+    // } else {
+    //     conn_service.sgw_conn->bc.opt->send_handler(&conn_service.sgw_conn->bc, &(gsnf_key_upd_remind_t){
+    //                                                     GSNF_KEY_UPD_REMIND, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_C,
+    //                                                     snf_obj.GS_SAC, GST_SAC
+    //                                                 }, &gsnf_key_upd_remind_desc, NULL, NULL);
+    // }
     return LDCAUC_OK;
 }
 

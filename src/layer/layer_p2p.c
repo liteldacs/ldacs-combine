@@ -9,6 +9,15 @@
 
 peer_service_t peer_service = {};
 
+static field_desc handover_peer_ini_fields[] = {
+    {ft_set, SAC_LEN, "AS_SAC", NULL},
+    {ft_set, SAC_LEN, "GSS_SAC", NULL},
+    {ft_set, SAC_LEN, "GST_SAC", NULL},
+    {ft_pad, 0, "PAD", NULL},
+    {ft_end, 0, NULL, NULL},
+};
+struct_desc_t handover_peer_ini_desc = {"Handover Peer ini", handover_peer_ini_fields};
+
 struct hashmap *init_peer_enode_map();
 
 l_err set_peer_enode(peer_propt_node_t *en);
@@ -105,10 +114,19 @@ l_err set_peer_enode(peer_propt_node_t *en) {
     return LD_OK;
 }
 
-peer_propt_node_t *get_peer_enode(const uint16_t gs_sac) {
+
+peer_propt_node_t *get_peer_enode(uint16_t gs_sac) {
     return hashmap_get(peer_service.peer_map, &(peer_propt_node_t){
                            .GS_SAC = gs_sac,
                        });
+}
+
+peer_propt_t *get_peer_propt(uint16_t gs_sac) {
+    peer_propt_node_t *peer_node;
+    if ((peer_node = get_peer_enode(gs_sac)) == NULL) {
+        return NULL;
+    }
+    return peer_node->propt;
 }
 
 peer_propt_node_t *get_peer_enode_by_peerptr(peer_propt_t *ptr) {

@@ -138,15 +138,14 @@ l_err make_lme_layer() {
                 }
                 case LD_GS: {
                     config.is_merged == TRUE
-                        ? init_gs_snf_layer(get_gs_sac(), config.gsnf_addr, config.gsnf_remote_port,
+                        ? init_gs_snf_layer(config.GS_SAC, config.gsnf_addr, config.gsnf_remote_port,
                                             config.gsnf_local_port, trans_snp_data, NULL)
-                        : init_gs_snf_layer_unmerged(get_gs_sac(), config.gsnf_addr, config.gsnf_remote_port,
+                        : init_gs_snf_layer_unmerged(config.GS_SAC, config.gsnf_addr, config.gsnf_remote_port,
                                                      config.gsnf_local_port,
                                                      trans_snp_data, register_snf_failed);
 
                     /* GS set the initial state 'OPEN' */
                     init_lme_fsm(&lme_layer_objs, LME_OPEN);
-                    log_warn("????????? %d", config.GS_SAC);
                     lme_layer_objs.GS_SAC = config.GS_SAC;
                     lme_layer_objs.LME_GS_AUTH_AS = init_lme_sac_map();
 
@@ -246,7 +245,10 @@ void L_SAPC(ld_prim_t *prim) {
                     log_warn("No such AS with UA `%d`", handover_opt->UA);
                     break;
                 }
-                handover_initiate(as_man->AS_SAC, handover_opt->GST_SAC);
+                if (handover_initiate(as_man->AS_SAC, handover_opt->GST_SAC) != LD_OK) {
+                    log_warn("No such peer connection, GST SAC:`%d` !", handover_opt->GST_SAC);
+                    return;
+                }
             }
 
             break;

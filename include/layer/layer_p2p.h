@@ -26,13 +26,19 @@ typedef struct peer_service_s {
 } peer_service_t;
 
 #pragma pack(1)
-typedef struct handover_peer_initiate_s {
+typedef struct ho_peer_ini_s {
     uint16_t AS_SAC;
     uint16_t GSS_SAC;
-    uint16_t GSG_SAC;
-} handover_peer_initiate;
+    uint16_t GST_SAC;
+} ho_peer_ini_t;
 #pragma pack()
 
+extern struct_desc_t handover_peer_ini_desc;
+
 l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_count);
+
+peer_propt_node_t *get_peer_enode(const uint16_t gs_sac);
+
+peer_propt_t *get_peer_propt(uint16_t gs_sac);
 
 #endif //P2P_H
