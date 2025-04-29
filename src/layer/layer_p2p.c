@@ -3,12 +3,11 @@
 //
 
 #include "ldacs_def.h"
-#include "../../include/layer/layer_p2p.h"
+#include "layer_p2p.h"
 
 #include "gs_conn.h"
 
 peer_service_t peer_service = {};
-
 
 struct hashmap *init_peer_enode_map();
 
@@ -53,12 +52,16 @@ void p2p_conn_close(basic_conn_t *bc) {
     log_warn("Closing connection!");
 }
 
+l_err p2p_conn_recv(basic_conn_t *bc) {
+    return LD_OK;
+}
 
 l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_count) {
     peer_service.p2p_ctx = (net_ctx_t){
         .conn_handler = p2p_conn_connect,
         .accept_handler = p2p_conn_accept,
-        .recv_handler = NULL,
+        .recv_handler = p2p_conn_recv,
+        .send_handler = NULL,
         .close_handler = p2p_conn_close,
         .epoll_fd = core_epoll_create(0, -1),
     };

@@ -66,7 +66,7 @@ l_err trans_gsnf(gs_propt_t *conn, void *pkg, struct_desc_t *desc, l_err (*mid_f
     cat_to_buffer(gsnf_buf, gsnf_pbs.start, pbs_offset(&gsnf_pbs));
     log_buf(LOG_FATAL, "GSNF OUT", gsnf_buf->ptr, gsnf_buf->len);
 
-    conn->bc.opt->send_handler(&conn->bc, gsnf_buf);
+    send_packet(&conn->bc, gsnf_buf);
 
     return LD_OK;
 }

@@ -42,8 +42,6 @@ l_err init_server_gs_conn_service(int listen_port);
 
 bool send_gs_pkt(basic_conn_t *bc);
 
-l_err gs_conn_send(basic_conn_t *bc, buffer_t *buf);
-
 bool reset_gs_conn(basic_conn_t *bc);
 
 void gs_conn_close(basic_conn_t *bc);

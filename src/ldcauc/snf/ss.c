@@ -251,10 +251,11 @@ l_err finish_auc(void *args) {
     );
 
     gs_propt_node_t *save = get_conn_enode(as_man->GS_SAC);
-    if (trans_gsnf(save->propt, &(gsnf_pkt_cn_t){
-                       GSNF_KEY_TRANS, DEFAULT_GSNF_VERSION, as_man->AS_SAC, ELE_TYP_8, sdu
-                   }, &gsnf_pkt_cn_desc, generate_auz_info, &as_man->AS_SAC
-    )) {
+    if (save && save->propt->bc.opt->send_handler(&save->propt->bc, &(gsnf_pkt_cn_t){
+                                                      GSNF_KEY_TRANS, DEFAULT_GSNF_VERSION, as_man->AS_SAC, ELE_TYP_8,
+                                                      sdu
+                                                  }, &gsnf_pkt_cn_desc, generate_auz_info, &as_man->AS_SAC
+        )) {
         log_warn("SGW send GS key failed");
         free_buffer(sdu);
         return LD_ERR_INTERNAL;
@@ -433,9 +434,11 @@ l_err handle_send_msg(void *args, struct_desc_t *desc, snf_entity_t *as_man, KEY
 
     if (snf_obj.role == LD_SGW) {
         CLONE_TO_CHUNK(*sdu, lme_ss_pbs.start, pbs_offset(&lme_ss_pbs))
-        trans_gsnf(as_man->gs_conn,
-                   &(gsnf_pkt_cn_t){GSNF_SNF_UPLOAD, DEFAULT_GSNF_VERSION, as_man->AS_SAC, ELE_TYP_F, sdu},
-                   &gsnf_pkt_cn_desc, NULL, NULL);
+        as_man->gs_conn->bc.opt->send_handler(&as_man->gs_conn->bc,
+                                              &(gsnf_pkt_cn_t){
+                                                  GSNF_SNF_UPLOAD, DEFAULT_GSNF_VERSION, as_man->AS_SAC, ELE_TYP_F, sdu
+                                              },
+                                              &gsnf_pkt_cn_desc, NULL, NULL);
     } else if (snf_obj.role == LD_AS) {
         snf_obj.trans_snp_func(as_man->AS_SAC, as_man->GS_SAC, lme_ss_pbs.start, pbs_offset(&lme_ss_pbs));
     }

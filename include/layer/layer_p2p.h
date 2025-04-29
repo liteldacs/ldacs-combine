@@ -10,7 +10,6 @@
 #include <ld_net.h>
 #include <ld_hashmap.h>
 
-
 typedef struct peer_propt_s {
     basic_conn_t bc;
 } peer_propt_t;
@@ -25,6 +24,14 @@ typedef struct peer_service_s {
     net_ctx_t p2p_ctx;
     pthread_t p2p_thread;
 } peer_service_t;
+
+#pragma pack(1)
+typedef struct handover_peer_initiate_s {
+    uint16_t AS_SAC;
+    uint16_t GSS_SAC;
+    uint16_t GSG_SAC;
+} handover_peer_initiate;
+#pragma pack()
 
 l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_count);
 
