@@ -6,6 +6,7 @@
 #include "layer_p2p.h"
 
 #include "gs_conn.h"
+#include "ldcauc.h"
 
 peer_service_t peer_service = {};
 
@@ -62,6 +63,20 @@ void p2p_conn_close(basic_conn_t *bc) {
 }
 
 l_err p2p_conn_recv(basic_conn_t *bc) {
+    peer_propt_t *peer_propt = (peer_propt_t *) bc;
+    log_buf(LOG_INFO, "RECV PEER", peer_propt->bc.read_pkt.ptr, peer_propt->bc.read_pkt.len);
+
+    ho_peer_ini_t *ini = calloc(1, sizeof(ho_peer_ini_t));
+    pb_stream pbs;
+    zero(&pbs);
+    init_pbs(&pbs, peer_propt->bc.read_pkt.ptr, peer_propt->bc.read_pkt.len, "GSNF IN");
+    if (!in_struct(ini, &handover_peer_ini_desc, &pbs, NULL)) {
+        log_error("Cannot parse gsnf pdu");
+        free(ini);
+        return LD_ERR_INTERNAL;
+    }
+    handover_response(ini->AS_SAC, ini->GSS_SAC, ini->GST_SAC);
+    free(ini);
     return LD_OK;
 }
 

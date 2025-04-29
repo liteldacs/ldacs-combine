@@ -300,12 +300,13 @@ int8_t handover_initiate(uint16_t AS_SAC, uint16_t GST_SAC) {
     return LDCAUC_OK;
 }
 
-int8_t handover_response(uint16_t AS_SAC) {
+int8_t handover_response(uint16_t AS_SAC, uint16_t GSS_SAC, uint16_t GST_SAC) {
     if (snf_obj.is_merged) {
     } else {
-        // trans_gsnf(conn_service.sgw_conn, &(gsnf_key_upd_remind_t){
-        //                GSNF_KEY_UPD_REMIND, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_C, snf_obj.GS_SAC, GST_SAC
-        //            }, &gsnf_key_upd_remind_desc, NULL, NULL);
+        conn_service.sgw_conn->bc.opt->send_handler(&conn_service.sgw_conn->bc, &(gsnf_key_upd_remind_t){
+                                                        GSNF_KEY_UPD_REMIND, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_C,
+                                                        GSS_SAC, GST_SAC
+                                                    }, &gsnf_key_upd_remind_desc, NULL, NULL);
     }
     return LDCAUC_OK;
 }

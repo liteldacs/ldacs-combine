@@ -315,18 +315,18 @@ l_err recv_key_update_rqst(buffer_t *buf, snf_entity_t *as_man) {
     UA_STR(ua_gs_src);
     UA_STR(ua_gs_dst);
     UA_STR(ua_sgw);
-    get_ua_str(10010, ua_as);
-    get_ua_str(10086, ua_gs_src);
-    get_ua_str(10087, ua_gs_dst);
-    get_ua_str(10000, ua_sgw);
+    get_ua_str(as_man->AS_UA, ua_as);
+    get_ua_str(key_upd_rqst.SAC_src, ua_gs_src);
+    get_ua_str(key_upd_rqst.SAC_dst, ua_gs_dst);
+    get_ua_str(DFT_SGW_UA, ua_sgw);
     as_update_mkey(ua_sgw, ua_gs_src, ua_gs_dst, ua_as, key_upd_rqst.NONCE, &as_man->key_as_gs_h);
 
-    send_key_update_resp(as_man);
+    send_key_update_resp(as_man, key_upd_rqst.SAC_dst);
     return LD_OK;
 }
 
 
-l_err send_key_update_resp(void *args) {
+l_err send_key_update_resp(void *args, uint16_t GST_SAC) {
     snf_entity_t *as_man = args;
     key_upd_resp_t key_upd_resp = {
         .S_TYP = KEY_UPD_RESP,
@@ -334,7 +334,7 @@ l_err send_key_update_resp(void *args) {
         .PID = PID_MAC,
         .AS_SAC = as_man->AS_SAC,
         .KEY_TYPE = MASTER_KEY_AS_SGW,
-        .SAC_dst = as_man->GS_SAC,
+        .SAC_dst = GST_SAC,
         .NCC = 10086,
     };
     handle_send_msg(&key_upd_resp, &key_upd_resp_desc, as_man, as_man->key_as_sgw_s_h);
@@ -352,19 +352,19 @@ l_err recv_key_update_resp(buffer_t *buf, snf_entity_t *as_man) {
         return LD_ERR_INVALID_MAC;
     }
 
-
-    // buffer_t *sdu = gen_pdu(&(gs_key_trans_t){
-    //                             . key = as_man->key_as_gs_b,
-    //                             . nonce = as_man->shared_random
-    //                         }, &gs_key_trans_desc, "GS KEY"
-    // );
-    // if (trans_gsnf(as_man->gs_conn, &(gsnf_pkt_cn_t){
-    //                    GSNF_KEY_TRANS, DEFAULT_GSNF_VERSION, as_man->AS_SAC, ELE_TYP_8, sdu
-    //                }, &gsnf_pkt_cn_desc, generate_auz_info, &as_man->AS_SAC
-    // )) {
-    //     log_warn("SGW send GS key failed");
-    //     free_buffer(sdu);
-    // }
+    buffer_t *sdu = gen_pdu(&(gs_key_trans_t){
+                                .key = as_man->key_as_gs_b,
+                                .nonce = as_man->shared_random
+                            }, &gs_key_trans_desc, "GS KEY"
+    );
+    gs_propt_node_t *save = get_conn_enode(key_upd_resp.SAC_dst);
+    if (save->propt->bc.opt->send_handler(&save->propt->bc, &(gsnf_pkt_cn_t){
+                                              GSNF_KEY_TRANS, DEFAULT_GSNF_VERSION, as_man->AS_SAC, ELE_TYP_8, sdu
+                                          }, &gsnf_pkt_cn_desc, generate_auz_info, &as_man->AS_SAC
+    )) {
+        log_warn("SGW send GS key failed");
+        free_buffer(sdu);
+    }
 
     return LD_OK;
 }

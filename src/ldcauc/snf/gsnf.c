@@ -163,8 +163,8 @@ l_err recv_gsnf(basic_conn_t *bc) {
 
                     UA_STR(ua_as);
                     UA_STR(ua_gs);
-                    get_ua_str(as_man->AS_UA, ua_as);
-                    get_ua_str(as_man->GS_SAC, ua_gs);
+                    get_ua_str(gsnf_pkt->AS_SAC, ua_as);
+                    get_ua_str(snf_obj.GS_SAC, ua_gs);
 
                     gs_install_keys(key_trans.key, key_trans.nonce->ptr, key_trans.nonce->len, ua_as, ua_gs,
                                     &as_man->key_as_gs_h);
