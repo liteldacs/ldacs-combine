@@ -175,14 +175,7 @@ typedef struct lme_as_man_s {
     uint16_t AS_SAC;
     uint16_t AS_CURR_GS_SAC; /* current connected/to connect GS SAC for AS */
 
-    //    uint8_t AUTHC_MACLEN,
-    //            AUTHC_AUTH_ID,
-    //            AUTHC_ENC_ID,
-    //            AUTHC_KLEN;
     ld_co_t CO;
-
-    // for GS
-    bool gs_finish_auth;
 
     uint8_t RPSO,
             NRPS;

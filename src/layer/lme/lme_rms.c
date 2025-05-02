@@ -24,7 +24,6 @@ typedef struct lme_rms_obj_s {
     lme_layer_objs_t *lme_obj;
 
     // lfqueue_t *req_queue;
-    lfqueue_t *cc_queue;
     pthread_t rrm_th;
 
     ld_bitset_t *CO_bitset;
@@ -41,12 +40,12 @@ typedef struct lme_rms_obj_s {
 
 
 static lme_rms_obj_t lme_rms_obj = {
-        .lme_obj = NULL,
-        .CO_successor = 0,
+    .lme_obj = NULL,
+    .CO_successor = 0,
 
-        .stimer = {
-                {trans_cc_must_timer_func, NULL, CC_MAC_INTVL},
-        },
+    .stimer = {
+        {trans_cc_must_timer_func, NULL, CC_MAC_INTVL},
+    },
 };
 
 
@@ -76,8 +75,6 @@ void free_CO(uint16_t co) {
 
 l_err init_lme_rms(lme_layer_objs_t *obj) {
     lme_rms_obj.lme_obj = obj;
-    // lme_rms_obj.req_queue = lfqueue_init();
-    lme_rms_obj.cc_queue = lfqueue_init();
 
     switch (config.role) {
         case LD_AS:
@@ -147,8 +144,8 @@ void trans_cc_sd_timer_func(void *args) {
 
     /* TODO:  CCL更改 */
     cc_slot_desc_t sd_n = {
-            .CCL = ((lme_rms_obj.cc_sz - 1) / CC_BLK_LEN_MIN) + 1,
-            .DCL = highest_co + 1 >= DCL_MAX ? DCL_MAX : highest_co + 1
+        .CCL = ((lme_rms_obj.cc_sz - 1) / CC_BLK_LEN_MIN) + 1,
+        .DCL = highest_co + 1 >= DCL_MAX ? DCL_MAX : highest_co + 1
     };
 
     //TODO: 这里和MAC的对应位置改成和DCCH DESC一样的
@@ -199,16 +196,16 @@ void D_SAPC_cb(ld_prim_t *prim) {
     }
     dls_en_data_t *en_data = prim->prim_objs;
     cc_cell_resp_t resp = {
-            .c_type = C_TYP_CELL_RESP,
-            .SAC = en_data->AS_SAC,
-            .UA = en_data->AS_UA,
-            .PAV = 0,
-            .FAV = 0,
-            .TAV = 255,
-            .CO = get_CO(),
-            .EPLDACS = init_buffer_unptr(), /* 16bytes */
-            .CCLDACS = 128,
-            .VER = 1,
+        .c_type = C_TYP_CELL_RESP,
+        .SAC = en_data->AS_SAC,
+        .UA = en_data->AS_UA,
+        .PAV = 0,
+        .FAV = 0,
+        .TAV = 255,
+        .CO = get_CO(),
+        .EPLDACS = init_buffer_unptr(), /* 16bytes */
+        .CCLDACS = 128,
+        .VER = 1,
     };
 
     uint8_t test_epldacs[16] = {0};
@@ -255,10 +252,10 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
 
                     add_co(&as_man->CO, resp->CO);
 
-                    dls_en_data_t *dls_en_data = &(dls_en_data_t) {
-                            .GS_SAC = lme_layer_objs.GS_SAC,
-                            .AS_UA = resp->UA,
-                            .AS_SAC = resp->SAC,
+                    dls_en_data_t *dls_en_data = &(dls_en_data_t){
+                        .GS_SAC = lme_layer_objs.GS_SAC,
+                        .AS_UA = resp->UA,
+                        .AS_SAC = resp->SAC,
                     };
 
                     // log_warn("ALLOC CO SAC %d %d", resp->CO, resp->SAC);
@@ -358,11 +355,11 @@ static void resource_rl_alloc_cb(ld_drr_t *drr, size_t *map, void *args) {
         }
 
         cc_rl_alloc_t rl_alloc = {
-                .c_type = C_TYP_RL_ALLOC,
-                .SAC = i,
-                .RPSO = mac_rpso_sac->avail_start,
-                .NRPS = alloc_blks,
-                .CMS = CMS_TYP_1,
+            .c_type = C_TYP_RL_ALLOC,
+            .SAC = i,
+            .RPSO = mac_rpso_sac->avail_start,
+            .NRPS = alloc_blks,
+            .CMS = CMS_TYP_1,
         };
 
         preempt_prim(&MAC_CCCH_REQ_PRIM, C_TYP_RL_ALLOC,
@@ -386,15 +383,15 @@ static void resource_fl_alloc_cb(ld_drr_t *drr, size_t *map, void *args) {
         //          drr->req_entitys[i].req_sz);
 
         cc_fl_alloc_t rl_alloc = {
-                .c_type = C_TYP_FL_ALLOC,
-                .SAC = i,
-                .BO = *BO,
-                .BL = map[i],
+            .c_type = C_TYP_FL_ALLOC,
+            .SAC = i,
+            .BO = *BO,
+            .BL = map[i],
         };
 
         *BO += map[i];
 
-        if (preempt_prim(&LME_R_IND_PRIM, E_TYP_ANY, &(cc_rsc_t) {.SAC = i, .resource = map[i]}, NULL, 0, 0) != LD_OK) {
+        if (preempt_prim(&LME_R_IND_PRIM, E_TYP_ANY, &(cc_rsc_t){.SAC = i, .resource = map[i]}, NULL, 0, 0) != LD_OK) {
             //错误处理
             return;
         }
