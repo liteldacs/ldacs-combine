@@ -97,7 +97,7 @@ l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_coun
     };
 
     peer_service.peer_map = init_peer_enode_map();
-    server_entity_setup(server_port, &peer_service.p2p_ctx);
+    server_entity_setup(server_port, &peer_service.p2p_ctx, LD_TCP_SERVER);
     for (int i = 0; i < peer_count; i++) {
         peer_gs_t *peer = peers[i];
         log_info("Peer[%d] `%s:%d` SAC: %d, listening on port: %d", i, peer->peer_addr, peer->peer_port, peer->peer_SAC,

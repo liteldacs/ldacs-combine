@@ -138,7 +138,7 @@ l_err make_lme_layer() {
                 }
                 case LD_GS: {
                     config.is_merged == TRUE
-                        ? init_gs_snf_layer(config.GS_SAC, config.gsnf_addr, config.gsnf_remote_port,
+                        ? init_gs_snf_layer(config.GS_SAC, config.gsnf_addr_v6, config.gsnf_remote_port,
                                             config.gsnf_local_port, trans_snp_data, register_snf_failed,
                                             finish_handover_func)
                         : init_gs_snf_layer_unmerged(config.GS_SAC, config.gsnf_addr, config.gsnf_remote_port,
@@ -161,12 +161,7 @@ l_err make_lme_layer() {
             break;
         }
         case LD_SGW: {
-            /* 默认AS的UA为10010，SGW的UA为10000 */
-            UA_STR(ua_as);
-            UA_STR(ua_sgw);
-            //            embed_rootkey(LD_SGW, get_ua_str(10010, ua_as), get_ua_str(config.UA, ua_sgw));
-
-            init_sgw_snf_layer(config.port);
+            config.is_merged == TRUE ? init_sgw_snf_layer(config.port) : init_sgw_snf_layer_unmerged(config.port);
         }
         default:
             break;
