@@ -11,7 +11,7 @@
 #define GSG_PKT_HEAD_LEN 2
 #define GSG_SAC_HEAD_LEN 4
 #define GSNF_PKT_CN_HEAD_LEN 4
-#define GSNF_PKT_CN_INI_HEAD_LEN 7
+#define GSNF_PKT_CN_INI_HEAD_LEN 9
 
 #define GSNF_AS_AUZ_INFO_PRE_LEN 4
 
@@ -22,8 +22,8 @@ static gsg_pkt_t *init_gsg_pkg(size_t pdu_len) {
     return gsnf_pkg;
 }
 
-static gsg_sac_pkt_t *init_gsg_sac_pkg(size_t pdu_len) {
-    gsg_sac_pkt_t *gsnf_sac = calloc(1, sizeof(gsg_sac_pkt_t));
+static gsg_ini_pkt_t *init_gsg_sac_pkg(size_t pdu_len) {
+    gsg_ini_pkt_t *gsnf_sac = calloc(1, sizeof(gsg_ini_pkt_t));
     gsnf_sac->sdu = init_buffer_ptr(pdu_len - GSG_SAC_HEAD_LEN);
     return gsnf_sac;
 }
@@ -35,7 +35,7 @@ static void free_gsg_pkg(gsg_pkt_t *gsnf_pkg) {
     free(gsnf_pkg);
 }
 
-static void free_gsg_sac_pkg(gsg_sac_pkt_t *gsnf_sac) {
+static void free_gsg_sac_pkg(gsg_ini_pkt_t *gsnf_sac) {
     if (gsnf_sac->sdu) {
         free_buffer(gsnf_sac->sdu);
     }
@@ -43,16 +43,16 @@ static void free_gsg_sac_pkg(gsg_sac_pkt_t *gsnf_sac) {
 }
 
 
-static l_err parse_gsg_sac_pkt(buffer_t *pdu, gsg_sac_pkt_t **gsnf_pkg_ptr) {
+static l_err parse_gsg_sac_pkt(buffer_t *pdu, gsg_ini_pkt_t **gsnf_pkg_ptr) {
     pb_stream gsnf_sac_pbs;
     zero(&gsnf_sac_pbs);
     *gsnf_pkg_ptr = init_gsg_sac_pkg(pdu->len);
-    gsg_sac_pkt_t *gsnf_sac_pkg = *gsnf_pkg_ptr;
+    gsg_ini_pkt_t *gsnf_sac_pkg = *gsnf_pkg_ptr;
 
 
     init_pbs(&gsnf_sac_pbs, pdu->ptr, pdu->len, "GSNF IN");
 
-    if (!in_struct(gsnf_sac_pkg, &gsg_sac_pkt_desc, &gsnf_sac_pbs, NULL)) {
+    if (!in_struct(gsnf_sac_pkg, &gsg_ini_pkt_desc, &gsnf_sac_pbs, NULL)) {
         log_error("Cannot parse gsnf pdu");
         return LD_ERR_INTERNAL;
     }
@@ -236,7 +236,9 @@ l_err recv_gsg(basic_conn_t *bc) {
     gs_propt_t *mlt_ld = (gs_propt_t *) bc;
     log_buf(LOG_INFO, "RECV GSG", mlt_ld->bc.read_pkt.ptr, mlt_ld->bc.read_pkt.len);
     switch ((*mlt_ld->bc.read_pkt.ptr >> (BITS_PER_BYTE - GTYP_LEN)) & (0xFF >> (BITS_PER_BYTE - GTYP_LEN))) {
-        //        case GS_SAC_RQST:
+        case GS_INITIAL_MSG:
+            log_error("???????????????????");
+            break;
         //        case GS_SAC_RESP: {
         //            gsg_sac_pkt_t *gsnf_sac_pkg;
         //            if (parse_gsg_sac_pkt(&mlt_ld->bc->read_pkt, &gsnf_sac_pkg) != LD_OK) {
