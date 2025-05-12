@@ -242,6 +242,8 @@ void L_SAPC(ld_prim_t *prim) {
                     break;
                 }
 
+                //TODO: GSG
+
                 peer_propt_t *peer = get_peer_propt(handover_opt->GST_SAC);
                 if (!peer) return;
 
@@ -287,6 +289,26 @@ void M_SAPI_cb(ld_prim_t *prim) {
 void L_SAPT(ld_prim_t *prim) {
 }
 
+l_err entry_LME_FSCANNING(void *args) {
+    l_err err = LD_OK;
+    do {
+        /* activate the lower layer execute CSCAN process */
+        if ((err = preempt_prim(&MAC_FSCAN_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0))) {
+            log_error("LME can not call lower layers manipulate FSCANNING");
+            break;
+        }
+
+        if ((err = preempt_prim(&LME_STATE_IND_PRIM, LME_STATE_CHANGE, &(lme_state_chg_t){
+                                    .ua = lme_layer_objs.lme_as_man->AS_UA,
+                                    .sac = lme_layer_objs.lme_as_man->AS_SAC,
+                                    .state = LME_FSCANNING,
+                                }, NULL, 0, 0))) {
+            log_error("LME can not call RCU current state");
+            break;
+        }
+    } while (0);
+    return err;
+}
 
 l_err entry_LME_CSCANNING(void *args) {
     l_err err = LD_OK;
