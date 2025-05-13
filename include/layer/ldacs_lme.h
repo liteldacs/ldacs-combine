@@ -141,6 +141,11 @@ enum PID_E {
     PID_BOTH = 0x3,
 };
 
+enum HO_TYPE {
+    HO1 = 0,
+    HO2 = 1,
+};
+
 
 extern const char *lme_fsm_states[];
 
@@ -321,6 +326,14 @@ typedef struct cc_dcch_desc_s {
     uint16_t COM;
 } cc_dcch_desc_t;
 
+typedef struct cc_ho_com_s {
+    uint8_t c_type;
+    uint16_t AS_SAC;
+    uint16_t GS_SAC;
+    uint8_t HOT;
+    uint16_t NEXT_CO;
+} cc_ho_com_t;
+
 typedef struct cc_cell_resp_s {
     uint8_t c_type;
     uint16_t SAC;
@@ -413,6 +426,7 @@ extern struct_desc_t bc_sib_desc;
 extern struct_desc_t bc_hmac_desc;
 extern struct_desc_t cc_slot_desc;
 extern struct_desc_t cc_dcch_desc;
+extern struct_desc_t cc_ho_com_desc;
 extern struct_desc_t cc_cell_resp_desc;
 extern struct_desc_t cc_fl_alloc_desc;
 extern struct_desc_t cc_rl_alloc_desc;
@@ -436,6 +450,8 @@ extern ld_prim_t LME_R_REQ_PRIM;
 extern ld_prim_t LME_R_IND_PRIM;
 
 l_err make_lme_layer();
+
+uint16_t get_CO();
 
 void L_SAPC(ld_prim_t *prim);
 

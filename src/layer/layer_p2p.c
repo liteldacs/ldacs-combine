@@ -16,6 +16,7 @@ static field_desc handover_peer_ini_fields[] = {
     {ft_set, UA_LEN, "AS_UA", NULL},
     {ft_set, SAC_LEN, "GSS_SAC", NULL},
     {ft_set, SAC_LEN, "GST_SAC", NULL},
+    {ft_set, 9, "NEXT_CO", NULL},
     {ft_pad, 0, "PAD", NULL},
     {ft_end, 0, NULL, NULL},
 };
@@ -82,7 +83,7 @@ l_err p2p_conn_recv(basic_conn_t *bc) {
     } else {
         // TODO:  send HO by CCCH
         log_info("Handover finished! Waiting for cell exit");
-        if (peer_service.ho_com_cb) peer_service.ho_com_cb();
+        if (peer_service.ho_com_cb) peer_service.ho_com_cb(ini->AS_SAC, ini->GST_SAC, ini->NEXT_CO);
     }
     free(ini);
     return LD_OK;

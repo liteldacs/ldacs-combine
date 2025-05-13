@@ -62,7 +62,7 @@ static void free_co_res(void *res) {
     free(res);
 }
 
-static uint16_t get_CO() {
+uint16_t get_CO() {
     uint16_t *co = NULL;
     bs_alloc_resource(lme_rms_obj.CO_bitset, (void **) &co);
     return *co;
@@ -264,6 +264,10 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                     preempt_prim(&DLS_OPEN_REQ_PRIM, DL_TYP_AS_INIT, dls_en_data, NULL, 0, 0);
 
                     lme_layer_objs.finish_status = LME_CONNECTING_FINISHED;
+                    break;
+                }
+                case C_TYP_HO_COM: {
+                    log_warn("++++++++==============+++++++++++");
                     break;
                 }
 

@@ -76,6 +76,19 @@ static field_desc cc_dcch_desc_fields[] = {
 
 struct_desc_t cc_dcch_desc = {"DCCH_DESC", cc_dcch_desc_fields};
 
+static field_desc cc_ho_com_fields[] = {
+    {ft_set, C_TYPE_LEN, "C_TYPE", NULL},
+    {ft_set, 12, "AS_SAC", NULL},
+    {ft_set, 12, "GS_SAC", NULL},
+    {ft_set, 1, "HOT", NULL},
+    {ft_set, 9, "NEXT CO", NULL},
+    {ft_pad, 0, "PAD", NULL},
+    {ft_crc, CRC_8_SIZE, "CRC", NULL},
+    {ft_end, 0, NULL, NULL},
+};
+
+struct_desc_t cc_ho_com_desc = {"HO COM", cc_ho_com_fields};
+
 
 /**
  * CC cell response
@@ -218,7 +231,7 @@ ld_format_desc_t cc_format_descs[] = {
     {C_TYP_RL_ALLOC, &cc_rl_alloc_desc, 6, sizeof(cc_rl_alloc_t), free, 8, DIR_DLS},
     {C_TYP_P_RL_ALLOC, &cc_dcch_desc, 5, sizeof(cc_dcch_desc_t), free, 8, DIR_LME},
     {C_TYP_SYNC_POLL, &cc_dcch_desc, 5, sizeof(cc_dcch_desc_t), free, 9, DIR_LME},
-    {C_TYP_HO_COM, &cc_dcch_desc, 5, sizeof(cc_dcch_desc_t), free, 10, DIR_LME},
+    {C_TYP_HO_COM, &cc_ho_com_desc, 6, sizeof(cc_ho_com_t), free, 10, DIR_LME},
     {C_TYP_KEEY_ALIVE, &cc_dcch_desc, 5, sizeof(cc_dcch_desc_t), free, 11, DIR_LME},
     {C_TYP_P_RL_CANCEL, &cc_dcch_desc, 5, sizeof(cc_dcch_desc_t), free, 8, DIR_LME},
     {C_TYP_CC_MAC, &cc_hmac_desc, 0, sizeof(cc_mac_bd_t), free, MAX_ORDER, DIR_LME},

@@ -7,7 +7,7 @@
 #include "snf.h"
 #include "layer_p2p.h"
 
-static l_err send_ho_com();
+static l_err send_ho_com(uint16_t, uint16_t, uint16_t);
 
 static lyr_desc_t *sn_upper_lyr[] = {
 };
@@ -477,8 +477,16 @@ l_err entry_LME_OPEN(void *args) {
     return err;
 }
 
-static l_err send_ho_com() {
-    log_warn("????????????????????????");
+static l_err send_ho_com(uint16_t AS_SAC, uint16_t GS_SAC, uint16_t next_CO) {
+    cc_ho_com_t ho_com = (cc_ho_com_t){
+        .c_type = C_TYP_HO_COM,
+        .AS_SAC = AS_SAC,
+        .GS_SAC = GS_SAC,
+        .HOT = HO2,
+        .NEXT_CO = next_CO,
+    };
+    preempt_prim(&MAC_CCCH_REQ_PRIM, C_TYP_HO_COM,
+                 gen_pdu(&ho_com, cc_format_descs[C_TYP_HO_COM].f_desc, "cc resp OUT"), NULL, 0, 0);
     return LD_OK;
 }
 
@@ -508,6 +516,7 @@ int8_t gst_handover_complete_key(uint16_t AS_SAC, uint16_t GSS_SAC) {
                                    .AS_UA = 0, //useless in ACK, set 0
                                    .GSS_SAC = GSS_SAC,
                                    .GST_SAC = 0,
+                                   .NEXT_CO = get_CO(),
                                }, &handover_peer_ini_desc, NULL, NULL);
     return LD_OK;
 }

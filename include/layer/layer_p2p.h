@@ -10,7 +10,7 @@
 #include <ld_net.h>
 #include <ld_hashmap.h>
 
-typedef l_err (*send_ho_com_cb)();
+typedef l_err (*send_ho_com_cb)(uint16_t AS_SAC, uint16_t GST_SAC, uint16_t next_co);
 
 typedef struct peer_propt_s {
     basic_conn_t bc;
@@ -35,6 +35,7 @@ typedef struct ho_peer_ini_s {
     uint32_t AS_UA;
     uint16_t GSS_SAC;
     uint16_t GST_SAC;
+    uint16_t NEXT_CO;
 } ho_peer_ini_t;
 #pragma pack()
 
