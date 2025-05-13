@@ -336,6 +336,11 @@ l_err recv_gsg(basic_conn_t *bc) {
                     gs_install_keys(key_trans.key, key_trans.nonce->ptr, key_trans.nonce->len, ua_as, ua_gs,
                                     &as_man->key_as_gs_h);
 
+                    /* 未来使用切换状态机， 抛弃这种方法*/
+                    if (snf_obj.GS_SAC != as_man->CURR_GS_SAC) {
+                        snf_obj.gst_ho_complete_key_func(as_man->AS_SAC, as_man->CURR_GS_SAC);
+                    }
+
                     free_buffer(key_trans.key);
                     free_buffer(key_trans.nonce);
                     as_man->gs_finish_auth = TRUE;
