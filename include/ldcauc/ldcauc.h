@@ -171,6 +171,8 @@ int8_t unregister_snf_en(uint16_t AS_SAC);
  */
 int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_buf, size_t buf_len);
 
+int8_t gss_handover_trigger(uint16_t AS_SAC, uint16_t GSS_SAC, uint16_t GST_SAC);
+
 /**
  * \brief Handover响应，应在目标GS接收到源GS的切换提醒时调用
  * @param[in] AS_SAC 切换`AS`对应的SAC
@@ -179,7 +181,7 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
  * @param[in] GST_SAC 目标`GS`对应的SAC
  * @return 错误码
  */
-int8_t handover_response(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_SAC, uint16_t GST_SAC);
+int8_t gst_handover_response(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_SAC, uint16_t GST_SAC);
 
 /**
  * \brief 产生至多64位随机数

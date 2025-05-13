@@ -301,12 +301,22 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
     return LDCAUC_OK;
 }
 
+int8_t gss_handover_trigger(uint16_t AS_SAC, uint16_t GSS_SAC, uint16_t GST_SAC) {
+    gs_conn_service.sgw_conn->bc.opt->send_handler(&gs_conn_service.sgw_conn->bc, &(gsg_ho_req_t){
+                                                       GS_HO_REQUEST, AS_SAC, GSS_SAC, GST_SAC,
+                                                   }, &gsg_ho_req_desc, NULL, NULL);
+    return LDCAUC_OK;
+}
 
-int8_t handover_response(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_SAC, uint16_t GST_SAC) {
+
+int8_t gst_handover_response(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_SAC, uint16_t GST_SAC) {
+    register_snf_en(ROLE_GS, AS_SAC, AS_UA, GSS_SAC);
     if (snf_obj.is_merged) {
+        gs_conn_service.sgw_conn->bc.opt->send_handler(&gs_conn_service.sgw_conn->bc, &(gsg_ho_req_t){
+                                                           GS_HO_REQUEST, AS_SAC, GSS_SAC, GST_SAC,
+                                                       }, &gsg_ho_req_desc, NULL, NULL);
     } else {
         /* GS SAC for current GS (before handover) */
-        register_snf_en(ROLE_GS, AS_SAC, AS_UA, GSS_SAC);
         gs_conn_service.sgw_conn->bc.opt->send_handler(&gs_conn_service.sgw_conn->bc, &(gsnf_key_upd_remind_t){
                                                            GSNF_KEY_UPD_REMIND, DEFAULT_GSNF_VERSION, AS_SAC, ELE_TYP_C,
                                                            GSS_SAC, GST_SAC

@@ -132,7 +132,7 @@ l_err recv_gsnf(basic_conn_t *bc) {
         case GSNF_SNF_DOWNLOAD:
         case GSNF_AS_AUZ_INFO:
         case GSNF_KEY_TRANS: {
-            gsnf_pkt_cn_t *gsnf_pkt = calloc(1, sizeof(gsnf_pkt_cn_ini_t));
+            gsnf_pkt_cn_t *gsnf_pkt = calloc(1, sizeof(gsnf_pkt_cn_t));
             PARSE_GSNF(&gs_propt->bc.read_pkt, gsnf_pkt, gsnf_pkt_cn_desc, GSNF_PKT_CN_HEAD_LEN,
                        gsnf_type == GSNF_AS_AUZ_INFO ? GSNF_AS_AUZ_INFO_PRE_LEN : 0);
             if ((as_man = (snf_entity_t *) get_enode(gsnf_pkt->AS_SAC)) == NULL) {
@@ -197,9 +197,22 @@ l_err recv_gsnf(basic_conn_t *bc) {
                 free(gsnf_pkt);
                 break;
             }
-            if (gsnf_pkt->State == GSNF_EXIT) {
-                delete_enode_by_sac(gsnf_pkt->AS_SAC, clear_snf_en);
+            switch (gsnf_pkt->State) {
+                case GSNF_ACCESS: {
+                    log_info("Successfully Access In");
+                    break;
+                }
+                case GSNF_EXIT: {
+                    delete_enode_by_sac(gsnf_pkt->AS_SAC, clear_snf_en);
+                    break;
+                }
+                default: {
+                    break;
+                }
             }
+            // if (gsnf_pkt->State == GSNF_EXIT) {
+            //     delete_enode_by_sac(gsnf_pkt->AS_SAC, clear_snf_en);
+            // }
 
             free(gsnf_pkt);
             break;
@@ -237,7 +250,6 @@ l_err recv_gsg(basic_conn_t *bc) {
     log_buf(LOG_INFO, "RECV GSG", mlt_ld->bc.read_pkt.ptr, mlt_ld->bc.read_pkt.len);
     switch ((*mlt_ld->bc.read_pkt.ptr >> (BITS_PER_BYTE - GTYP_LEN)) & (0xFF >> (BITS_PER_BYTE - GTYP_LEN))) {
         case GS_INITIAL_MSG:
-            log_error("???????????????????");
             break;
         //        case GS_SAC_RESP: {
         //            gsg_sac_pkt_t *gsnf_sac_pkg;

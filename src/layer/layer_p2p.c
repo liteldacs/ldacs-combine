@@ -78,7 +78,7 @@ l_err p2p_conn_recv(basic_conn_t *bc) {
         return LD_ERR_INTERNAL;
     }
     if (ini->is_ACK == FALSE) {
-        handover_response(ini->AS_SAC, ini->AS_UA, ini->GSS_SAC, ini->GST_SAC);
+        gst_handover_response(ini->AS_SAC, ini->AS_UA, ini->GSS_SAC, ini->GST_SAC);
     } else {
         // TODO:  send HO by CCCH
         log_info("Handover finished! Waiting for cell exit");

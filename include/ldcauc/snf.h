@@ -39,7 +39,7 @@ typedef enum {
     GSNF_INITIAL_AS = 0xD1,
     GSNF_SNF_UPLOAD = 0x72,
     GSNF_SNF_DOWNLOAD = 0xD3,
-    GSNF_KEY_UPD_REMIND = 0x51,
+    GSNF_KEY_UPD_REMIND = 0xDF,
     GSNF_KEY_TRANS = 0x75,
     GSNF_AS_AUZ_INFO = 0xB4,
     GSNF_STATE_CHANGE = 0xEE,
@@ -246,6 +246,13 @@ typedef struct gsg_as_exit_s {
     uint16_t AS_SAC;
 } gsg_as_exit_t;
 
+typedef struct gsg_ho_req_s {
+    uint8_t TYPE;
+    uint16_t AS_SAC;
+    uint16_t GSS_SAC;
+    uint16_t GST_SAC;
+} gsg_ho_req_t;
+
 typedef struct gsnf_pkt_cn_s {
     uint8_t G_TYP;
     uint8_t VER;
@@ -298,7 +305,6 @@ typedef struct gs_sac_resp_sdu_s {
     uint16_t SAC;
 } gs_sac_resp_sdu_t;
 
-
 #pragma pack()
 
 
@@ -313,6 +319,7 @@ extern struct_desc_t failed_message_desc;
 extern struct_desc_t gsg_ini_pkt_desc;
 extern struct_desc_t gsg_pkt_desc;
 extern struct_desc_t gsg_as_exit_desc;
+extern struct_desc_t gsg_ho_req_desc;
 extern struct_desc_t gsnf_pkt_cn_desc;
 extern struct_desc_t gsnf_pkt_cn_ini_desc;
 extern struct_desc_t gsnf_as_auz_info_desc;

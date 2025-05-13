@@ -243,6 +243,9 @@ void L_SAPC(ld_prim_t *prim) {
                 }
 
                 //TODO: GSG
+                if (config.is_merged == TRUE)
+                    gss_handover_trigger(as_man->AS_SAC, snf_obj.GS_SAC,
+                                         handover_opt->GST_SAC);
 
                 peer_propt_t *peer = get_peer_propt(handover_opt->GST_SAC);
                 if (!peer) return;
