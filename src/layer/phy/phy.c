@@ -78,9 +78,6 @@ l_err make_phy_layer(enum PHY_SIM_LEVEL level) {
             phy_layer_objs.sim->init_sim(&phy_layer_objs);
             break;
         case LD_GS: {
-            //TODO:!!!!!!!!!!
-            // init_global_timer(&g_timer, SF_TIMER, SF_TIMER / 1000);
-            // register_timer_event(&phy_layer_objs.cyc_def[PHY_TIMER_BC]);
             register_gtimer(&gtimer);
             register_gtimer_event(&gtimer, &phy_layer_objs.gtimer[0]);
             phy_layer_objs.sim->init_sim(&phy_layer_objs);
