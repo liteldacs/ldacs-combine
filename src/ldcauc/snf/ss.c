@@ -381,7 +381,7 @@ l_err recv_key_update_resp(buffer_t *buf, snf_entity_t *as_man) {
     if (!bc || bc->opt->send_handler(bc, &(gsnf_pkt_cn_t){
                                          GSNF_KEY_TRANS, DEFAULT_GSNF_VERSION, as_man->AS_SAC, ELE_TYP_8,
                                          sdu
-                                     }, &gsnf_pkt_cn_desc, generate_auz_info, &as_man->AS_SAC
+                                     }, &gsnf_pkt_cn_desc, NULL, NULL
         )) {
         log_warn("SGW send GS key failed");
         free_buffer(sdu);
