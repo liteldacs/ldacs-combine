@@ -7,6 +7,8 @@
 #include "snf.h"
 #include "layer_p2p.h"
 
+static l_err send_ho_com();
+
 static lyr_desc_t *sn_upper_lyr[] = {
 };
 static lyr_desc_t *rl_upper_lyr[] = {
@@ -140,17 +142,17 @@ l_err make_lme_layer() {
                     config.is_merged == TRUE
                         ? init_gs_snf_layer(config.GS_SAC, config.gsnf_addr_v6, config.gsnf_remote_port,
                                             config.gsnf_local_port, trans_snp_data, register_snf_failed,
-                                            finish_handover_func)
+                                            gst_handover_complete_key)
                         : init_gs_snf_layer_unmerged(config.GS_SAC, config.gsnf_addr, config.gsnf_remote_port,
                                                      config.gsnf_local_port,
-                                                     trans_snp_data, register_snf_failed, finish_handover_func);
+                                                     trans_snp_data, register_snf_failed, gst_handover_complete_key);
 
                     /* GS set the initial state 'OPEN' */
                     init_lme_fsm(&lme_layer_objs, LME_OPEN);
                     lme_layer_objs.GS_SAC = config.GS_SAC;
                     lme_layer_objs.LME_GS_AUTH_AS = init_lme_sac_map();
 
-                    init_p2p_service(config.peer_server_port, config.peers, config.peer_count);
+                    init_p2p_service(config.peer_server_port, config.peers, config.peer_count, NULL);
                     break;
                 }
                 default:
@@ -244,8 +246,8 @@ void L_SAPC(ld_prim_t *prim) {
 
                 //TODO: GSG
                 if (config.is_merged == TRUE)
-                    gss_handover_trigger(as_man->AS_SAC, snf_obj.GS_SAC,
-                                         handover_opt->GST_SAC);
+                    gss_handover_request_trigger(as_man->AS_SAC, snf_obj.GS_SAC,
+                                                 handover_opt->GST_SAC);
 
                 peer_propt_t *peer = get_peer_propt(handover_opt->GST_SAC);
                 if (!peer) return;
@@ -475,6 +477,11 @@ l_err entry_LME_OPEN(void *args) {
     return err;
 }
 
+static l_err send_ho_com() {
+    log_warn("????????????????????????");
+    return LD_OK;
+}
+
 int8_t trans_snp_data(uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size_t buf_len) {
     orient_sdu_t *orient_sdu = create_orient_sdus(AS_SAC, GS_SAC);
 
@@ -492,7 +499,7 @@ int8_t register_snf_failed(uint16_t AS_SAC) {
     return LD_OK;
 }
 
-int8_t finish_handover_func(uint16_t AS_SAC, uint16_t GSS_SAC) {
+int8_t gst_handover_complete_key(uint16_t AS_SAC, uint16_t GSS_SAC) {
     peer_propt_t *peer = get_peer_propt(GSS_SAC);
     if (!peer) return LD_ERR_INTERNAL;
     peer->bc.opt->send_handler(&peer->bc, &(ho_peer_ini_t){

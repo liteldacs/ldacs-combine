@@ -78,16 +78,17 @@ l_err p2p_conn_recv(basic_conn_t *bc) {
         return LD_ERR_INTERNAL;
     }
     if (ini->is_ACK == FALSE) {
-        gst_handover_response(ini->AS_SAC, ini->AS_UA, ini->GSS_SAC, ini->GST_SAC);
+        gst_handover_request_handle(ini->AS_SAC, ini->AS_UA, ini->GSS_SAC, ini->GST_SAC);
     } else {
         // TODO:  send HO by CCCH
         log_info("Handover finished! Waiting for cell exit");
+        if (peer_service.ho_com_cb) peer_service.ho_com_cb();
     }
     free(ini);
     return LD_OK;
 }
 
-l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_count) {
+l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_count, send_ho_com_cb send_ho_com) {
     peer_service.p2p_ctx = (net_ctx_t){
         .conn_handler = p2p_conn_connect,
         .accept_handler = p2p_conn_accept,
@@ -98,6 +99,7 @@ l_err init_p2p_service(uint16_t server_port, peer_gs_t **peers, size_t peer_coun
     };
 
     peer_service.peer_map = init_peer_enode_map();
+    peer_service.ho_com_cb = send_ho_com;
     server_entity_setup(server_port, &peer_service.p2p_ctx, LD_TCP_SERVER);
     for (int i = 0; i < peer_count; i++) {
         peer_gs_t *peer = peers[i];

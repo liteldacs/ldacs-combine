@@ -470,7 +470,7 @@ int8_t trans_snp_data(uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size_t buf
 
 int8_t register_snf_failed(uint16_t SAC);
 
-int8_t finish_handover_func(uint16_t AS_SAC, uint16_t GSS_SAC);
+int8_t gst_handover_complete_key(uint16_t AS_SAC, uint16_t GSS_SAC);
 
 /* mms */
 l_err init_lme_mms(lme_layer_objs_t *obj);

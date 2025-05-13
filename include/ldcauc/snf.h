@@ -121,7 +121,7 @@ typedef struct snf_obj_s {
 
     trans_snp trans_snp_func;
     register_snf_fail register_fail_func;
-    finish_handover finish_handover_func;
+    gst_ho_complete_key gst_ho_complete_key_func;
 
     //AS
     finish_auth finish_auth_func;
