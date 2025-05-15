@@ -463,6 +463,11 @@ l_err entry_LME_OPEN(void *args) {
             break;
         }
 
+        if ((err = preempt_prim(&MAC_OPEN_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0))) {
+            log_error("LME can not call MAC layers manipulate OPEN");
+            break;
+        }
+
         /* Tell RCU the state of LME is OPEN */
         if ((err = preempt_prim(&LME_STATE_IND_PRIM, LME_STATE_CHANGE,
                                 &(lme_state_chg_t){

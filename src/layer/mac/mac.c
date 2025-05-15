@@ -253,14 +253,14 @@ l_err make_mac_layer() {
     /* temperory */
     UA_STR(ua_as);
     UA_STR(ua_sgw);
-//    if (config.role == LD_AS) {
-//        key_get_handle(config.role, get_ua_str(config.UA, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
-//                       &mac_layer_objs.sm3_key);
-//    } else {
-//        key_get_handle(config.role, get_ua_str(10010, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
-//                       &mac_layer_objs.sm3_key);
-//    }
-//
+    //    if (config.role == LD_AS) {
+    //        key_get_handle(config.role, get_ua_str(config.UA, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
+    //                       &mac_layer_objs.sm3_key);
+    //    } else {
+    //        key_get_handle(config.role, get_ua_str(10010, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
+    //                       &mac_layer_objs.sm3_key);
+    //    }
+    //
 
     mac_layer_objs.interv_head = &mac_layer_objs.intervs.lpointer;
     init_list_head(mac_layer_objs.interv_head);
@@ -317,7 +317,10 @@ void M_SAPI(ld_prim_t *prim) {
                 prim->prim_err = LD_ERR_WRONG_STATE;
                 break;
             }
-            prim->prim_err = preempt_prim(&PHY_CSCAN_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0);
+            if ((prim->prim_err = preempt_prim(&PHY_CSCAN_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0))) {
+                log_error("cant indicate phy to `PHY_CSAN`");
+                break;
+            }
 
             /* change to the new state cscanning */
             if ((prim->prim_err = change_state(&mac_layer_objs.mac_fsm, MAC_EV_DEFAULT,
@@ -326,6 +329,18 @@ void M_SAPI(ld_prim_t *prim) {
                 break;
             }
 
+            break;
+        }
+        case MAC_GSCAN_REQ: {
+            if (!in_state(&mac_layer_objs.mac_fsm, mac_fsm_states[MAC_OPEN])) {
+                prim->prim_err = LD_ERR_WRONG_STATE;
+                break;
+            }
+
+            if ((prim->prim_err = preempt_prim(&PHY_GSCAN_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0))) {
+                log_error("cant indicate phy to `PHY_CSAN`");
+                break;
+            }
             break;
         }
         case MAC_CONNECT_REQ: {
@@ -357,6 +372,21 @@ void M_SAPI(ld_prim_t *prim) {
                 break;
             }
             break;
+        }
+        case MAC_OPEN_REQ: {
+            if ((prim->prim_err = change_state(&mac_layer_objs.mac_fsm, MAC_EV_DEFAULT,
+                                               &(fsm_event_data_t){&mac_fsm_events[MAC_OPEN], NULL}))) {
+                log_error("cant change state correctly");
+                break;
+            }
+            break;
+        }
+        case MAC_HO_REQ: {
+            if ((prim->prim_err = change_state(&mac_layer_objs.mac_fsm, MAC_EV_DEFAULT,
+                                               &(fsm_event_data_t){&mac_fsm_events[MAC_HO2], NULL}))) {
+                log_error("cant change state correctly");
+                break;
+            }
         }
         default: {
             break;
@@ -970,7 +1000,8 @@ void P_SAPD_cb(ld_prim_t *prim) {
                         pb_stream mac_pbs;
                         init_pbs(&mac_pbs, mac_buf->ptr, mac_buf->len, "BC_MAC");
                         if (in_struct(&bc_mac, bc_format_descs[B_TYP].f_desc, &mac_pbs, NULL) == FALSE
-                        || !verify_hmac_buffer(mac_layer_objs.sm3_key, bc_mac.mac, to_calc_mac, get_sec_maclen(SEC_MACLEN_64))
+                            || !verify_hmac_buffer(mac_layer_objs.sm3_key, bc_mac.mac, to_calc_mac,
+                                                   get_sec_maclen(SEC_MACLEN_64))
                         ) {
                             lfqueue_destroy(queue);
                             lfqueue_free(queue);

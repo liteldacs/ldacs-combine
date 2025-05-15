@@ -258,8 +258,6 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                         .AS_SAC = resp->SAC,
                     };
 
-                    // log_warn("ALLOC CO SAC %d %d", resp->CO, resp->SAC);
-
                     // init as dls entity ,未来做切换的时候需要考虑可行性
                     preempt_prim(&DLS_OPEN_REQ_PRIM, DL_TYP_AS_INIT, dls_en_data, NULL, 0, 0);
 
@@ -267,10 +265,16 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                     break;
                 }
                 case C_TYP_HO_COM: {
-                    log_warn("++++++++==============+++++++++++");
+                    //TODO: GSCAN应在 接受STB后就触发
+                    if (preempt_prim(&MAC_HO_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0) != LD_OK) {
+                        log_error("LME can not call MAC layers manipulate HO2");
+                        break;
+                    }
+
+                    //TODO： 发送cell exit
+
                     break;
                 }
-
                 default: {
                     break;
                 }

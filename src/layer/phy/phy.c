@@ -471,6 +471,9 @@ void P_SAPC(ld_prim_t *prim) {
             pthread_detach(phy_layer_objs.recv_th);
             break;
         }
+        case PHY_GSCAN_REQ: {
+            break;
+        }
         default:
             break;
     }
