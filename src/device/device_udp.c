@@ -166,12 +166,5 @@ l_err set_udp_device(ld_dev_entity_t *en) {
     en->recv_pkt = udp_recv_msg;
     en->set_freq = set_freq_port;
 
-    if (!set_new_freq(en, config.init_fl_freq, FL)) {
-        return LD_ERR_INTERNAL;
-    }
-    if (!set_new_freq(en, config.init_rl_freq, RL)) {
-        return LD_ERR_INTERNAL;
-    }
-
     return LD_OK;
 }

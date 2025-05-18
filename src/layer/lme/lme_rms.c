@@ -266,13 +266,28 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                 }
                 case C_TYP_HO_COM: {
                     //TODO: GSCAN应在 接受STB后就触发
-                    if (preempt_prim(&MAC_HO_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0) != LD_OK) {
+
+                    cc_ho_com_t *ho_com = data_struct;
+
+
+                    //HO2不需要CELL_EXIT！！！！除非信号特别差得手动退出
+                    // if (!in_state(&lme_layer_objs.lme_fsm, lme_fsm_states[LME_OPEN]) && !in_state(
+                    //         &lme_layer_objs.lme_fsm, lme_fsm_states[LME_AUTH])) {
+                    //     prim->prim_err = LD_ERR_WRONG_STATE;
+                    //     break;
+                    // }
+                    //
+                    // if ((prim->prim_err = change_state(&lme_layer_objs.lme_fsm, LME_EV_DEFAULT,
+                    //                                    &(fsm_event_data_t){&lme_fsm_events[LME_FSCANNING], NULL}))) {
+                    //     log_error("LME can not change state from LME_CONNECTING to LME_AUTH correctly");
+                    //     break;
+                    // }
+
+                    /* Tell MAC change to HO2 state */
+                    if ((prim->prim_err = preempt_prim(&MAC_HO_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0)) != LD_OK) {
                         log_error("LME can not call MAC layers manipulate HO2");
                         break;
                     }
-
-                    //TODO： 发送cell exit
-
                     break;
                 }
                 default: {

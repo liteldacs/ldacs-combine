@@ -232,7 +232,6 @@ void L_SAPC(ld_prim_t *prim) {
             /* 等待接收到AUTH完成信号 */
             while (lme_layer_objs.finish_status != LME_AUTH_FINISHED) usleep(100000);
 
-
             break;
         }
         case LME_CONF_REQ: {
@@ -520,7 +519,7 @@ int8_t gst_handover_complete_key(uint16_t AS_SAC, uint16_t GSS_SAC) {
                                    .AS_SAC = AS_SAC,
                                    .AS_UA = 0, //useless in ACK, set 0
                                    .GSS_SAC = GSS_SAC,
-                                   .GST_SAC = 0,
+                                   .GST_SAC = lme_layer_objs.GS_SAC,
                                    .NEXT_CO = get_CO(),
                                }, &handover_peer_ini_desc, NULL, NULL);
     return LD_OK;

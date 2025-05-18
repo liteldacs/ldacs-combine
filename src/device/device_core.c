@@ -22,6 +22,13 @@ l_err set_device(const char *dev_name, ld_dev_entity_t *dev_en) {
         return LD_ERR_WRONG_PARA;
     }
 
+    if (!set_new_freq(dev_en, config.init_fl_freq, FL)) {
+        return LD_ERR_INTERNAL;
+    }
+    if (!set_new_freq(dev_en, config.init_rl_freq, RL)) {
+        return LD_ERR_INTERNAL;
+    }
+
     return LD_OK;
 }
 
