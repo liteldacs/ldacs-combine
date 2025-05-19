@@ -145,6 +145,7 @@ typedef struct rl_dch_pdu_s {
 } rl_dch_pdu_t;
 
 typedef struct dcch_pdu_s {
+    uint8_t sync_tile;
     uint16_t slot_ser;
     buffer_t *dc;
 } dcch_pdu_t;

@@ -121,6 +121,7 @@ static void trans_cc_func(void *args) {
 
         size_t rl_avail_blks = RL_SLOT_MAX - cc_dd.COL;
         ld_rpso_t *mac_rpso_sac = init_rpsos(cc_dd.COL, rl_avail_blks);
+
         /* 在这里做资源分配drr */
         drr_resource_alloc(lme_rms_obj.rl_drr, 200, rl_avail_blks * RL_DATA_BLK_LEN_MAX, 0, resource_rl_alloc_cb,
                            mac_rpso_sac);
