@@ -79,10 +79,12 @@ typedef int8_t (*register_snf_fail)(uint16_t AS_SAC);
 /**
 * @brief 用于GS，Handover完成回调，应包含功能：1. 向源基站GS Source发送 ACK
  * @param[in] AS_SAC 进行切换的`AS`对应的SAC
+ * //////////////////
+ * @param AS_UA 进行切换的`AS`对应的UA
  * @param[in] GSS_SAC 该`AS`切换前的`GS`对应的SAC
  * @return 错误码
  */
-typedef int8_t (*gst_ho_complete_key)(uint16_t AS_SAC, uint16_t GSS_SAC);
+typedef int8_t (*gst_ho_complete_key)(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_SAC);
 
 /**
  * \brief  AS初始化SNF层

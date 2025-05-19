@@ -82,7 +82,7 @@ l_err p2p_conn_recv(basic_conn_t *bc) {
         gst_handover_request_handle(ini->AS_SAC, ini->AS_UA, ini->GSS_SAC, ini->GST_SAC);
     } else {
         // TODO:  send HO by CCCH
-        log_info("Handover finished! Waiting for cell exit");
+        log_info("Handover finished!");
         if (peer_service.ho_com_cb) peer_service.ho_com_cb(ini->AS_SAC, ini->GST_SAC, ini->NEXT_CO);
     }
     free(ini);

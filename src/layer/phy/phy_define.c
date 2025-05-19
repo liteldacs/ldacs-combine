@@ -34,7 +34,6 @@ static json_tmpl_t rach_j_tmpl[] = {
 };
 
 static json_tmpl_t dcch_j_tmpl[] = {
-    {cJSON_Number, sizeof(uint8_t), "sync-tile", "sync-tile", NULL},
     {cJSON_Number, sizeof(uint16_t), "slot", "slot", NULL},
     {cJSON_String, sizeof(buffer_t *), "dcch", "dcch", NULL},
     {cJSON_Invalid, 0, NULL, NULL, NULL}

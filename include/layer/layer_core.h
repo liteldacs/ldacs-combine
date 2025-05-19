@@ -115,6 +115,9 @@ enum ELE_TYP {
     DL_TYP_AS_INIT = 0x1,
     DL_TYP_GS_INIT = 0x2,
 
+    /* PHY */
+    PHY_TYP_HO = 0x1,
+
     /* RCU */
     RC_TYP_OPEN = 0x0,
     RC_TYP_CLOSE = 0x1,

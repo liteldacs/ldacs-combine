@@ -205,7 +205,6 @@ void M_SAPC_D_cb(ld_prim_t *prim) {
                     cc_rl_alloc_t *rl_alloc = data_struct;
 
                     set_rl_param(rl_alloc->RPSO, rl_alloc->NRPS);
-                    // log_warn("!!!!!!!!!!!!???????????????");
                     dls_frag_func(dls_layer_objs.AS_DLS, rl_alloc->NRPS * RL_DATA_BLK_LEN_MAX);
                     break;
                 }
@@ -223,7 +222,6 @@ void M_SAPC_D_cb(ld_prim_t *prim) {
                 case C_TYP_ACK: {
                     cc_ack_t *ack = data_struct;
                     if (ack->AS_SAC != dls_layer_objs.AS_DLS->AS_SAC) break;
-                    // log_fatal("?????????????????????? %d %d", ack->bitmap, ack->PID);
                     recv_ack(dls_layer_objs.AS_DLS, ack->PID, ack->bitmap);
                     break;
                 }

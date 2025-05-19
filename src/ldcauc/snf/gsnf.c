@@ -171,7 +171,7 @@ l_err recv_gsnf(basic_conn_t *bc) {
 
                     /* 未来使用切换状态机， 抛弃这种方法*/
                     if (snf_obj.GS_SAC != as_man->CURR_GS_SAC) {
-                        snf_obj.gst_ho_complete_key_func(as_man->AS_SAC, as_man->CURR_GS_SAC);
+                        snf_obj.gst_ho_complete_key_func(as_man->AS_SAC, as_man->AS_UA, as_man->CURR_GS_SAC);
                     }
 
                     free_buffer(key_trans.key);
@@ -338,7 +338,7 @@ l_err recv_gsg(basic_conn_t *bc) {
 
                     /* 未来使用切换状态机， 抛弃这种方法*/
                     if (snf_obj.GS_SAC != as_man->CURR_GS_SAC) {
-                        snf_obj.gst_ho_complete_key_func(as_man->AS_SAC, as_man->CURR_GS_SAC);
+                        snf_obj.gst_ho_complete_key_func(as_man->AS_SAC, as_man->AS_UA, as_man->CURR_GS_SAC);
                     }
 
                     free_buffer(key_trans.key);

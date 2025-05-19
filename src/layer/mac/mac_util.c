@@ -9,7 +9,7 @@ fsm_event_t mac_fsm_events[] = {
     {"MAC_CONNECTING", NULL, NULL},
     {"MAC_AUTH", NULL, NULL},
     {"MAC_OPEN", NULL, NULL},
-    {"MAC_HO2", NULL, NULL},
+    {"MAC_HO2", entry_MAC_HO2, NULL},
 };
 
 static struct sm_state_s mac_states[] = {

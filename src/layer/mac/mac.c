@@ -388,6 +388,13 @@ void M_SAPI(ld_prim_t *prim) {
                 break;
             }
         }
+        case MAC_SYNC_REQ: {
+            if ((prim->prim_err = preempt_prim(&PHY_SYNC_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0)) != LD_OK) {
+                log_warn("Can not call PHY to SYNC signal");
+                break;
+            }
+            break;
+        }
         default: {
             break;
         }
@@ -1262,4 +1269,21 @@ void P_SAPD_cb(ld_prim_t *prim) {
 }
 
 void P_SAPC_cb(ld_prim_t *prim) {
+}
+
+
+l_err entry_MAC_HO2(void *args) {
+    l_err err = LD_OK;
+    // if ((err = preempt_prim(&PHY_SYNC_REQ_PRIM)))
+    // TODO: 未来这里要指定频率作为Obj
+    if ((err = preempt_prim(&PHY_CONF_REQ_PRIM, PHY_TYP_HO, NULL, NULL, 0, 0)) != LD_OK) {
+        log_error("Set PHY layer for new GS has failed");
+        return err;
+    }
+
+    // if ((err = preempt_prim(&PHY_SYNC_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0)) != LD_OK) {
+    //     log_error("Cannot exec PHY SYNC primitive");
+    //     return err;
+    // }
+    return err;
 }

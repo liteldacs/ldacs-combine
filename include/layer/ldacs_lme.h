@@ -204,6 +204,12 @@ l_err as_man_update_key_handler(lme_as_man_t *as_man, void *key, uint64_t value,
 
 extern ACM_t acm[CMS_N];
 
+
+typedef struct to_sync_poll_s {
+    uint16_t SAC;
+    struct list_head lpointer; //链表节点
+} to_sync_poll_t;
+
 typedef struct lme_layer_objs_s {
     uint32_t LME_T_CELL_RESP,
             LME_T_MAKE,
@@ -233,6 +239,9 @@ typedef struct lme_layer_objs_s {
 
     /* */
     uint16_t GS_SAC;
+    // TO SYNC POLL
+    to_sync_poll_t to_sync;
+    struct list_head *to_sync_head;
 
     /* lme状态机 */
     sm_statemachine_t lme_fsm;
@@ -486,7 +495,7 @@ int8_t trans_snp_data(uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size_t buf
 
 int8_t register_snf_failed(uint16_t SAC);
 
-int8_t gst_handover_complete_key(uint16_t AS_SAC, uint16_t GSS_SAC);
+int8_t gst_handover_complete_key(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_SAC);
 
 /* mms */
 l_err init_lme_mms(lme_layer_objs_t *obj);
@@ -514,6 +523,8 @@ l_err init_lme_rms(lme_layer_objs_t *obj);
 void *trans_lme_cc_timer_func(void *args);
 
 void trans_cc_sd_timer_func(void *args);
+
+void trans_cc_sync_timer_func(void *args);
 
 void trans_cc_dd_func(void *args);
 

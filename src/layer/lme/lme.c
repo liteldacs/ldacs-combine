@@ -139,6 +139,10 @@ l_err make_lme_layer() {
                     break;
                 }
                 case LD_GS: {
+                    lme_layer_objs.to_sync.lpointer = (struct list_head){
+                        &lme_layer_objs.to_sync.lpointer, &lme_layer_objs.to_sync.lpointer
+                    };
+                    lme_layer_objs.to_sync_head = &lme_layer_objs.to_sync.lpointer;
                     config.is_merged == TRUE
                         ? init_gs_snf_layer(config.GS_SAC, config.gsnf_addr_v6, config.gsnf_remote_port,
                                             config.gsnf_local_port, trans_snp_data, register_snf_failed,
@@ -511,16 +515,30 @@ int8_t register_snf_failed(uint16_t AS_SAC) {
     return LD_OK;
 }
 
-int8_t gst_handover_complete_key(uint16_t AS_SAC, uint16_t GSS_SAC) {
+int8_t gst_handover_complete_key(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_SAC) {
     peer_propt_t *peer = get_peer_propt(GSS_SAC);
     if (!peer) return LD_ERR_INTERNAL;
+
+    uint16_t next_co = get_CO();
     peer->bc.opt->send_handler(&peer->bc, &(ho_peer_ini_t){
                                    .is_ACK = TRUE,
                                    .AS_SAC = AS_SAC,
                                    .AS_UA = 0, //useless in ACK, set 0
                                    .GSS_SAC = GSS_SAC,
                                    .GST_SAC = lme_layer_objs.GS_SAC,
-                                   .NEXT_CO = get_CO(),
+                                   .NEXT_CO = next_co,
                                }, &handover_peer_ini_desc, NULL, NULL);
+
+
+    if (has_lme_as_enode(AS_SAC) == FALSE) {
+        set_lme_as_enode(init_as_man(AS_SAC, AS_UA, lme_layer_objs.GS_SAC));
+    }
+
+    set_mac_CO(next_co, AS_SAC);
+
+    to_sync_poll_t *to_sync = calloc(1, sizeof(to_sync_poll_t));
+    to_sync->SAC = AS_SAC;
+    list_add_tail(&to_sync->lpointer, lme_layer_objs.to_sync_head);
+
     return LD_OK;
 }

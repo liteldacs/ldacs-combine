@@ -94,9 +94,8 @@ l_err init_lme_rms(lme_layer_objs_t *obj) {
 
 static void trans_cc_must_timer_func(evutil_socket_t fd, short event, void *arg) {
     trans_cc_sd_timer_func(NULL);
+    trans_cc_sync_timer_func(NULL);
     trans_cc_mac_timer_func(NULL);
-    // if (lme_rms_obj.BO != 0)
-    //     log_warn("!!!!!!!!!!! %d", lme_rms_obj.BO);
 }
 
 static void trans_cc_func(void *args) {
@@ -149,10 +148,16 @@ void trans_cc_sd_timer_func(void *args) {
         .DCL = highest_co + 1 >= DCL_MAX ? DCL_MAX : highest_co + 1
     };
 
-    //TODO: 这里和MAC的对应位置改成和DCCH DESC一样的
-    // preempt_prim(&MAC_CCCH_REQ_PRIM, C_TYP_SLOT_DESC,
-    //              gen_pdu(&sd_n, cc_format_descs[C_TYP_SLOT_DESC].f_desc, "CCSD OUT"), NULL, 0, 0);
     preempt_prim(&MAC_CCCH_REQ_PRIM, C_TYP_SLOT_DESC, &sd_n, NULL, 0, 0);
+}
+
+void trans_cc_sync_timer_func(void *args) {
+    struct list_head *pos;
+    list_for_each(pos, lme_layer_objs.to_sync_head) {
+        to_sync_poll_t *to_sync = list_entry(pos, to_sync_poll_t, lpointer);
+
+        preempt_prim(&MAC_SYNC_REQ_PRIM, E_TYP_ANY, &to_sync->SAC, NULL, 0, 0);
+    }
 }
 
 void trans_cc_dd_func(void *args) {
@@ -269,20 +274,7 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                     //TODO: GSCAN应在 接受STB后就触发
 
                     cc_ho_com_t *ho_com = data_struct;
-
-
                     //HO2不需要CELL_EXIT！！！！除非信号特别差得手动退出
-                    // if (!in_state(&lme_layer_objs.lme_fsm, lme_fsm_states[LME_OPEN]) && !in_state(
-                    //         &lme_layer_objs.lme_fsm, lme_fsm_states[LME_AUTH])) {
-                    //     prim->prim_err = LD_ERR_WRONG_STATE;
-                    //     break;
-                    // }
-                    //
-                    // if ((prim->prim_err = change_state(&lme_layer_objs.lme_fsm, LME_EV_DEFAULT,
-                    //                                    &(fsm_event_data_t){&lme_fsm_events[LME_FSCANNING], NULL}))) {
-                    //     log_error("LME can not change state from LME_CONNECTING to LME_AUTH correctly");
-                    //     break;
-                    // }
 
                     /* Tell MAC change to HO2 state */
                     if ((prim->prim_err = preempt_prim(&MAC_HO_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0)) != LD_OK) {

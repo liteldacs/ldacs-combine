@@ -297,4 +297,6 @@ l_err mac_register_interv(inter_func func);
 
 l_err set_rl_param(uint8_t RPSO, uint8_t NRPS);
 
+l_err entry_MAC_HO2(void *args);
+
 #endif //LDACS_SIM_LDACS_MAC_H
