@@ -185,6 +185,8 @@ int8_t gss_handover_request_trigger(uint16_t AS_SAC, uint16_t GSS_SAC, uint16_t 
  */
 int8_t gst_handover_request_handle(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_SAC, uint16_t GST_SAC);
 
+int8_t gst_handover_complete(uint16_t AS_SAC);
+
 /**
  * \brief 产生至多64位随机数
  * @param[in] rand_bits_sz  随机数比特长度

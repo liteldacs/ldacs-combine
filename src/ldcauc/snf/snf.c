@@ -325,3 +325,22 @@ int8_t gst_handover_request_handle(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS
     }
     return LDCAUC_OK;
 }
+
+int8_t gst_handover_complete(uint16_t AS_SAC) {
+    if (snf_obj.is_merged) {
+        gs_conn_service.sgw_conn->bc.opt->send_handler(&gs_conn_service.sgw_conn->bc, &(gsg_ho_cplt_t){
+                                                           .TYPE = GS_HO_COMPLETE,
+                                                           .AS_SAC = AS_SAC,
+                                                           .GS_SAC = snf_obj.GS_SAC
+                                                       }, &gsg_ho_cplt_desc, NULL, NULL);
+    } else {
+        gs_conn_service.sgw_conn->bc.opt->send_handler(&gs_conn_service.sgw_conn->bc, &(gsnf_st_chg_t){
+                                                           .G_TYP = GSNF_STATE_CHANGE,
+                                                           .VER = DEFAULT_GSNF_VERSION,
+                                                           .AS_SAC = AS_SAC,
+                                                           .State = GSNF_SWITCH,
+                                                           .GS_SAC = snf_obj.GS_SAC
+                                                       }, &gsnf_st_chg_desc, NULL, NULL);
+    }
+    return LDCAUC_OK;
+}

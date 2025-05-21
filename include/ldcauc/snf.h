@@ -253,6 +253,12 @@ typedef struct gsg_ho_req_s {
     uint16_t GST_SAC;
 } gsg_ho_req_t;
 
+typedef struct gsg_ho_cplt_s {
+    uint8_t TYPE;
+    uint16_t AS_SAC;
+    uint16_t GS_SAC;
+} gsg_ho_cplt_t;
+
 typedef struct gsnf_pkt_cn_s {
     uint8_t G_TYP;
     uint8_t VER;
@@ -296,6 +302,7 @@ typedef struct gsnf_key_upd_remind_s {
     uint16_t GST_SAC;
 } gsnf_key_upd_remind_t;
 
+
 typedef struct gs_key_trans_s {
     buffer_t *key;
     buffer_t *nonce;
@@ -320,6 +327,7 @@ extern struct_desc_t gsg_ini_pkt_desc;
 extern struct_desc_t gsg_pkt_desc;
 extern struct_desc_t gsg_as_exit_desc;
 extern struct_desc_t gsg_ho_req_desc;
+extern struct_desc_t gsg_ho_cplt_desc;
 extern struct_desc_t gsnf_pkt_cn_desc;
 extern struct_desc_t gsnf_pkt_cn_ini_desc;
 extern struct_desc_t gsnf_as_auz_info_desc;

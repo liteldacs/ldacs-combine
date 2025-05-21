@@ -300,6 +300,7 @@ void M_SAPI_cb(ld_prim_t *prim) {
                 if (*(uint16_t *) prim->prim_objs == to_sync->SAC) {
                     list_del(&to_sync->lpointer);
 
+                    gst_handover_complete(to_sync->SAC);
 
                     // preempt_prim(&MAC_CCCH_REQ_PRIM, )
                     break;

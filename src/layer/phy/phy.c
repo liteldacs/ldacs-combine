@@ -22,8 +22,12 @@ static phy_sim_t real_sim = {
 };
 
 void as_init_gtimer() {
-    register_gtimer(&gtimer);
-    register_gtimer_event(&gtimer, &phy_layer_objs.gtimer[PHY_TIMER_RA]);
+    if (gtimer.is_reg == FALSE) {
+        register_gtimer(&gtimer);
+        register_gtimer_event(&gtimer, &phy_layer_objs.gtimer[PHY_TIMER_RA]);
+    } else {
+        reregister_gtimer(&gtimer);
+    }
 }
 
 phy_layer_objs_t phy_layer_objs = {
