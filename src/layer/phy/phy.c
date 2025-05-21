@@ -542,7 +542,16 @@ void P_SAPT(ld_prim_t *prim) {
 }
 
 void P_SAPS(ld_prim_t *prim) {
-    log_warn("!!!!!!!!!!!!!!!!! ");
+    buffer_t *out_buf = NULL;
+    if ((prim->prim_err = phy_layer_objs.sim->downward_process(prim, NULL, &out_buf)) == LD_OK) {
+        if (out_buf) {
+            prim->prim_err = phy_layer_objs.dev.send_pkt(out_buf, (config.role == LD_AS) ? RL : FL);
+        }
+    }
+
+    if (out_buf) {
+        free_buffer(out_buf);
+    }
 }
 
 void process_phy_pkt(void *data) {

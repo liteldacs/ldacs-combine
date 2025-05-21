@@ -384,6 +384,13 @@ typedef struct cc_rl_alloc_s {
     uint8_t CMS;
 } cc_rl_alloc_t;
 
+typedef struct cc_lm_data_s {
+    uint8_t c_type;
+    uint16_t SAC;
+    uint8_t PAV;
+    uint8_t FAV;
+    uint8_t TAV;
+} cc_lm_data_t;
 
 typedef struct cc_mac_bd_s {
     uint8_t c_type;
@@ -405,6 +412,7 @@ typedef struct cc_rsc_rqst_s {
     uint8_t SC;
     uint16_t resource;
 } cc_rsc_t;
+
 
 typedef struct ra_cell_rqst_s {
     uint8_t r_type;
@@ -444,6 +452,7 @@ extern struct_desc_t cc_ho_com_desc;
 extern struct_desc_t cc_cell_resp_desc;
 extern struct_desc_t cc_fl_alloc_desc;
 extern struct_desc_t cc_rl_alloc_desc;
+extern struct_desc_t cc_lm_data_desc;
 extern struct_desc_t cc_hmac_desc;
 extern struct_desc_t ra_cell_rqst_desc;
 extern struct_desc_t dc_keep_alive_desc;

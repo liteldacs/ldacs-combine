@@ -33,6 +33,11 @@ static json_tmpl_t rach_j_tmpl[] = {
     {cJSON_Invalid, 0, NULL, NULL, NULL}
 };
 
+static json_tmpl_t dcch_sync_j_tmpl[] = {
+    {cJSON_Number, sizeof(uint16_t), "SAC", "SAC", NULL},
+    {cJSON_Invalid, 0, NULL, NULL, NULL}
+};
+
 static json_tmpl_t dcch_j_tmpl[] = {
     {cJSON_Number, sizeof(uint16_t), "slot", "slot", NULL},
     {cJSON_String, sizeof(buffer_t *), "dcch", "dcch", NULL},
@@ -49,6 +54,7 @@ static json_tmpl_t rl_dch_j_tmpl[] = {
 json_tmpl_desc_t bcch_j_tmpl_desc = {"BCCH", bcch_j_tmpl, sizeof(bcch_pdu_t)};
 json_tmpl_desc_t cc_dch_j_tmpl_desc = {"CC_DCH", cc_dch_j_tmpl, sizeof(cc_dch_pdu_t)};
 json_tmpl_desc_t rach_j_tmpl_desc = {"RACH", rach_j_tmpl, sizeof(rach_pdu_t)};
+json_tmpl_desc_t dcch_sync_j_tmpl_desc = {"DCCH SYNC", dcch_sync_j_tmpl, sizeof(dcch_sync_t)};
 json_tmpl_desc_t dcch_j_tmpl_desc = {"DCCH", dcch_j_tmpl, sizeof(dcch_pdu_t)};
 json_tmpl_desc_t rl_dch_j_tmpl_desc = {"RL_DCH", rl_dch_j_tmpl, sizeof(rl_dch_pdu_t)};
 json_tmpl_desc_t phy_json_hdr_j_tmpl_desc = {"JSON_HDR", phy_json_hdr_j_tmpl, sizeof(phy_json_hdr_t)};

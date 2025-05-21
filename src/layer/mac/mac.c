@@ -116,8 +116,8 @@ ld_prim_t MAC_HO_REQ_PRIM = {
 ld_prim_t MAC_SYNC_IND_PRIM = {
     .name = "MAC_SYNC_IND_REQ",
     .prim_seq = MAC_SYNC_IND,
-    .SAP = {M_SAPI, NULL, NULL},
-    .req_cb = {NULL, NULL, NULL},
+    .SAP = {NULL, NULL, NULL},
+    .req_cb = {M_SAPI_cb, NULL, NULL},
     .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 ld_prim_t MAC_CC_STATUS_REQ_PRIM = {
@@ -387,9 +387,10 @@ void M_SAPI(ld_prim_t *prim) {
                 log_error("cant change state correctly");
                 break;
             }
+            break;
         }
         case MAC_SYNC_REQ: {
-            if ((prim->prim_err = preempt_prim(&PHY_SYNC_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0)) != LD_OK) {
+            if ((prim->prim_err = preempt_prim(&PHY_SYNC_REQ_PRIM, E_TYP_ANY, prim->prim_objs, NULL, 0, 0)) != LD_OK) {
                 log_warn("Can not call PHY to SYNC signal");
                 break;
             }
@@ -1272,6 +1273,18 @@ void P_SAPC_cb(ld_prim_t *prim) {
 }
 
 void P_SAPS_cb(ld_prim_t *prim) {
+    switch (prim->prim_seq) {
+        case PHY_SYNC_IND: {
+            if ((prim->prim_err = preempt_prim(&MAC_SYNC_IND_PRIM, E_TYP_ANY, prim->prim_objs, NULL, 0, 0)) != LD_OK) {
+                log_error("Can not call MAC_SYNC_IND");
+                return;
+            }
+            break;
+        }
+        default: {
+            break;
+        }
+    }
 }
 
 

@@ -203,6 +203,15 @@ RA_FREE: {
 }
 
 static void upward_DCCH_j(cJSON *j_node) {
+    int is_array = cJSON_IsArray(j_node);
+    //通过判断jnode是否为数组，进而知道是否为SYNC
+    if (!is_array) {
+        dcch_sync_t sync;
+        unmarshel_json(j_node, (void **) &sync, &dcch_sync_j_tmpl_desc);
+        preempt_prim(&PHY_SYNC_IND_PRIM, E_TYP_ANY, &sync.SAC, NULL, 0, 0);
+        return;
+    }
+
     size_t array_size = cJSON_GetArraySize(j_node);
     phy_slots_t *slots = &phy_json_obj.dc_slots;
 
@@ -400,29 +409,36 @@ l_err downward_json_sim(ld_prim_t *prim, buffer_t **in_bufs, buffer_t **out_buf)
 
             break;
         }
-        case PHY_DC_REQ: {
+        case PHY_DC_REQ:
+        case PHY_SYNC_REQ: {
             json_hdr.channel = DCCH;
             // json_hdr.sf_seq = 0;
+            switch (seq) {
+                case PHY_DC_REQ: {
+                    j_node = cJSON_CreateArray();
+                    for (int p = 0; p < DC_SLOT_MAX; p++) {
+                        if (in_bufs[p] != NULL) {
+                            dcch_pdu_t dcch_pdu;
+                            cJSON *array_node = NULL;
 
-            j_node = cJSON_CreateArray();
-            for (int p = 0; p < DC_SLOT_MAX; p++) {
-                if (in_bufs[p] != NULL) {
-                    dcch_pdu_t dcch_pdu;
-                    cJSON *array_node = NULL;
+                            dcch_pdu.slot_ser = p;
+                            INIT_BUF_ARRAY_UNPTR(&dcch_pdu.dc, DC_BLK_N);
+                            clone_by_alloced_buffer(dcch_pdu.dc,
+                                                    encode_b64_buffer(0, in_bufs[p]->ptr, in_bufs[p]->total));
+                            array_node = marshel_json(&dcch_pdu, &dcch_j_tmpl_desc);
+                            CLEAR_BUF_ARRAY_DEEP(&dcch_pdu.dc, DC_BLK_N);
 
-                    dcch_pdu.slot_ser = p;
-                    INIT_BUF_ARRAY_UNPTR(&dcch_pdu.dc, DC_BLK_N);
-                    clone_by_alloced_buffer(dcch_pdu.dc, encode_b64_buffer(0, in_bufs[p]->ptr, in_bufs[p]->total));
-                    array_node = marshel_json(&dcch_pdu, &dcch_j_tmpl_desc);
-                    CLEAR_BUF_ARRAY_DEEP(&dcch_pdu.dc, DC_BLK_N);
-
-                    cJSON_AddItemToArray(j_node, array_node);
+                            cJSON_AddItemToArray(j_node, array_node);
+                        }
+                    }
+                    break;
+                }
+                case PHY_SYNC_REQ: {
+                    j_node = marshel_json(&(dcch_sync_t){.SAC = *(uint16_t *) prim->prim_objs}, &dcch_sync_j_tmpl_desc);
+                    break;
                 }
             }
 
-            break;
-        }
-        case PHY_SYNC_REQ: {
             break;
         }
         default: break;

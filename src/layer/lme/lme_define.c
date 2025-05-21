@@ -150,6 +150,21 @@ static field_desc cc_rl_alloc_fields[] = {
 struct_desc_t cc_rl_alloc_desc = {"CC_RL_ALLOC", cc_rl_alloc_fields};
 
 /**
+ * CC LM DATA
+ */
+static field_desc cc_lm_data_fields[] = {
+    {ft_set, C_TYPE_LEN, "C_TYPE", NULL},
+    {ft_set, 12, "SAC", NULL},
+    {ft_set, 7, "PAV", NULL},
+    {ft_set, 10, "FAV", NULL},
+    {ft_set, 10, "TAV", NULL},
+    {ft_pad, 0, "PAD", NULL},
+    {ft_crc, CRC_8_SIZE, "CRC", NULL},
+    {ft_end, 0, NULL, NULL},
+};
+struct_desc_t cc_lm_data_desc = {"CC_RL_ALLOC", cc_lm_data_fields};
+
+/**
  * CC MAC
  */
 static field_desc cc_hmac_fields[] = {
@@ -233,7 +248,7 @@ ld_format_desc_t cc_format_descs[] = {
     {C_TYP_CELL_RESP, &cc_cell_resp_desc, 30, sizeof(cc_cell_resp_t), free_cc_cell_resp, 3, DIR_LME},
     {C_TYP_CHANGE_CO, &cc_dcch_desc, 5, sizeof(cc_dcch_desc_t), free, 3, DIR_LME},
     {C_TYP_CELL_DENIED, &cc_dcch_desc, 5, sizeof(cc_dcch_desc_t), free, 3, DIR_LME},
-    {C_TYP_LM_DATA, &cc_dcch_desc, 5, sizeof(cc_dcch_desc_t), free, 4, DIR_LME},
+    {C_TYP_LM_DATA, &cc_lm_data_desc, 7, sizeof(cc_lm_data_t), free, 4, DIR_LME},
     {0, NULL, 0},
     {C_TYP_ACK, &cc_ack_desc, 6, sizeof(cc_ack_t), free, 5, DIR_DLS},
     {C_TYP_ACK_FRAG, &cc_frag_ack_desc, 6, sizeof(cc_frag_ack_t), free, 6, DIR_DLS},

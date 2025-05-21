@@ -144,6 +144,11 @@ typedef struct rl_dch_pdu_s {
     buffer_t *rl_dch;
 } rl_dch_pdu_t;
 
+//手册中SYNC TILE不应携带任何内容，这里仅作模拟
+typedef struct dcch_sync_s {
+    uint16_t SAC;
+} dcch_sync_t;
+
 typedef struct dcch_pdu_s {
     uint16_t slot_ser;
     buffer_t *dc;
@@ -155,6 +160,7 @@ typedef struct dcch_pdu_s {
 extern json_tmpl_desc_t bcch_j_tmpl_desc;
 extern json_tmpl_desc_t cc_dch_j_tmpl_desc;
 extern json_tmpl_desc_t rach_j_tmpl_desc;
+extern json_tmpl_desc_t dcch_sync_j_tmpl_desc;
 extern json_tmpl_desc_t dcch_j_tmpl_desc;
 extern json_tmpl_desc_t rl_dch_j_tmpl_desc;
 extern json_tmpl_desc_t phy_json_hdr_j_tmpl_desc;

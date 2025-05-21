@@ -288,6 +288,25 @@ void M_SAPI_cb(ld_prim_t *prim) {
 
             break;
         }
+        case MAC_SYNC_IND: {
+            struct list_head *pos;
+            list_for_each(pos, lme_layer_objs.to_sync_head) {
+                log_warn("!!!!!!!! %d", *(uint16_t *) prim->prim_objs);
+                to_sync_poll_t *to_sync = list_entry(pos, to_sync_poll_t, lpointer);
+                if (!to_sync) {
+                    prim->prim_err = LD_ERR_NULL;
+                    return;
+                }
+                if (*(uint16_t *) prim->prim_objs == to_sync->SAC) {
+                    list_del(&to_sync->lpointer);
+
+
+                    // preempt_prim(&MAC_CCCH_REQ_PRIM, )
+                    break;
+                }
+            }
+            break;
+        }
         default: {
             break;
         }

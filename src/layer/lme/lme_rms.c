@@ -103,10 +103,7 @@ static void trans_cc_func(void *args) {
     lme_rms_obj.BO = 0;
 
     /* start timer for cc mac. */
-
     register_stimer(&lme_rms_obj.stimer[0]);
-
-    // trans_cc_sd_timer_func(NULL);
 
     /* 10.6.4.2 Note that the DCCH descriptor message is not required if no aircraft are registered in the cell */
     if (bs_get_alloced(lme_rms_obj.CO_bitset) != 0) {
@@ -290,7 +287,9 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                     break;
                 }
                 case C_TYP_SYNC_POLL: {
-                    if ((prim->prim_err = preempt_prim(&MAC_SYNC_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0)) != LD_OK) {
+                    if ((prim->prim_err = preempt_prim(&MAC_SYNC_REQ_PRIM, E_TYP_ANY,
+                                                       &lme_layer_objs.lme_as_man->AS_SAC, NULL, 0, 0)) !=
+                        LD_OK) {
                         log_error("LME can not call MAC SYNC");
                         break;
                     }
