@@ -94,6 +94,7 @@ void D_SAPD(ld_prim_t *prim) {
     }
 
     if (d_entity == NULL) {
+        log_warn("DLS Entity is NULL");
         return;
     }
 

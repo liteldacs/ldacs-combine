@@ -864,7 +864,9 @@ l_err generate_data_pkt() {
         dls_data_req_t *dls_data_req = NULL;
         while (stop_flag == FALSE) {
             lfqueue_get(mac_layer_objs.cd_to_trans_node->dch_q, (void **) &dls_data_req);
-            if (dls_data_req == NULL) break;
+            if (dls_data_req == NULL) {
+                break;
+            }
             cat_to_buffer(sdu_buf, dls_data_req->mac_sdu->ptr, dls_data_req->mac_sdu->len);
 
             // log_buf(LOG_FATAL, "FL BUF", dls_data_req->mac_sdu->ptr, dls_data_req->mac_sdu->len);

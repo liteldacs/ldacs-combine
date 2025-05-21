@@ -365,6 +365,8 @@ static void *dls_reassy_func(void *args) {
                                          },
                                          cc_format_descs[C_TYP_ACK_FRAG].f_desc, "CC FRAG ACK"), NULL, 0, 1);
                 }
+            } else {
+                log_error("Cannot input");
             }
 
             free_buffer(dls_data.DATA);

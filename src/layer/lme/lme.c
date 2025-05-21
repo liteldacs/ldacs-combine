@@ -303,6 +303,7 @@ void M_SAPI_cb(ld_prim_t *prim) {
                     gst_handover_complete(to_sync->SAC);
 
                     // preempt_prim(&MAC_CCCH_REQ_PRIM, )
+                    free(to_sync);
                     break;
                 }
             }
@@ -553,6 +554,9 @@ int8_t gst_handover_complete_key(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_S
     if (has_lme_as_enode(AS_SAC) == FALSE) {
         set_lme_as_enode(init_as_man(AS_SAC, AS_UA, lme_layer_objs.GS_SAC));
     }
+    if (set_dls_enode(lme_layer_objs.GS_SAC, AS_SAC) == NULL) {
+        return LDCAUC_FAIL;
+    }
 
     set_mac_CO(next_co, AS_SAC);
 
@@ -560,5 +564,5 @@ int8_t gst_handover_complete_key(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_S
     to_sync->SAC = AS_SAC;
     list_add_tail(&to_sync->lpointer, lme_layer_objs.to_sync_head);
 
-    return LD_OK;
+    return LDCAUC_OK;
 }
