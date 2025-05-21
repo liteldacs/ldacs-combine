@@ -156,7 +156,13 @@ void trans_cc_sync_timer_func(void *args) {
     list_for_each(pos, lme_layer_objs.to_sync_head) {
         to_sync_poll_t *to_sync = list_entry(pos, to_sync_poll_t, lpointer);
 
-        preempt_prim(&MAC_SYNC_REQ_PRIM, E_TYP_ANY, &to_sync->SAC, NULL, 0, 0);
+        cc_sync_poll_t sync_poll = {
+            .c_type = C_TYP_SYNC_POLL,
+            .SAC = to_sync->SAC,
+        };
+
+        preempt_prim(&MAC_CCCH_REQ_PRIM, C_TYP_SYNC_POLL,
+                     gen_pdu(&sync_poll, cc_format_descs[C_TYP_SYNC_POLL].f_desc, "CC SYNC POLL OUT"), NULL, 0, 0);
     }
 }
 
@@ -279,6 +285,13 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                     /* Tell MAC change to HO2 state */
                     if ((prim->prim_err = preempt_prim(&MAC_HO_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0)) != LD_OK) {
                         log_error("LME can not call MAC layers manipulate HO2");
+                        break;
+                    }
+                    break;
+                }
+                case C_TYP_SYNC_POLL: {
+                    if ((prim->prim_err = preempt_prim(&MAC_SYNC_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0)) != LD_OK) {
+                        log_error("LME can not call MAC SYNC");
                         break;
                     }
                     break;

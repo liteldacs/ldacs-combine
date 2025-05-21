@@ -431,8 +431,8 @@ ld_prim_t PHY_CONF_IND_PRIM = {
 ld_prim_t PHY_FLSYNC_IND_PRIM = {
     .name = "PHY_FLSYNC_IND",
     .prim_seq = PHY_FLSYNC_IND,
-    .SAP = {P_SAPS, NULL, NULL},
-    .req_cb = {NULL, NULL, NULL},
+    .SAP = {NULL, NULL, NULL},
+    .req_cb = {P_SAPS_cb, NULL, NULL},
     .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
@@ -440,15 +440,15 @@ ld_prim_t PHY_SYNC_REQ_PRIM = {
     .name = "PHY_SYNC_REQ",
     .prim_seq = PHY_SYNC_REQ,
     .SAP = {P_SAPS, NULL, NULL},
-    .req_cb = {NULL, NULL, NULL},
+    .req_cb = {P_SAPS_cb, NULL, NULL},
     .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 
 ld_prim_t PHY_SYNC_IND_PRIM = {
     .name = "PHY_SYNC_IND",
     .prim_seq = PHY_SYNC_IND,
-    .SAP = {P_SAPS, NULL, NULL},
-    .req_cb = {NULL, NULL, NULL},
+    .SAP = {NULL, NULL, NULL},
+    .req_cb = {P_SAPS_cb, NULL, NULL},
     .mutex = PTHREAD_MUTEX_INITIALIZER,
 };
 

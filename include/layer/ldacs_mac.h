@@ -267,6 +267,8 @@ void P_SAPT_cb(ld_prim_t *prim);
 
 void P_SAPC_cb(ld_prim_t *prim);
 
+void P_SAPS_cb(ld_prim_t *prim);
+
 extern mac_layer_objs_t mac_layer_objs;
 
 static void set_mac_CO(uint16_t CO, uint16_t SAC) {

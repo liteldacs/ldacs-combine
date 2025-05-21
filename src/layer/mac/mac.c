@@ -1271,6 +1271,9 @@ void P_SAPD_cb(ld_prim_t *prim) {
 void P_SAPC_cb(ld_prim_t *prim) {
 }
 
+void P_SAPS_cb(ld_prim_t *prim) {
+}
+
 
 l_err entry_MAC_HO2(void *args) {
     l_err err = LD_OK;

@@ -335,6 +335,11 @@ typedef struct cc_dcch_desc_s {
     uint16_t COM;
 } cc_dcch_desc_t;
 
+typedef struct cc_sync_poll_s {
+    uint8_t c_type;
+    uint16_t SAC;
+} cc_sync_poll_t;
+
 typedef struct cc_ho_com_s {
     uint8_t c_type;
     uint16_t AS_SAC;

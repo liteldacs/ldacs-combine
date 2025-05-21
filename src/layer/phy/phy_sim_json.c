@@ -422,6 +422,9 @@ l_err downward_json_sim(ld_prim_t *prim, buffer_t **in_bufs, buffer_t **out_buf)
 
             break;
         }
+        case PHY_SYNC_REQ: {
+            break;
+        }
         default: break;
     }
 
