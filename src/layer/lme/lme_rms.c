@@ -77,16 +77,18 @@ l_err init_lme_rms(lme_layer_objs_t *obj) {
     lme_rms_obj.lme_obj = obj;
 
     switch (config.role) {
-        case LD_AS:
+        case LD_AS: {
             break;
+        }
         case LD_GS: {
             lme_rms_obj.rl_drr = init_ld_drr(SAC_MAX);
             lme_rms_obj.fl_drr = init_ld_drr(SAC_MAX);
             lme_rms_obj.CO_bitset = init_bitset(CO_MAX, sizeof(uint16_t), init_co_res, free_co_res);
             break;
         }
-        default:
+        default: {
             break;
+        }
     }
 
     return LD_OK;
@@ -339,8 +341,9 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                     delete_lme_as_node_by_sac(cell_exit->SAC, clear_as_man);
                     break;
                 }
-                default:
+                default: {
                     break;
+                }
             }
 
             desc->free_func(data_struct);

@@ -82,15 +82,18 @@ void D_SAPD(ld_prim_t *prim) {
     const dls_entity_t *d_entity = NULL;
 
     switch (config.role) {
-        case LD_AS:
+        case LD_AS: {
             d_entity = dls_layer_objs.AS_DLS;
             break;
+        }
         case LD_GS: {
             d_entity = get_dls_enode(ori_sdu->AS_SAC);
             break;
         }
-        default:
+        default: {
+
             break;
+        }
     }
 
     if (d_entity == NULL) {
@@ -99,9 +102,12 @@ void D_SAPD(ld_prim_t *prim) {
     }
 
     switch (prim->prim_obj_typ) {
-        case SN_TYP_FROM_LME:
+        case SN_TYP_FROM_LME: {
+
+
             lfqueue_put(d_entity->cos_oqueue[DLS_COS_7], snp_pdu);
             break;
+        }
         case SN_TYP_FROM_UP:
             lfqueue_put(d_entity->cos_oqueue[DLS_COS_7], snp_pdu);
             break;

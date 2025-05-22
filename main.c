@@ -79,15 +79,18 @@ int opt_parse(int argc, char *const *argv) {
     while ((c = getopt(argc, argv, "p:dt:w:c:AGWHM")) != -1) {
         switch (c) {
             case 'p': {
-
+                config.port = strtol(optarg, NULL, 10);
+                break;
             }
-            case 'd':
+            case 'd': {
                 config.debug = TRUE;
                 break;
-            case 't':
+            }
+            case 't': {
                 config.timeout = strtol(optarg, NULL, 10);
                 break;
-            case 'w':
+            }
+            case 'w': {
                 config.worker = strtol(optarg, NULL, 10);
                 if (config.worker > sysconf(_SC_NPROCESSORS_ONLN)) {
                     fprintf(stderr,
@@ -95,13 +98,15 @@ int opt_parse(int argc, char *const *argv) {
                     return ERROR;
                 }
                 break;
-            case 'c':
+            }
+            case 'c': {
                 memcpy(config.config_path, optarg, strlen(optarg));
                 if (init_config_path() != OK) {
                     return ERROR;
                 }
                 parse_config(&config, config.config_path);
                 break;
+            }
             case 'A':
             case 'G':
             case 'W': {
@@ -126,17 +131,22 @@ int opt_parse(int argc, char *const *argv) {
                 }
                 parse_config(&config, config.config_path);
             }
-            case 'H':
+            case 'H': {
                 config.use_http = TRUE;
                 break;
-            case 'M':
+            }
+            case 'M': {
+
                 if (config.role == LD_SGW) {
                     config.port = strtol("55551", NULL, 10);
                 }
                 config.is_merged = TRUE;
                 break;
-            default:
+            }
+            default: {
+
                 return ERROR;
+            }
         }
     }
     return OK;

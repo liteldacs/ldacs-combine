@@ -464,11 +464,12 @@ void M_SAPC(ld_prim_t *prim) {
     switch (config.role) {
         case LD_GS: {
             switch (prim->prim_obj_typ) {
-                case C_TYP_CC_MAC:
+                case C_TYP_CC_MAC: {
                     q_node->pri = cc_format_descs[C_TYP_CC_MAC].pri;
                     q_node->n_data = prim->prim_objs;
                     q_node->free_func = free_cc_mac_bd;
                     break;
+                }
                 case C_TYP_SLOT_DESC: {
                     cc_slot_desc_t *cc_sd = prim->prim_objs;
 
@@ -607,11 +608,12 @@ l_err generate_bc_pkt() {
 
 
         switch (node->type) {
-            case B_TYP_BC_MAC:
-
+            case B_TYP_BC_MAC: {
                 lfqueue_destroy(out_q);
                 lfqueue_free(out_q);
                 goto BC_Cal_Mac;
+            }
+
             default: {
                 buffer_t *buf = node->n_data;
 
@@ -623,9 +625,11 @@ l_err generate_bc_pkt() {
                     log_warn("No available BC space.");
 
                 switch (node->type) {
-                    case B_TYP_ACB:
+                    case B_TYP_ACB: {
+
                         cat_to_buffer(to_trans_bc_1_3, buf->ptr, buf->len);
                         break;
+                    }
                     case B_TYP_SIB:
                         cat_to_buffer(to_trans_bc_2, buf->ptr, buf->len);
                         break;
