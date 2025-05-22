@@ -206,7 +206,6 @@ static void upward_DCCH_j(cJSON *j_node) {
     int is_array = cJSON_IsArray(j_node);
     //通过判断jnode是否为数组，进而知道是否为SYNC
     if (!is_array) {
-        phy_layer_objs.need_sync = TRUE;
         dcch_sync_t sync;
         unmarshel_json(j_node, (void **) &sync, &dcch_sync_j_tmpl_desc);
         preempt_prim(&PHY_SYNC_IND_PRIM, E_TYP_ANY, &sync.SAC, NULL, 0, 0);

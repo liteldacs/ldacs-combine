@@ -150,7 +150,6 @@ l_err set_conn_enode(gs_propt_node_t *en) {
     if (!en) return LD_ERR_NULL;
 
     const void *ret = hashmap_set(gs_conn_service.conn_map, en);
-    /* !!!Do not free the previous entity !!! */
     free(en);
     return LD_OK;
 }

@@ -554,9 +554,7 @@ int8_t gst_handover_complete_key(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_S
     if (has_lme_as_enode(AS_SAC) == FALSE) {
         set_lme_as_enode(init_as_man(AS_SAC, AS_UA, lme_layer_objs.GS_SAC));
     }
-    if (set_dls_enode(lme_layer_objs.GS_SAC, AS_SAC) == NULL) {
-        return LDCAUC_FAIL;
-    }
+    set_dls_enode(lme_layer_objs.GS_SAC, AS_SAC);
 
     set_mac_CO(next_co, AS_SAC);
 

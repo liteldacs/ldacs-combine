@@ -232,7 +232,6 @@ static const void *set_dls_enode(uint16_t gs_sac, uint16_t as_sac) {
     const void *ret = NULL;
     if (en != NULL) {
         ret = hashmap_set(dls_layer_objs.as_dls_map, en);
-        // free(en);
     }
     return ret;
 }

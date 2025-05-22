@@ -489,6 +489,8 @@ void P_SAPC(ld_prim_t *prim) {
                     log_error("Cannot set new Freqency for RL.");
                     prim->prim_err = LD_ERR_INTERNAL;
                 }
+
+                phy_layer_objs.need_sync = TRUE;
             }
             break;
         }
