@@ -159,8 +159,9 @@ l_err make_lme_layer() {
                     init_p2p_service(config.peer_server_port, config.peers, config.peer_count, send_ho_com);
                     break;
                 }
-                default:
+                default: {
                     break;
+                }
             }
             init_lme_mms(&lme_layer_objs);
             init_lme_rms(&lme_layer_objs);
@@ -169,8 +170,9 @@ l_err make_lme_layer() {
         case LD_SGW: {
             config.is_merged == TRUE ? init_sgw_snf_layer(config.port) : init_sgw_snf_layer_unmerged(config.port);
         }
-        default:
+        default: {
             break;
+        }
     }
 
 

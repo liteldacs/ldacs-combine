@@ -78,9 +78,9 @@ int opt_parse(int argc, char *const *argv) {
     int c;
     while ((c = getopt(argc, argv, "p:dt:w:c:AGWHM")) != -1) {
         switch (c) {
-            case 'p':
-                config.port = strtol(optarg, NULL, 10);
-                break;
+            case 'p': {
+
+            }
             case 'd':
                 config.debug = TRUE;
                 break;
