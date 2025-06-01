@@ -104,6 +104,8 @@ static l_km_err key_install(buffer_t *key_ag, const char *as_ua, const char *gs_
                             KEY_HANDLE *handle) {
     l_km_err err = LD_KM_OK;
 
+    log_buf(LOG_ERROR, "KEY", key_ag->ptr, key_ag->len);
+    log_buf(LOG_FATAL, "NONCE", nonce, nonce_len);
     char *db_name = get_db_name(LD_GS);
     const char *table_name = get_table_name(LD_GS);
     if ((err = km_install_key(db_name, table_name, key_ag->len, key_ag->ptr, as_ua, gs_ua, nonce_len, nonce)) !=
@@ -118,6 +120,8 @@ static l_km_err key_install(buffer_t *key_ag, const char *as_ua, const char *gs_
         err = LD_ERR_KM_QUERY;
         goto cleanup;
     }
+
+    log_warn("%d %s", qr_mk->count, qr_mk->ids[0]);
 
     if ((err = get_handle_from_db(db_name, table_name, qr_mk->ids[0], handle)) != LD_KM_OK) {
         log_error("Can not get handle");
@@ -188,6 +192,7 @@ l_km_err gs_install_keys(buffer_t *ag_raw, uint8_t *rand, uint32_t randlen, cons
                          const char *gs_ua, KEY_HANDLE*key_ag) {
     l_km_err err = LD_KM_OK;
 
+
     if ((err = key_install(ag_raw, as_ua, gs_ua, rand, randlen, key_ag)) != LD_KM_OK) {
         log_error("GS cannot install Kas-sgw");
         return err;
@@ -247,12 +252,12 @@ l_km_err key_get_handle(ldacs_roles role, const char *owner1, const char *owner2
         goto cleanup;
     }
 
-    QueryResult_for_keyvalue *result = query_keyvalue(db_name, table_name, qr_mk->ids[0]);
-    if (!result) {
-        log_error("Key not found or error occurred.\n");
-        err = LD_ERR_KM_QUERY;
-        goto cleanup;
-    }
+    // QueryResult_for_keyvalue *result = query_keyvalue(db_name, table_name, qr_mk->ids[0]);
+    // if (!result) {
+    //     log_error("Key not found or error occurred.\n");
+    //     err = LD_ERR_KM_QUERY;
+    //     goto cleanup;
+    // }
 cleanup:
     free(db_name);
     return err;
@@ -266,8 +271,70 @@ l_km_err as_update_mkey(const char *sgw_ua, const char *gs_s_ua, const char *gs_
     if (km_update_masterkey(db_name, table_name, sgw_ua, gs_s_ua, gs_t_ua, as_ua, nonce->len, nonce->ptr) != LD_KM_OK) {
         log_error("Cannot update masterkey");
         err = LD_ERR_KM_UPDATE_SESSIONKEY;
+        return err;
     }
-    free(db_name);
 
+    QueryResult_for_queryid *qr_mk = query_id(db_name, table_name, as_ua, gs_t_ua, MASTER_KEY_AS_GS, ACTIVE);
+    if (qr_mk->count == 0) {
+        log_error("Query mkid failed. %s %s %s\n", table_name, as_ua, gs_t_ua);
+        err = LD_ERR_KM_QUERY;
+        return err;
+    }
+
+    if ((err = get_handle_from_db(db_name, table_name, qr_mk->ids[0], key_as_gs)) != LD_KM_OK) {
+        log_error("err:%08x", err);
+    }
+
+    free(db_name);
+    return err;
+}
+
+l_km_err sgw_update_mkey(const char *sgw_ua, const char *gs_s_ua, const char *gs_t_ua, const char *as_ua,
+                         buffer_t *nonce, buffer_t **kbuf) {
+    l_km_err err = LD_KM_OK;
+    char *db_name = get_db_name(LD_SGW);
+    const char *table_name = get_table_name(LD_SGW);
+
+    if (km_update_masterkey(db_name, table_name, sgw_ua, gs_s_ua, gs_t_ua, as_ua, nonce->len, nonce->ptr) != LD_KM_OK) {
+        log_error("Cannot update masterkey");
+        err = LD_ERR_KM_UPDATE_SESSIONKEY;
+        return err;
+    }
+
+    QueryResult_for_queryid *qr_mk = query_id(db_name, table_name, as_ua, gs_t_ua, MASTER_KEY_AS_GS, ACTIVE);
+    if (qr_mk->count == 0) {
+        log_error("Query mkid failed. %s %s %s\n", table_name, as_ua, gs_t_ua);
+        err = LD_ERR_KM_QUERY;
+        return err;
+    }
+    QueryResult_for_keyvalue *result = query_keyvalue(db_name, table_name, qr_mk->ids[0]);
+    if (!result) {
+        log_error("Key not found or error occurred.\n");
+        err = LD_ERR_KM_QUERY;
+    }
+    CLONE_TO_CHUNK(**kbuf, result->key, result->key_len);
+
+
+    free(db_name);
+    return err;
+}
+
+l_km_err revoke_key(ldacs_roles role, const char *owner1, const char *owner2, enum KEY_TYPE key_type) {
+    l_km_err err = LD_KM_OK;
+    char *db_name = get_db_name(role);
+    const char *table_name = get_table_name(role);
+    QueryResult_for_queryid *qr_mk = query_id(db_name, table_name, owner1, owner2, key_type, ACTIVE);
+    if (qr_mk->count == 0) {
+        log_error("Query mkid failed. %s %s %s\n", table_name, owner1, owner2);
+        err = LD_ERR_KM_QUERY;
+        goto cleanup;
+    }
+
+    if ((err = km_revoke_key(db_name, table_name, qr_mk->ids[0])) != LD_KM_OK) {
+        err = LD_ERR_KM_QUERY;
+    }
+
+cleanup:
+    free(db_name);
     return err;
 }

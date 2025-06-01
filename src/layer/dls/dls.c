@@ -163,7 +163,7 @@ void M_SAPD_cb(ld_prim_t *prim) {
                 return;
             }
 
-            // log_buf(LOG_ERROR, "buf", rl_data->buf->ptr, rl_data->buf->len);
+            // log_buf(LOG_INFO, "buf", rl_data->buf->ptr, rl_data->buf->len);
             buffer_t *rbuffer = init_buffer_unptr();
             CLONE_BY_BUFFER_UNFREE(*rbuffer, *rl_data->buf);
             /* 放入SAC对应实体的重组队列 */
@@ -175,7 +175,7 @@ void M_SAPD_cb(ld_prim_t *prim) {
         case D_TYP_FL: {
             channel_data_t *fl_data = prim->prim_objs;
             if (*fl_data->buf->ptr != 0x00) {
-                // log_buf(LOG_DEBUG, "FL INPUT", fl_input->ptr, fl_input->len);
+                // log_buf(LOG_INFO, "FL INPUT", fl_input->ptr, fl_input->len);
             }
 
             /* 临时的， 此处以后需要使用MAC状态机以及PHY状态机共同控制 */

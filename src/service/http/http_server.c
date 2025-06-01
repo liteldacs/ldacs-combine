@@ -55,7 +55,7 @@ static l_err init_http_service() {
         log_error("Cannot bind address and port");
     }
 
-    evhttp_set_timeout(http_server.http_entity, config.timeout);
+    evhttp_set_timeout(http_server.http_entity, 9999);
 
     start_http_server();
     return LD_OK;

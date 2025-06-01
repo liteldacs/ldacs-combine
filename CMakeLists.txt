@@ -49,7 +49,7 @@ endif (SQLite3_FOUND)
 #    include_directories(${Ldcauc_INCLUDE_DIRS})
 #    link_libraries(ldcauc::ldcauc)
 #endif ()
-#
+##
 find_package(LiteLdacsSdk REQUIRED)
 if (LiteLdacsSdk_FOUND)
     include_directories(${LiteLdacsSdk_INCLUDE_DIRS})

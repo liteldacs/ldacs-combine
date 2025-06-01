@@ -193,6 +193,7 @@ l_err send_auc_key_exec(void *args) {
         . N_3 = n_3,
     };
 
+    log_warn("!!&&&& !! %p", as_man->key_as_sgw_s_h);
     l_err err = handle_send_msg(auc_key_exec, &auc_key_exec_desc, as_man, as_man->key_as_sgw_s_h);
     free_buffer(n_3);
     return err;
@@ -287,26 +288,26 @@ l_err finish_auc(void *args) {
 
 l_err send_key_update_rqst(snf_entity_t *en, uint16_t GST_SAC) {
     /* 生成随机数NONCE */
-    buffer_t *nonce = init_buffer_ptr(32);
+    if (en->shared_random) free_buffer(en->shared_random);
+    en->shared_random = init_buffer_ptr(NONCE_LEN);
     uint8_t NONCE_str[NONCE_LEN] = {0};
     generate_nrand(NONCE_str, NONCE_LEN);
-    CLONE_TO_CHUNK(*nonce, NONCE_str, NONCE_LEN)
+    CLONE_TO_CHUNK(*en->shared_random, NONCE_str, NONCE_LEN)
 
     key_upd_rqst_t *key_upd_rqst = &(key_upd_rqst_t){
         .S_TYP = KEY_UPD_RQST,
         .VER = snf_obj.PROTOCOL_VER,
         .PID = PID_MAC,
         .AS_SAC = en->AS_SAC,
-        .KEY_TYPE = MASTER_KEY_AS_SGW,
+        .KEY_TYPE = MASTER_KEY_AS_GS,
         .SAC_src = en->CURR_GS_SAC,
         .SAC_dst = GST_SAC, /* 假设GS没变 */
         .NCC = 10086,
-        .NONCE = nonce,
+        .NONCE = en->shared_random,
     };
 
     handle_send_msg(key_upd_rqst, &key_upd_rqst_desc, en, en->key_as_sgw_s_h);
 
-    free_buffer(nonce);
     return LD_OK;
 }
 
@@ -322,18 +323,17 @@ l_err recv_key_update_rqst(buffer_t *buf, snf_entity_t *as_man) {
     }
 
     // log_warn("NEW GS: %d %d %d", key_upd_rqst.AS_SAC, key_upd_rqst.SAC_src, key_upd_rqst.SAC_dst);
+    send_key_update_resp(as_man, key_upd_rqst.SAC_dst);
 
     UA_STR(ua_as);
-    UA_STR(ua_gs_src);
-    UA_STR(ua_gs_dst);
+    UA_STR(gss_sac);
+    UA_STR(gst_sac);
     UA_STR(ua_sgw);
     get_ua_str(as_man->AS_UA, ua_as);
-    get_ua_str(key_upd_rqst.SAC_src, ua_gs_src);
-    get_ua_str(key_upd_rqst.SAC_dst, ua_gs_dst);
+    get_ua_str(key_upd_rqst.SAC_src, gss_sac);
+    get_ua_str(key_upd_rqst.SAC_dst, gst_sac);
     get_ua_str(DFT_SGW_UA, ua_sgw);
-    as_update_mkey(ua_sgw, ua_gs_src, ua_gs_dst, ua_as, key_upd_rqst.NONCE, &as_man->key_as_gs_h);
-
-    send_key_update_resp(as_man, key_upd_rqst.SAC_dst);
+    as_update_mkey(ua_sgw, gss_sac, gst_sac, ua_as, key_upd_rqst.NONCE, &as_man->key_as_gs_h);
     return LD_OK;
 }
 
@@ -349,40 +349,57 @@ l_err send_key_update_resp(void *args, uint16_t GST_SAC) {
         .SAC_dst = GST_SAC,
         .NCC = 10086,
     };
+
     handle_send_msg(&key_upd_resp, &key_upd_resp_desc, as_man, as_man->key_as_sgw_s_h);
     return LD_OK;
 }
 
-l_err recv_key_update_resp(buffer_t *buf, snf_entity_t *as_man) {
+l_err recv_key_update_resp(buffer_t *buf, snf_entity_t *en) {
     key_upd_resp_t key_upd_resp;
     pb_stream pbs;
     zero(&pbs);
     init_pbs(&pbs, buf->ptr, buf->len, "IN MSG");
 
     in_struct(&key_upd_resp, &key_upd_resp_desc, &pbs, NULL);
-    if (!pb_in_mac(&pbs, get_sec_maclen(as_man->AUTHC_MACLEN), as_man->key_as_sgw_s_h, verify_hmac_uint)) {
+    if (!pb_in_mac(&pbs, get_sec_maclen(en->AUTHC_MACLEN), en->key_as_sgw_s_h, verify_hmac_uint)) {
         return LD_ERR_INVALID_MAC;
     }
 
+    //更新AS-GS密钥，等待在接收到RESP之后向目的GS发送KEY
+    UA_STR(ua_as);
+    UA_STR(gss_sac);
+    UA_STR(gst_sac);
+    UA_STR(ua_sgw);
+    get_ua_str(en->AS_UA, ua_as);
+    get_ua_str(en->CURR_GS_SAC, gss_sac);
+    get_ua_str(key_upd_resp.SAC_dst, gst_sac);
+    get_ua_str(DFT_SGW_UA, ua_sgw);
+    sgw_update_mkey(ua_sgw, gss_sac, gst_sac, ua_as, en->shared_random, &en->key_as_gs_b);
+
+    usleep(10000);
+    log_buf(LOG_ERROR, "KEY", en->key_as_gs_b->ptr, en->key_as_gs_b->len);
+    log_buf(LOG_FATAL, "NONCE", en->shared_random->ptr, en->shared_random->len);
+
+    en->CURR_GS_SAC = key_upd_resp.SAC_dst;
     buffer_t *sdu = gen_pdu(&(gs_key_trans_t){
-                                .key = as_man->key_as_gs_b,
-                                .nonce = as_man->shared_random
+                                .key = en->key_as_gs_b,
+                                .nonce = en->shared_random
                             }, &gs_key_trans_desc, "GS KEY"
     );
     basic_conn_t *bc;
     if (snf_obj.is_merged == FALSE) {
-        log_warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! => %d", key_upd_resp.SAC_dst);
         gs_propt_node_t *save = get_conn_enode(key_upd_resp.SAC_dst);
         if (!save) return LD_ERR_NULL;
         bc = &save->propt->bc;
-        as_man->gs_conn = save->propt;
+        en->gs_conn = save->propt;
     } else {
         gsc_propt_t *save = get_gsc_conn(key_upd_resp.SAC_dst);
         if (!save) return LD_ERR_NULL;
         bc = &save->bc;
     }
+    //接收到RESP之后向目的GS发送KEY
     if (!bc || bc->opt->send_handler(bc, &(gsnf_pkt_cn_t){
-                                         GSNF_KEY_TRANS, DEFAULT_GSNF_VERSION, as_man->AS_SAC, ELE_TYP_8,
+                                         GSNF_KEY_TRANS, DEFAULT_GSNF_VERSION, en->AS_SAC, ELE_TYP_8,
                                          sdu
                                      }, &gsnf_pkt_cn_desc, NULL, NULL
         )) {
@@ -390,6 +407,11 @@ l_err recv_key_update_resp(buffer_t *buf, snf_entity_t *as_man) {
         free_buffer(sdu);
     }
 
+    return LD_OK;
+}
+
+l_err recv_failed_msg(buffer_t *buf, snf_entity_t *as_man) {
+    log_error("GS has received Failed Message.");
     return LD_OK;
 }
 

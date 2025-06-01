@@ -79,7 +79,7 @@ static l_err parse_gsg_pkt(buffer_t *pdu, gsg_pkt_t **gsnf_pkg_ptr, snf_entity_t
 
     *as_man = (snf_entity_t *) get_enode(gsnf_pkg->AS_SAC);
 
-    log_buf(LOG_DEBUG, "RECV GSNF SDU", gsnf_pkg->sdu->ptr, gsnf_pkg->sdu->len);
+    log_buf(LOG_INFO, "RECV GSNF SDU", gsnf_pkg->sdu->ptr, gsnf_pkg->sdu->len);
     return LD_OK;
 }
 
@@ -153,7 +153,7 @@ l_err recv_gsnf(basic_conn_t *bc) {
                     pb_stream pbs;
                     gs_key_trans_t key_trans = {
                         .key = init_buffer_ptr(ROOT_KEY_LEN),
-                        .nonce = init_buffer_ptr(SHAREDINFO_LEN)
+                        .nonce = init_buffer_ptr(NONCE_LEN)
                     };
 
                     init_pbs(&pbs, gsnf_pkt->sdu->ptr, gsnf_pkt->sdu->len, "GS KEY GET");
@@ -163,7 +163,7 @@ l_err recv_gsnf(basic_conn_t *bc) {
 
                     UA_STR(ua_as);
                     UA_STR(ua_gs);
-                    get_ua_str(gsnf_pkt->AS_SAC, ua_as);
+                    get_ua_str(as_man->AS_UA, ua_as);
                     get_ua_str(snf_obj.GS_SAC, ua_gs);
 
                     gs_install_keys(key_trans.key, key_trans.nonce->ptr, key_trans.nonce->len, ua_as, ua_gs,
@@ -203,6 +203,7 @@ l_err recv_gsnf(basic_conn_t *bc) {
                     break;
                 }
                 case GSNF_EXIT: {
+                    log_warn("+++++++++++++");
                     delete_enode_by_sac(gsnf_pkt->AS_SAC, clear_snf_en);
                     break;
                 }
@@ -320,7 +321,7 @@ l_err recv_gsg(basic_conn_t *bc) {
                     pb_stream pbs;
                     gs_key_trans_t key_trans = {
                         .key = init_buffer_ptr(ROOT_KEY_LEN),
-                        .nonce = init_buffer_ptr(SHAREDINFO_LEN)
+                        .nonce = init_buffer_ptr(NONCE_LEN)
                     };
 
                     init_pbs(&pbs, gsnf_pkg->sdu->ptr, gsnf_pkg->sdu->len, "GS KEY GET");

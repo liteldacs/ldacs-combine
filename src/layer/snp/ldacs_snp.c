@@ -182,7 +182,7 @@ void SN_SAPD(ld_prim_t *prim) {
         prim->prim_err = LD_ERR_INTERNAL;
         return;
     }
-    log_buf(LOG_ERROR, "TO DEC", enc_arr, enc_sz);
+    // log_buf(LOG_INFO, "TO DEC", enc_arr, enc_sz);
     CLONE_TO_CHUNK(*enc_buf, enc_arr, enc_sz);
 
     /* 如果还没有派生KAS-GS，则不验证完整性 */
@@ -210,7 +210,7 @@ void SN_SAPD(ld_prim_t *prim) {
         clear_dup_prim_data(orient_sdu_from, free);
         free_buffer(enc_buf);
     }
-    log_buf(LOG_WARN, "TO CALC MAC", snp_pbs.start, pbs_offset(&snp_pbs));
+    // log_buf(LOG_INFO, "TO CALC MAC", snp_pbs.start, pbs_offset(&snp_pbs));
     memcpy(snp_pbs.cur, hmac, hmac_len);
     snp_pbs.cur += hmac_len;
     close_output_pbs(&snp_pbs);
@@ -233,7 +233,7 @@ void D_SAPD_cb(ld_prim_t *prim) {
             zero(&pbs);
             snp_pdu_t pdu;
 
-            log_buf(LOG_WARN, "SNP IN", snp_in->ptr, snp_in->len);
+            log_buf(LOG_INFO, "SNP IN", snp_in->ptr, snp_in->len);
 
             /* TODO: 搞出更多的错误代码，然后再网关显示 */
             if (snpsub_vfy_hmac(o_sdu->AS_SAC, snp_layer_objs.SEC, snp_in->ptr, snp_in->len) != LDCAUC_OK) {
@@ -268,7 +268,7 @@ void D_SAPD_cb(ld_prim_t *prim) {
             size_t dec_sz = 0;
             o_sdu->buf = init_buffer_unptr();
 
-            log_buf(LOG_ERROR, "TO DEC", pdu.sdu->ptr, pdu.sdu->len);
+            // log_buf(LOG_INFO, "TO DEC", pdu.sdu->ptr, pdu.sdu->len);
             if (snpsub_crypto(o_sdu->AS_SAC, pdu.sdu->ptr, pdu.sdu->len, dec_arr, &dec_sz, FALSE) != LDCAUC_OK) {
                 free_buffer(pdu.sdu);
                 prim->prim_err = LD_ERR_INTERNAL;

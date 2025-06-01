@@ -211,12 +211,13 @@ void L_SAPC(ld_prim_t *prim) {
                 }
                 break;
             } else if (prim->prim_obj_typ == RC_TYP_CLOSE) {
+                // unregister_snf_en(lme_layer_objs.lme_as_man->AS_SAC);
                 if (!in_state(&lme_layer_objs.lme_fsm, lme_fsm_states[LME_OPEN]) && !in_state(
                         &lme_layer_objs.lme_fsm, lme_fsm_states[LME_AUTH])) {
                     prim->prim_err = LD_ERR_WRONG_STATE;
                     break;
                 }
-                /* if success, change LME state to CSCANNING */
+                /* if success, change LME state to FSCANNING */
                 if ((prim->prim_err = change_state(&lme_layer_objs.lme_fsm, LME_EV_DEFAULT,
                                                    &(fsm_event_data_t){&lme_fsm_events[LME_FSCANNING], NULL}))) {
                     log_error("LME can not change state from LME_FSCANNING to LME_CSACNNING correctly");
@@ -422,6 +423,7 @@ void exit_LME_CONN_OPEN_action(void *curr_st_data, struct sm_event_s *event, voi
     };
     preempt_prim(&MAC_DCCH_REQ_PRIM, DC_TYP_CELL_EXIT,
                  gen_pdu(&exit, dc_format_descs[DC_TYP_CELL_EXIT].f_desc, "dc cell exit"), NULL, 0, 0);
+    unregister_snf_en(exit.SAC);
 }
 
 void SN_SAPC_cb(ld_prim_t *prim) {
@@ -517,6 +519,7 @@ static l_err send_ho_com(uint16_t AS_SAC, uint16_t GS_SAC, uint16_t next_CO) {
     };
     preempt_prim(&MAC_CCCH_REQ_PRIM, C_TYP_HO_COM,
                  gen_pdu(&ho_com, cc_format_descs[C_TYP_HO_COM].f_desc, "cc resp OUT"), NULL, 0, 0);
+    unregister_snf_en(AS_SAC);
     return LD_OK;
 }
 

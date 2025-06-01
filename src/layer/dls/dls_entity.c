@@ -248,7 +248,7 @@ l_err recv_ack(dls_entity_t *en, uint8_t PID, uint16_t bitmap) {
     // uint8_t map[2] = {0};
     // map[0] = ;
     // map[1] = ;
-    // log_buf(LOG_DEBUG, "ACK!!", map, 2);
+    // log_buf(LOG_INFO, "ACK!!", map, 2);
     uint8_t normal_endian = ((bitmap >> BITS_PER_BYTE) & 0xFF) << BITS_PER_BYTE | (bitmap & 0xFF);
     int offset = 1;
     while (TRUE) {

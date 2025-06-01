@@ -481,11 +481,11 @@ void P_SAPC(ld_prim_t *prim) {
         case PHY_CONF_REQ: {
             if (prim->prim_obj_typ == PHY_TYP_HO) {
                 //默认为1111.0和965.0,未来频率会被指定在Obj中
-                if (!set_new_freq(&phy_layer_objs.dev, 1111.0, FL)) {
+                if (!set_new_freq(&phy_layer_objs.dev, 1112.0, FL)) {
                     log_error("Cannot set new Freqency for FL.");
                     prim->prim_err = LD_ERR_INTERNAL;
                 }
-                if (!set_new_freq(&phy_layer_objs.dev, 965.0, RL)) {
+                if (!set_new_freq(&phy_layer_objs.dev, 966.0, RL)) {
                     log_error("Cannot set new Freqency for RL.");
                     prim->prim_err = LD_ERR_INTERNAL;
                 }

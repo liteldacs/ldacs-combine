@@ -337,7 +337,7 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                         prim->prim_err = LD_ERR_INTERNAL;
                         break;
                     }
-                    unregister_snf_en(cell_exit->SAC);
+                    exit_snf_en(cell_exit->SAC);
                     delete_lme_as_node_by_sac(cell_exit->SAC, clear_as_man);
                     break;
                 }
