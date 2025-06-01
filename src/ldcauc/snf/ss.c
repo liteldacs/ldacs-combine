@@ -193,7 +193,6 @@ l_err send_auc_key_exec(void *args) {
         . N_3 = n_3,
     };
 
-    log_warn("!!&&&& !! %p", as_man->key_as_sgw_s_h);
     l_err err = handle_send_msg(auc_key_exec, &auc_key_exec_desc, as_man, as_man->key_as_sgw_s_h);
     free_buffer(n_3);
     return err;
@@ -322,7 +321,6 @@ l_err recv_key_update_rqst(buffer_t *buf, snf_entity_t *as_man) {
         return LD_ERR_INVALID_MAC;
     }
 
-    // log_warn("NEW GS: %d %d %d", key_upd_rqst.AS_SAC, key_upd_rqst.SAC_src, key_upd_rqst.SAC_dst);
     send_key_update_resp(as_man, key_upd_rqst.SAC_dst);
 
     UA_STR(ua_as);
@@ -377,8 +375,6 @@ l_err recv_key_update_resp(buffer_t *buf, snf_entity_t *en) {
     sgw_update_mkey(ua_sgw, gss_sac, gst_sac, ua_as, en->shared_random, &en->key_as_gs_b);
 
     usleep(10000);
-    log_buf(LOG_ERROR, "KEY", en->key_as_gs_b->ptr, en->key_as_gs_b->len);
-    log_buf(LOG_FATAL, "NONCE", en->shared_random->ptr, en->shared_random->len);
 
     en->CURR_GS_SAC = key_upd_resp.SAC_dst;
     buffer_t *sdu = gen_pdu(&(gs_key_trans_t){

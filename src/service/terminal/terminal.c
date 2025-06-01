@@ -51,9 +51,9 @@ static void monitor_terminal_input() {
         input[strcspn(input, "\n")] = '\0';
 
         if (strlen(input)) {
-            char** argv;
+            char **argv;
             int argc = ld_split(input, &argv);
-            if (argc == 0 || argv == NULL) {continue;}
+            if (argc == 0 || argv == NULL) { continue; }
             long serial = strtol(argv[0], NULL, 10);
             if (serial >= funcs_sz) {
                 log_warn("Invalid func serial number");
@@ -87,7 +87,6 @@ static void handle_st_chg_terminal(lme_state_chg_t *st_chg) {
 }
 
 static void handle_as_info_key_upd_terminal(as_info_key_upd_t *as_upd) {
-    log_warn("NEW value of AS key `%s` is `%x`", as_upd->key->ptr, as_upd->value);
     const char *tag = "AS_SAC";
     if (as_upd->key->len >= strlen(tag) && !memcmp(as_upd->key->ptr, tag, strlen(tag))) {
         terminal_obj.AS_SAC = as_upd->value;
@@ -111,7 +110,7 @@ static void trigger_handover(int argc, char **argv) {
         log_warn("Wrong paras");
         return;
     }
-    uint32_t UA =strtol(argv[1], NULL, 10);
-    uint32_t GST_SAC =strtol(argv[2], NULL, 10);
+    uint32_t UA = strtol(argv[1], NULL, 10);
+    uint32_t GST_SAC = strtol(argv[2], NULL, 10);
     rcu_handover(UA, GST_SAC);
 }

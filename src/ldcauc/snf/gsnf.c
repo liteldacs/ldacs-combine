@@ -203,7 +203,6 @@ l_err recv_gsnf(basic_conn_t *bc) {
                     break;
                 }
                 case GSNF_EXIT: {
-                    log_warn("+++++++++++++");
                     delete_enode_by_sac(gsnf_pkt->AS_SAC, clear_snf_en);
                     break;
                 }

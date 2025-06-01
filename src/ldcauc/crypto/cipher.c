@@ -33,9 +33,6 @@ void calc_hmac_uint(uint8_t *udata, size_t data_len, void *key_med, uint8_t *mac
         log_warn("Cant calc hmac");
     }
     memcpy(mac_dst, mac_buf, mac_limit);
-
-    log_buf(LOG_WARN, "HMAC DATA", udata, data_len);
-    log_buf(LOG_DEBUG, "HMAC TO VFY", mac_buf, mac_limit);
 }
 
 void calc_hmac_buffer(buffer_t *bdata, void *key_med, buffer_t *mac_dst, size_t mac_limit) {
@@ -47,10 +44,6 @@ void calc_hmac_buffer(buffer_t *bdata, void *key_med, buffer_t *mac_dst, size_t 
 bool verify_hmac_uint(void *key_med, uint8_t *to_verify, uint8_t *udata, size_t data_len, size_t mac_limit) {
     uint8_t mac_buf[32] = {0};
     calc_hmac_uint(udata, data_len, key_med, mac_buf, mac_limit);
-
-    log_buf(LOG_WARN, "HMAC DATA", udata, data_len);
-    log_buf(LOG_DEBUG, "HMAC TO VFY", to_verify, mac_limit);
-    log_buf(LOG_FATAL, "HMAC HAS CALC", mac_buf, mac_limit);
 
     return !memcmp(to_verify, mac_buf, mac_limit);
 }
