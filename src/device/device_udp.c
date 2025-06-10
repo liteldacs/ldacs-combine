@@ -120,13 +120,13 @@ static l_err set_freq_port(int channel_num, ld_orient ori) {
                     close(udp_para.fl_recv_fd);
                 }
                 udp_para.fl_recv_fd = init_udp_bd_recv(port);
-                log_error("FL recv port %d", port);
+                log_error("FL recv port %d, fd: %d", port, udp_para.fl_recv_fd);
             } else {
                 if (udp_para.rl_send_fd != -1) {
                     close(udp_para.rl_send_fd);
                 }
                 udp_para.rl_send_fd = init_udp_bd_send(&udp_para.rl_send_addr, port);
-                log_error("RL send port %d", port);
+                log_error("RL send port %d, fd: %d", port, udp_para.rl_send_fd);
             }
             break;
         }
@@ -136,13 +136,13 @@ static l_err set_freq_port(int channel_num, ld_orient ori) {
                     close(udp_para.fl_send_fd);
                 }
                 udp_para.fl_send_fd = init_udp_bd_send(&udp_para.fl_send_addr, port);
-                log_error("FL send port %d", port);
+                log_error("FL send port %d, fd: %d", port, udp_para.fl_send_fd);
             } else {
                 if (udp_para.rl_recv_fd != -1) {
                     close(udp_para.rl_recv_fd);
                 }
                 udp_para.rl_recv_fd = init_udp_bd_recv(port);
-                log_error("RL recv port %d", port);
+                log_error("RL recv port %d, fd: %d", port, udp_para.rl_recv_fd);
             }
             break;
         }

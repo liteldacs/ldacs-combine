@@ -626,7 +626,6 @@ l_err generate_bc_pkt() {
 
                 switch (node->type) {
                     case B_TYP_ACB: {
-
                         cat_to_buffer(to_trans_bc_1_3, buf->ptr, buf->len);
                         break;
                     }
