@@ -127,6 +127,7 @@ static void *trans_cc_timer_func(void *args) {
 
 static void *trans_ra_timer_func(void *args) {
     register_gtimer(&phy_layer_objs.phy_g_timer);
+    log_warn("===== RA TIMER FUNC: %d", phy_layer_objs.phy_g_timer.handler.epoll_fd);
     register_gtimer_event(&phy_layer_objs.phy_g_timer, &phy_layer_objs.gtimer[3]);
 
     p_rtx_obj_t *rtx_ra_obj = malloc(sizeof(p_rtx_obj_t));

@@ -2,14 +2,14 @@
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
     <data-source source="LOCAL" name="gs_sql.db" uuid="ed924fab-8251-45f5-be53-d8c33323e1ed">
-      <driver-ref>63ea6aaa-6e40-471d-8551-0b18b4358c4d</driver-ref>
+      <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/resources/gs_sql.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
     <data-source source="LOCAL" name="as_sql.db" uuid="a76d77e2-ba04-42c3-8c51-9d3676a6c601">
-      <driver-ref>63ea6aaa-6e40-471d-8551-0b18b4358c4d</driver-ref>
+      <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/resources/as_sql.db</jdbc-url>
