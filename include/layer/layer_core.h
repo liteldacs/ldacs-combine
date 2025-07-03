@@ -123,10 +123,6 @@ enum ELE_TYP {
     RC_TYP_CLOSE = 0x1,
     RC_TYP_HANDOVER = 0x2,
 
-    /* Verify */
-    VER_PASS = 0xE0,
-    VER_WRONG_MAC = 0xE1,
-    VER_WRONG_SQN = 0xE2,
 
     /* else type */
     E_TYP_ANY = 0XF0,

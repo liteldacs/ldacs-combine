@@ -7,7 +7,7 @@ init_fl_freq: 1110.0
 init_rl_freq: 964.0
 
 http:
-  http_port: 9456
+  http_port: 9123
   auto_auth: 1
 
-gsnf_addr_v6: fe01::1
+gsnf_addr_v6: fe01::2

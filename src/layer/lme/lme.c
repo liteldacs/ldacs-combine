@@ -433,7 +433,7 @@ void SN_SAPD_L_cb(ld_prim_t *prim) {
     switch (prim->prim_seq) {
         case SN_DATA_IND: {
             orient_sdu_t *osdu = prim->prim_objs;
-            upload_snf(prim->prim_obj_typ == VER_PASS, osdu->AS_SAC, osdu->GS_SAC, osdu->buf->ptr, osdu->buf->len);
+            upload_snf(prim->prim_obj_typ, osdu->AS_SAC, osdu->GS_SAC, osdu->buf->ptr, osdu->buf->len);
             break;
         }
         default:

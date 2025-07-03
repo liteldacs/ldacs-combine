@@ -101,7 +101,7 @@ static void handle_user_msg_terminal(user_msg_t *umsg) {
 }
 
 static void send_user_data_terminal(int argc, char **argv) {
-    char *test_msg = "CCCCC";
+    char *test_msg = "Testing User Message for LDACS";
     send_user_data((uint8_t *) test_msg, strlen(test_msg), terminal_obj.AS_SAC);
 }
 

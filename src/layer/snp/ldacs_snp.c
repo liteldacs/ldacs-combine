@@ -8,6 +8,7 @@
 
 #include <layer_interface.h>
 #include <ldacs_def.h>
+#include <snp_sub.h>
 
 const enum_names snp_pdu_ctrl_names = {USER_PLANE_PACKET, CONTROL_PLANE_PACKET, snp_ctrl_name, NULL};
 const enum_names snp_pdu_sec_names = {SEC_MACLEN_INVAILD, SEC_MACLEN_256, snp_sec_name, NULL};
@@ -257,6 +258,8 @@ void D_SAPD_cb(ld_prim_t *prim) {
                 (*check_sqn) = pdu.sqn;
             } else {
                 log_warn("The received sqn is out of range.");
+                preempt_prim(&SN_DATA_IND_PRIM, VER_WRONG_SQN, o_sdu, NULL, 0, 0);
+                prim->prim_err = LD_ERR_INVALID;
                 free_buffer(pdu.sdu);
                 return;
             }
