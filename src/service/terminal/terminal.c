@@ -3,6 +3,7 @@
 //
 
 #include "service/terminal.h"
+#include "ipv6_parse.h"
 
 terminal_obj_t terminal_obj = {
 
@@ -101,8 +102,12 @@ static void handle_user_msg_terminal(user_msg_t *umsg) {
 }
 
 static void send_user_data_terminal(int argc, char **argv) {
-    char *test_msg = "Testing User Message for LDACS";
-    send_user_data((uint8_t *) test_msg, strlen(test_msg), terminal_obj.AS_SAC);
+    // char *test_msg = "Testing User Message for LDACS";
+    // send_user_data((uint8_t *) test_msg, strlen(test_msg), terminal_obj.AS_SAC);
+    char *data = "ABBA";
+    char pkt[2048] = {0};
+    int pkt_len = construct_ipv6_udp_packet_to_char("2001::100", "2001::200", "5000", "5001", data, 4, pkt);
+    send_user_data((uint8_t *) pkt, pkt_len, terminal_obj.AS_SAC);
 }
 
 static void trigger_handover(int argc, char **argv) {

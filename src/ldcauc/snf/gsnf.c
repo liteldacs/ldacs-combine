@@ -7,6 +7,7 @@
 #include "crypto/authc.h"
 #include "crypto/key.h"
 #include "gs_conn.h"
+#include "inside.h"
 
 #define GSG_PKT_HEAD_LEN 2
 #define GSG_SAC_HEAD_LEN 4
@@ -43,19 +44,17 @@ static void free_gsg_sac_pkg(gsg_ini_pkt_t *gsnf_sac) {
 }
 
 
-static l_err parse_gsg_sac_pkt(buffer_t *pdu, gsg_ini_pkt_t **gsnf_pkg_ptr) {
-    pb_stream gsnf_sac_pbs;
-    zero(&gsnf_sac_pbs);
-    *gsnf_pkg_ptr = init_gsg_sac_pkg(pdu->len);
-    gsg_ini_pkt_t *gsnf_sac_pkg = *gsnf_pkg_ptr;
+static l_err parse_gsg_sac_reqp_pkt(buffer_t *pdu, gsg_sac_resp_t *gsg_sac_resp) {
+    pb_stream gsg_sac_pbs;
+    zero(&gsg_sac_pbs);
 
+    init_pbs(&gsg_sac_pbs, pdu->ptr, pdu->len, "GSNF IN");
 
-    init_pbs(&gsnf_sac_pbs, pdu->ptr, pdu->len, "GSNF IN");
-
-    if (!in_struct(gsnf_sac_pkg, &gsg_ini_pkt_desc, &gsnf_sac_pbs, NULL)) {
-        log_error("Cannot parse gsnf pdu");
+    if (!in_struct(gsg_sac_resp, &gsg_sac_resp_desc, &gsg_sac_pbs, NULL)) {
+        log_error("Cannot parse gsg pdu");
         return LD_ERR_INTERNAL;
     }
+    log_warn("???????????");
     return LD_OK;
 }
 
@@ -166,8 +165,8 @@ l_err recv_gsnf(basic_conn_t *bc) {
                     get_ua_str(as_man->AS_UA, ua_as);
                     get_ua_str(snf_obj.GS_SAC, ua_gs);
 
-                    gs_install_keys(key_trans.key, key_trans.nonce->ptr, key_trans.nonce->len, ua_as, ua_gs,
-                                    &as_man->key_as_gs_h);
+                    key_install(key_trans.key, ua_as, ua_gs, key_trans.nonce->ptr, key_trans.nonce->len,
+                                &as_man->key_as_gs_h);
 
                     /* 未来使用切换状态机， 抛弃这种方法*/
                     if (snf_obj.GS_SAC != as_man->CURR_GS_SAC) {
@@ -333,8 +332,8 @@ l_err recv_gsg(basic_conn_t *bc) {
                     get_ua_str(as_man->AS_UA, ua_as);
                     get_ua_str(as_man->CURR_GS_SAC, ua_gs);
 
-                    gs_install_keys(key_trans.key, key_trans.nonce->ptr, key_trans.nonce->len, ua_as, ua_gs,
-                                    &as_man->key_as_gs_h);
+                    key_install(key_trans.key, ua_as, ua_gs, key_trans.nonce->ptr, key_trans.nonce->len,
+                                &as_man->key_as_gs_h);
 
                     /* 未来使用切换状态机， 抛弃这种方法*/
                     if (snf_obj.GS_SAC != as_man->CURR_GS_SAC) {
@@ -351,6 +350,15 @@ l_err recv_gsg(basic_conn_t *bc) {
                 }
             }
             free_gsg_pkg(gsnf_pkg);
+            break;
+        }
+        case GS_SAC_RESP: {
+            gsg_sac_resp_t resp;
+            parse_gsg_sac_reqp_pkt(&mlt_ld->bc.read_pkt, &resp);
+            if (snf_obj.setup_entity_func) {
+                snf_obj.setup_entity_func(resp.AS_SAC, resp.AS_UA);
+            }
+            // inside_combine_sac_response(resp.AS_SAC, resp.AS_UA);
             break;
         }
         default: {

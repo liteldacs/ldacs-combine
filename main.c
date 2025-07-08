@@ -21,7 +21,7 @@ static void sigint_handler(int signum) {
     // mempool_clear(global_mp);
 
     log_info("ldacs simulator(PID: %u) exit...", getpid());
-//    kill(-getpid(), SIGINT);
+    //    kill(-getpid(), SIGINT);
     exit(0);
 }
 
@@ -33,17 +33,17 @@ void init_signal() {
 }
 
 config_t config = {
-        .port = 8081,
-        .debug = FALSE,
-        .timeout = 999,
-        .worker = 4,
-        .ip_ver = IPVERSION_4,
-        .init_fl_freq = 960.0,
-        .use_http = FALSE,
-        .auto_auth = TRUE,
-        .UA = 0,
-        .is_merged = FALSE,
-        .role = LD_UNDEFINED,
+    .port = 8081,
+    .debug = FALSE,
+    .timeout = 999,
+    .worker = 4,
+    .ip_ver = IPVERSION_4,
+    .init_fl_freq = 960.0,
+    .use_http = FALSE,
+    .auto_auth = TRUE,
+    .UA = 0,
+    .is_merged = FALSE,
+    .role = LD_UNDEFINED,
 
 };
 
@@ -76,7 +76,7 @@ static int init_config_path() {
 
 int opt_parse(int argc, char *const *argv) {
     int c;
-    while ((c = getopt(argc, argv, "p:dt:w:c:AGWHM")) != -1) {
+    while ((c = getopt(argc, argv, "p:dt:w:c:AGWHMBE")) != -1) {
         switch (c) {
             case 'p': {
                 config.port = strtol(optarg, NULL, 10);
@@ -136,15 +136,31 @@ int opt_parse(int argc, char *const *argv) {
                 break;
             }
             case 'M': {
-
+                // if (config.role == LD_SGW) {
+                //     config.port = strtol("55551", NULL, 10);
+                // }
+                // config.is_merged = TRUE;
+                break;
+            }
+            case 'B': {
                 if (config.role == LD_SGW) {
                     config.port = strtol("55551", NULL, 10);
                 }
                 config.is_merged = TRUE;
+                config.is_beihang = TRUE;
+                config.is_e304 = FALSE;
+                break;
+            }
+            case 'E': {
+                if (config.role == LD_SGW) {
+                    config.port = strtol("55551", NULL, 10);
+                }
+                config.is_merged = TRUE;
+                config.is_beihang = FALSE;
+                config.is_e304 = TRUE;
                 break;
             }
             default: {
-
                 return ERROR;
             }
         }

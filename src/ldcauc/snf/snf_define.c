@@ -139,7 +139,7 @@ static field_desc failed_message_fields[] = {
     {ft_set, 3, "VER", NULL},
     {ft_set, 2, "PID", NULL},
     {ft_set, 12, "SAC", NULL},
-    {ft_set, 4, "FAILED TYPE", NULL},
+    {ft_set, 8, "FAILED TYPE", NULL},
     {ft_pad, 0, "PAD", NULL},
     {ft_dl_str, 0, "MSG", NULL},
     {ft_end, 0, NULL, NULL},
@@ -247,6 +247,7 @@ static field_desc gsnf_key_upd_remind_fields[] = {
     {ft_set, 4, "VER", NULL},
     {ft_set, 12, "AS SAC", NULL},
     {ft_set, 4, "KEY_TYPE", NULL},
+    {ft_pad, 0, "PAD", NULL},
     {ft_set, 12, "GSS SAC", NULL},
     {ft_set, 12, "GST SAC", NULL},
     {ft_pad, 0, "PAD", NULL},
@@ -270,6 +271,23 @@ static field_desc gs_key_trans_fields[] = {
 };
 
 struct_desc_t gs_key_trans_desc = {"KEY_TRANS_DESC", gs_key_trans_fields};
+
+static field_desc gsg_sac_rqst_fields[] = {
+    {ft_set, 4, "TYPE", NULL},
+    {ft_set, 28, "AS UA", NULL},
+    {ft_pad, 0, "PAD", NULL},
+    {ft_end, 0, NULL, NULL},
+};
+struct_desc_t gsg_sac_rqst_desc = {"GSG SAC REQUEST", gsg_sac_rqst_fields};
+
+static field_desc gsg_sac_resp_fields[] = {
+    {ft_set, 4, "TYPE", NULL},
+    {ft_set, 28, "AS UA", NULL},
+    {ft_set, 12, "AS SAC", NULL},
+    {ft_pad, 0, "PAD", NULL},
+    {ft_end, 0, NULL, NULL},
+};
+struct_desc_t gsg_sac_resp_desc = {"GSG SAC RESPONSE", gsg_sac_resp_fields};
 
 
 size_t as_recv_handlers_sz = 3;

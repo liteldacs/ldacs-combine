@@ -28,10 +28,32 @@ void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_po
     snf_obj.role = LD_GS;
     snf_obj.GS_SAC = GS_SAC;
     snf_obj.is_merged = TRUE;
+    snf_obj.is_beihang = TRUE;
+    snf_obj.is_e304 = FALSE;
 
     snf_obj.trans_snp_func = trans_snp;
     snf_obj.register_fail_func = register_fail;
     snf_obj.gst_ho_complete_key_func = gst_ho_complete_key;
+
+    if (init_client_gs_conn_service(gsnf_addr, gsnf_remote_port, gsnf_local_port, recv_gsg) != LD_OK) {
+        log_warn("Cannot init GS connection service");
+    }
+}
+
+void init_gs_snf_layer_inside(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
+                              trans_snp trans_snp, register_snf_fail register_fail,
+                              gst_ho_complete_key gst_ho_complete_key, setup_entity setup_entity) {
+    snf_obj.snf_emap = init_enode_map();
+    snf_obj.role = LD_GS;
+    snf_obj.GS_SAC = GS_SAC;
+    snf_obj.is_merged = TRUE;
+    snf_obj.is_beihang = FALSE;
+    snf_obj.is_e304 = TRUE;
+
+    snf_obj.trans_snp_func = trans_snp;
+    snf_obj.register_fail_func = register_fail;
+    snf_obj.gst_ho_complete_key_func = gst_ho_complete_key;
+    snf_obj.setup_entity_func = setup_entity;
 
     if (init_client_gs_conn_service(gsnf_addr, gsnf_remote_port, gsnf_local_port, recv_gsg) != LD_OK) {
         log_warn("Cannot init GS connection service");
@@ -45,6 +67,8 @@ void init_gs_snf_layer_unmerged(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_
     snf_obj.role = LD_GS;
     snf_obj.GS_SAC = GS_SAC;
     snf_obj.is_merged = FALSE;
+    snf_obj.is_beihang = FALSE;
+    snf_obj.is_e304 = FALSE;
 
 
     snf_obj.trans_snp_func = trans_snp;
@@ -61,7 +85,6 @@ void init_sgw_snf_layer(uint16_t listen_port) {
     snf_obj.is_merged = TRUE;
 
     snf_obj.register_fail_func = NULL;
-
     if (init_server_gsc_conn_service(listen_port) != LD_OK) {
         log_warn("Cannot init GSC connection service");
     }
@@ -147,13 +170,6 @@ int8_t clear_snf_en(snf_entity_t *snf_en) {
         ? revoke_key(snf_obj.role, ua_as, ua_gs, MASTER_KEY_AS_GS)
         : revoke_key(snf_obj.role, ua_as, ua_sgw, MASTER_KEY_AS_SGW);
 
-#ifdef UNUSE_CRYCARD
-    if (snf_en->key_as_sgw_r_h != NULL) { free_buffer(snf_en->key_as_sgw_r_h); }
-    if (snf_en->key_as_sgw_s_h != NULL) { free_buffer(snf_en->key_as_sgw_s_h); }
-    if (snf_en->key_as_gs_h != NULL) { free_buffer(snf_en->key_as_gs_h); }
-    if (snf_en->key_session_en_h != NULL) { free_buffer(snf_en->key_session_en_h); }
-    if (snf_en->key_session_mac_h != NULL) { free_buffer(snf_en->key_session_mac_h); }
-#endif
     return LDCAUC_OK;
 }
 
@@ -237,7 +253,7 @@ static buffer_t *gen_failed_pkt(uint8_t failed_type, uint16_t as_sac, buffer_t *
                    }, &failed_message_desc, "FAILED MESSAGE");
 }
 
-int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_buf, size_t buf_len) {
+int8_t upload_snf(uint8_t failed_type, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_buf, size_t buf_len) {
     /* sub-net control will not have unacknowledged data */
 
     buffer_t *in_buf = init_buffer_unptr();
@@ -247,8 +263,8 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
         snf_entity_t *as_man = get_enode(AS_SAC);
         if (snf_obj.is_merged == TRUE) {
             // send failed message to SGW
-            if (!is_valid) {
-                to_trans_buf = gen_failed_pkt(0xFF, as_man->AS_SAC, in_buf);
+            if (failed_type) {
+                to_trans_buf = gen_failed_pkt(failed_type, as_man->AS_SAC, in_buf);
                 gs_conn_service.sgw_conn->bc.opt->send_handler(&gs_conn_service.sgw_conn->bc, &(gsg_pkt_t){
                                                                    GS_SNF_DOWNLOAD, as_man->AS_SAC, to_trans_buf
                                                                }, &gsg_pkt_desc, NULL, NULL);
@@ -281,8 +297,8 @@ int8_t upload_snf(bool is_valid, uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *snp_
             }
         } else {
             to_trans_buf = in_buf;
-            if (!is_valid) {
-                to_trans_buf = gen_failed_pkt(0xFF, as_man->AS_SAC, in_buf);
+            if (failed_type) {
+                to_trans_buf = gen_failed_pkt(failed_type, as_man->AS_SAC, in_buf);
                 gs_conn_service.sgw_conn->bc.opt->send_handler(&gs_conn_service.sgw_conn->bc, &(gsnf_pkt_cn_t){
                                                                    GSNF_SNF_DOWNLOAD, DEFAULT_GSNF_VERSION, AS_SAC,
                                                                    0xFF,
@@ -356,5 +372,19 @@ int8_t gst_handover_complete(uint16_t AS_SAC) {
                                                            .GS_SAC = snf_obj.GS_SAC
                                                        }, &gsnf_st_chg_desc, NULL, NULL);
     }
+    return LDCAUC_OK;
+}
+
+
+int8_t inside_combine_sac_request(uint32_t UA) {
+    if (!snf_obj.is_e304) return LDCAUC_WRONG_PARA;
+    gs_conn_service.sgw_conn->bc.opt->send_handler(&gs_conn_service.sgw_conn->bc, &(struct gsg_sac_rqst_s){
+                                                       GS_SAC_RQST, UA,
+                                                   }, &gsg_sac_rqst_desc, NULL, NULL);
+    return LDCAUC_OK;
+}
+
+int8_t inside_combine_sac_response(uint16_t SAC, uint32_t UA) {
+    log_warn("!!!!!!!! %d %d ", SAC, UA);
     return LDCAUC_OK;
 }

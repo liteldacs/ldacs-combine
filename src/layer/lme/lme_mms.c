@@ -3,6 +3,8 @@
 //
 
 
+#include <inside.h>
+
 #include "ldacs_lme.h"
 
 typedef struct lme_mms_obj_s {
@@ -11,27 +13,28 @@ typedef struct lme_mms_obj_s {
     stimer_ev_t stimer[10];
 } lme_mms_obj_t;
 
+
 static lme_mms_obj_t lme_mms_obj = {
-        .lme_obj = NULL,
-        .stimer = {
-                {trans_bc_mac_timer_func, NULL, BC_MAC_INTVL}
-        },
+    .lme_obj = NULL,
+    .stimer = {
+        {trans_bc_mac_timer_func, NULL, BC_MAC_INTVL}
+    },
 };
 
 static const char *sib_mod_name[] = {
-        "MOD_USER_SPECIFIC",
-        "MOD_CELL_SPECIFIC",
+    "MOD_USER_SPECIFIC",
+    "MOD_CELL_SPECIFIC",
 };
 
 static const char *sib_cms_name[] = {
-        "CMS_TYP_1",
-        "CMS_TYP_2",
-        "CMS_TYP_3",
-        "CMS_TYP_4",
-        "CMS_TYP_5",
-        "CMS_TYP_6",
-        "CMS_TYP_7",
-        "CMS_TYP_8",
+    "CMS_TYP_1",
+    "CMS_TYP_2",
+    "CMS_TYP_3",
+    "CMS_TYP_4",
+    "CMS_TYP_5",
+    "CMS_TYP_6",
+    "CMS_TYP_7",
+    "CMS_TYP_8",
 };
 
 
@@ -92,11 +95,11 @@ void *trans_ra_cr_timer_func(void *args) {
         return NULL;
     }
     ra_cell_rqst_t rqst = {
-            .r_type = R_TYP_CR,
-            .UA = lme_layer_objs.lme_as_man->AS_UA,
-            .SAC = lme_layer_objs.GS_SAC,
-            .SCGS = 1,
-            .VER = 0x1,
+        .r_type = R_TYP_CR,
+        .UA = lme_layer_objs.lme_as_man->AS_UA,
+        .SAC = lme_layer_objs.GS_SAC,
+        .SCGS = 1,
+        .VER = 0x1,
     };
 
     preempt_prim(&MAC_RACH_REQ_PRIM, R_TYP_CR, gen_pdu(&rqst, ra_format_descs[R_TYP_CR].f_desc, "RA OUT"),
@@ -107,10 +110,10 @@ void *trans_ra_cr_timer_func(void *args) {
 
 void trans_bc_acb_func(void *args) {
     bc_acb_t acb_n = {
-            .b_type = B_TYP_ACB,
-            .SAC = lme_mms_obj.lme_obj->GS_SAC,
-            .FLF = lme_mms_obj.lme_obj->init_flf,
-            .RLF = lme_mms_obj.lme_obj->init_rlf,
+        .b_type = B_TYP_ACB,
+        .SAC = lme_mms_obj.lme_obj->GS_SAC,
+        .FLF = lme_mms_obj.lme_obj->init_flf,
+        .RLF = lme_mms_obj.lme_obj->init_rlf,
     };
 
     preempt_prim(&MAC_BCCH_REQ_PRIM, B_TYP_ACB, gen_pdu(&acb_n, bc_format_descs[B_TYP_ACB].f_desc, "ACB_OUT"), NULL, 0,
@@ -120,14 +123,14 @@ void trans_bc_acb_func(void *args) {
 
 void trans_bc_sib_func(void *args) {
     bc_sib_t sib_n = {
-            .b_type = B_TYP_SIB,
-            .SAC = lme_layer_objs.GS_SAC,
-            .VER = lme_layer_objs.PROTOCOL_VER,
-            .FLF = lme_layer_objs.init_flf,
-            .RLF = lme_layer_objs.init_rlf,
-            .MOD = lme_layer_objs.MOD,
-            .CMS = lme_layer_objs.CMS,
-            .EIRP = lme_layer_objs.EIRP,
+        .b_type = B_TYP_SIB,
+        .SAC = lme_layer_objs.GS_SAC,
+        .VER = lme_layer_objs.PROTOCOL_VER,
+        .FLF = lme_layer_objs.init_flf,
+        .RLF = lme_layer_objs.init_rlf,
+        .MOD = lme_layer_objs.MOD,
+        .CMS = lme_layer_objs.CMS,
+        .EIRP = lme_layer_objs.EIRP,
     };
 
     preempt_prim(&MAC_BCCH_REQ_PRIM, B_TYP_SIB, gen_pdu(&sib_n, bc_format_descs[B_TYP_SIB].f_desc, "SIB_OUT"), NULL, 0,
@@ -135,10 +138,10 @@ void trans_bc_sib_func(void *args) {
 }
 
 void trans_bc_mac_timer_func(evutil_socket_t fd, short event, void *arg) {
-    bc_mac_bd_t *mac_n = &(bc_mac_bd_t) {
-            .b_type = B_TYP_BC_MAC,
-            .mac_len = SEC_MACLEN_64,
-            .mac = init_buffer_ptr(get_sec_maclen(SEC_MACLEN_64)),
+    bc_mac_bd_t *mac_n = &(bc_mac_bd_t){
+        .b_type = B_TYP_BC_MAC,
+        .mac_len = SEC_MACLEN_64,
+        .mac = init_buffer_ptr(get_sec_maclen(SEC_MACLEN_64)),
     };
     preempt_prim(&MAC_BCCH_REQ_PRIM, B_TYP_BC_MAC, mac_n, NULL, 0, 0);
 }
@@ -214,22 +217,30 @@ void M_SAPR_cb(ld_prim_t *prim) {
                     return;
                 }
 
-                /* simulate sac alloc procession */
-                uint16_t sac = generate_urand(SAC_LEN);
-                if (has_lme_as_enode(sac) == FALSE) {
-                    set_lme_as_enode(init_as_man(sac, cr->UA, lme_layer_objs.GS_SAC));
+                // 北航merge、无GSC模式
+                if (config.is_beihang || config.is_merged == false) {
+                    /* simulate sac alloc procession */
+                    // uint16_t sac = generate_urand(SAC_LEN);
+                    // if (has_lme_as_enode(sac) == FALSE) {
+                    //     set_lme_as_enode(init_as_man(sac, cr->UA, lme_layer_objs.GS_SAC));
+                    // }
+                    // if (register_snf_en(LD_GS, sac, cr->UA, lme_layer_objs.GS_SAC) != LDCAUC_OK) {
+                    //     log_warn("Can not register snf");
+                    //     break;
+                    // }
+                    // dls_en_data_t *dls_en_data = &(dls_en_data_t){
+                    //     .GS_SAC = lme_layer_objs.GS_SAC,
+                    //     .AS_UA = cr->UA,
+                    //     .AS_SAC = sac, //和GSC共同协商分配给AS的SAC 10.6.4.5
+                    // };
+                    //
+                    // preempt_prim(&DLS_OPEN_REQ_PRIM, DL_TYP_GS_INIT, dls_en_data, NULL, 0, 0);
+                    mms_setup_entity(generate_urand(SAC_LEN), cr->UA);
+                } else {
+                    // 内部merge
+                    inside_combine_sac_request(cr->UA);
+                    // setup_entity(generate_urand(SAC_LEN), cr->UA);
                 }
-                if(register_snf_en(LD_GS, sac, cr->UA, lme_layer_objs.GS_SAC) != LDCAUC_OK){
-                    log_warn("Can not register snf");
-                    break;
-                }
-                dls_en_data_t *dls_en_data = &(dls_en_data_t) {
-                        .GS_SAC = lme_layer_objs.GS_SAC,
-                        .AS_UA = cr->UA,
-                        .AS_SAC = sac, //和GSC共同协商分配给AS的SAC 10.6.4.5
-                };
-
-                preempt_prim(&DLS_OPEN_REQ_PRIM, DL_TYP_GS_INIT, dls_en_data, NULL, 0, 0);
 
                 break;
             }
@@ -243,5 +254,21 @@ void M_SAPR_cb(ld_prim_t *prim) {
     }
 }
 
+int8_t mms_setup_entity(uint16_t sac, uint32_t UA) {
+    if (has_lme_as_enode(sac) == FALSE) {
+        set_lme_as_enode(init_as_man(sac, UA, lme_layer_objs.GS_SAC));
+    }
+    if (register_snf_en(LD_GS, sac, UA, lme_layer_objs.GS_SAC) != LDCAUC_OK) {
+        log_warn("Can not register snf");
+        return LD_ERR_INTERNAL;
+    }
+    dls_en_data_t *dls_en_data = &(dls_en_data_t){
+        .GS_SAC = lme_layer_objs.GS_SAC,
+        .AS_UA = UA,
+        .AS_SAC = sac, //和GSC共同协商分配给AS的SAC 10.6.4.5
+    };
 
+    preempt_prim(&DLS_OPEN_REQ_PRIM, DL_TYP_GS_INIT, dls_en_data, NULL, 0, 0);
+    return LD_OK;
+}
 

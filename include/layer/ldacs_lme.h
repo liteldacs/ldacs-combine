@@ -528,6 +528,8 @@ l_err start_mms();
 
 void free_CO(uint16_t co);
 
+int8_t mms_setup_entity(uint16_t sac, uint32_t UA);
+
 
 /* rms */
 l_err init_lme_rms(lme_layer_objs_t *obj);
