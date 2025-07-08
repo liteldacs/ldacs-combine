@@ -146,18 +146,15 @@ l_err make_lme_layer() {
                     lme_layer_objs.to_sync_head = &lme_layer_objs.to_sync.lpointer;
                     if (config.is_merged) {
                         if (config.is_beihang) {
-                            init_gs_snf_layer(config.GS_SAC, config.gsnf_addr_v6, config.gsnf_remote_port,
-                                              config.gsnf_local_port, trans_snp_data, register_snf_failed,
+                            init_gs_snf_layer(&config, trans_snp_data, register_snf_failed,
                                               gst_handover_complete_key);
                         } else if (config.is_e304) {
-                            init_gs_snf_layer_inside(config.GS_SAC, config.gsnf_addr_v6, config.gsnf_remote_port,
-                                                     config.gsnf_local_port, trans_snp_data, register_snf_failed,
+                            init_gs_snf_layer_inside(&config, trans_snp_data, register_snf_failed,
                                                      gst_handover_complete_key, mms_setup_entity);
                         }
                     } else {
-                        init_gs_snf_layer_unmerged(config.GS_SAC, config.gsnf_addr, config.gsnf_remote_port,
-                                                   config.gsnf_local_port,
-                                                   trans_snp_data, register_snf_failed, gst_handover_complete_key);
+                        init_gs_snf_layer_unmerged(&config, trans_snp_data, register_snf_failed,
+                                                   gst_handover_complete_key);
                     }
                     // config.is_merged == TRUE
                     //     ? init_gs_snf_layer(config.GS_SAC, config.gsnf_addr_v6, config.gsnf_remote_port,
