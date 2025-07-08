@@ -54,7 +54,6 @@ static l_err parse_gsg_sac_reqp_pkt(buffer_t *pdu, gsg_sac_resp_t *gsg_sac_resp)
         log_error("Cannot parse gsg pdu");
         return LD_ERR_INTERNAL;
     }
-    log_warn("???????????");
     return LD_OK;
 }
 

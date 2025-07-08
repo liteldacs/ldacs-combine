@@ -42,7 +42,7 @@ void init_gs_snf_layer(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_po
 
 void init_gs_snf_layer_inside(uint16_t GS_SAC, char *gsnf_addr, uint16_t gsnf_remote_port, uint16_t gsnf_local_port,
                               trans_snp trans_snp, register_snf_fail register_fail,
-                              gst_ho_complete_key gst_ho_complete_key, setup_entity setup_entity) {
+                              gst_ho_complete_key gst_ho_complete_key, inside_setup_entity setup_entity) {
     snf_obj.snf_emap = init_enode_map();
     snf_obj.role = LD_GS;
     snf_obj.GS_SAC = GS_SAC;
@@ -384,7 +384,11 @@ int8_t inside_combine_sac_request(uint32_t UA) {
     return LDCAUC_OK;
 }
 
-int8_t inside_combine_sac_response(uint16_t SAC, uint32_t UA) {
-    log_warn("!!!!!!!! %d %d ", SAC, UA);
+int8_t inside_combine_update_user_msg(uint16_t AS_SAC, uint8_t *snp_buf, size_t buf_len) {
+    buffer_t *in_buf = init_buffer_unptr();
+    CLONE_TO_CHUNK(*in_buf, snp_buf, buf_len);
+    gs_conn_service.sgw_conn->bc.opt->send_handler(&gs_conn_service.sgw_conn->bc, &(gsg_data_t){
+                                                       GS_DATA_DOWN, AS_SAC, 0, in_buf
+                                                   }, &gsg_data_desc, NULL, NULL);
     return LDCAUC_OK;
 }

@@ -4,6 +4,8 @@
 
 #include "layer_interface.h"
 
+#include "inside.h"
+
 int_layer_obj_t int_obj = {};
 
 l_err register_int_handler(void (*handler)(user_msg_t *)) {
@@ -14,10 +16,11 @@ l_err register_int_handler(void (*handler)(user_msg_t *)) {
 void SN_SAPD_U_cb(ld_prim_t *prim) {
     orient_sdu_t *o_sdu = prim->prim_objs;
     passert(int_obj.msg_handler != NULL);
-    int_obj.msg_handler(&(user_msg_t) {
-            .AS_SAC = o_sdu->AS_SAC,
-            .GS_SAC = o_sdu->GS_SAC,
-            .msg = o_sdu->buf
+    inside_combine_update_user_msg(o_sdu->AS_SAC, o_sdu->buf->ptr, o_sdu->buf->len);
+    int_obj.msg_handler(&(user_msg_t){
+        .AS_SAC = o_sdu->AS_SAC,
+        .GS_SAC = o_sdu->GS_SAC,
+        .msg = o_sdu->buf
     });
 }
 
@@ -32,8 +35,8 @@ void SN_SAPD_U_cb(ld_prim_t *prim) {
 l_err send_user_data(uint8_t *data, size_t sz, uint16_t AS_SAC) {
     orient_sdu_t *orient_sdu = create_orient_sdus(AS_SAC,
                                                   config.role == LD_AS
-                                                  ? lme_layer_objs.lme_as_man->AS_CURR_GS_SAC
-                                                  : lme_layer_objs.GS_SAC);
+                                                      ? lme_layer_objs.lme_as_man->AS_CURR_GS_SAC
+                                                      : lme_layer_objs.GS_SAC);
     CLONE_TO_CHUNK(*orient_sdu->buf, data, sz);
 
     preempt_prim(&SN_DATA_REQ_PRIM, SN_TYP_FROM_UP, orient_sdu, free_orient_sdus, 0, 0);

@@ -10,4 +10,4 @@ http:
   http_port: 9456
   auto_auth: 1
 
-gsnf_addr_v6: fe01::1
+gsnf_addr_v6: 2001:da8:a012:389:7bf3:43b7:9c07:4f01
