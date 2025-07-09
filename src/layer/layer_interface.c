@@ -14,6 +14,9 @@ l_err register_int_handler(void (*handler)(user_msg_t *)) {
 }
 
 void SN_SAPD_U_cb(ld_prim_t *prim) {
+    if (prim->prim_seq == SN_DATA_REQ) {
+        return;
+    }
     orient_sdu_t *o_sdu = prim->prim_objs;
     passert(int_obj.msg_handler != NULL);
     inside_combine_update_user_msg(o_sdu->AS_SAC, o_sdu->buf->ptr, o_sdu->buf->len);

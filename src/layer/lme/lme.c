@@ -536,12 +536,14 @@ static l_err send_ho_com(uint16_t AS_SAC, uint16_t GS_SAC, uint16_t next_CO) {
     return LD_OK;
 }
 
-int8_t trans_snp_data(uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size_t buf_len) {
+int8_t trans_snp_data(uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size_t buf_len, bool is_ctrl) {
     orient_sdu_t *orient_sdu = create_orient_sdus(AS_SAC, GS_SAC);
 
     /* 通过原语向SNP层传递对应报文 */
     CLONE_TO_CHUNK(*orient_sdu->buf, buf, buf_len);
-    preempt_prim(&SN_DATA_REQ_PRIM, SN_TYP_FROM_LME, orient_sdu, free_orient_sdus, 0, 0);
+
+    preempt_prim(&SN_DATA_REQ_PRIM, is_ctrl ? SN_TYP_FROM_LME : SN_TYP_FROM_UP, orient_sdu, free_orient_sdus, 0,
+                 is_ctrl ? 0 : 1);
     return LD_OK;
 }
 

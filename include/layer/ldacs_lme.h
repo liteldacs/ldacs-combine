@@ -505,7 +505,7 @@ l_err change_LME_OPEN();
 
 void exit_LME_CONN_OPEN_action(void *curr_st_data, struct sm_event_s *event, void *new_state_data);
 
-int8_t trans_snp_data(uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size_t buf_len);
+int8_t trans_snp_data(uint16_t AS_SAC, uint16_t GS_SAC, uint8_t *buf, size_t buf_len, bool is_ctrl);
 
 int8_t register_snf_failed(uint16_t SAC);
 

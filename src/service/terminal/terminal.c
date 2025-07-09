@@ -106,9 +106,14 @@ static void send_user_data_terminal(int argc, char **argv) {
     // send_user_data((uint8_t *) test_msg, strlen(test_msg), terminal_obj.AS_SAC);
     char *data = "ABBA";
     char pkt[2048] = {0};
-    int pkt_len = construct_ipv6_udp_packet_to_char(config.addr,
-                                                    "2001:da8:a012:389:7bf3:43b7:9c07:4f01", "5911", "5911", data, 4,
+    // int pkt_len = construct_ipv6_udp_packet_to_char(config.addr,
+    //                                                 "2001:da8:a012:389:7bf3:43b7:9c07:4f01", "5911", "5911", data, 4,
+    //                                                 pkt);
+
+    int pkt_len = construct_ipv6_udp_packet_to_char("2001:0:0:e304::141", config.addr,
+                                                    "5911", "5911", data, 4,
                                                     pkt);
+
     send_user_data((uint8_t *) pkt, pkt_len, terminal_obj.AS_SAC);
 }
 
