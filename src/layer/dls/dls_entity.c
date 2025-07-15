@@ -267,6 +267,7 @@ l_err recv_frag_ack(dls_entity_t *en, uint8_t PID, uint16_t SEQ1) {
 
 
 l_err dls_frag_func(dls_entity_t *en, size_t alloced) {
+    if (!en) return LD_ERR_NULL;
     window_t *win = en->owindow;
     window_ctx_t *w_ctx = NULL;
     int64_t alloced_sz = (int64_t) alloced;

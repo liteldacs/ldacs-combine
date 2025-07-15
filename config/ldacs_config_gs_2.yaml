@@ -13,8 +13,8 @@ gs:
 gsnf:
   gsnf_addr: 127.0.0.1
   gsnf_addr_v6: ::1
-  gsnf_remote_port: 55564
-  #  gsnf_remote_port: 55559
+  #gsnf_remote_port: 55564
+  gsnf_remote_port: 55559
   gsnf_local_port: 55565
 
 init_fl_freq: 1112.0

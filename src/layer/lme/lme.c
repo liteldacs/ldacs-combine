@@ -434,6 +434,7 @@ void exit_LME_CONN_OPEN_action(void *curr_st_data, struct sm_event_s *event, voi
         .d_type = DC_TYP_CELL_EXIT,
         .SAC = lme_layer_objs.lme_as_man->AS_SAC,
     };
+
     preempt_prim(&MAC_DCCH_REQ_PRIM, DC_TYP_CELL_EXIT,
                  gen_pdu(&exit, dc_format_descs[DC_TYP_CELL_EXIT].f_desc, "dc cell exit"), NULL, 0, 0);
     unregister_snf_en(exit.SAC);
@@ -581,5 +582,6 @@ int8_t gst_handover_complete_key(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_S
     to_sync->SAC = AS_SAC;
     list_add_tail(&to_sync->lpointer, lme_layer_objs.to_sync_head);
 
+    log_warn("========== Finish Handover ==========");
     return LDCAUC_OK;
 }

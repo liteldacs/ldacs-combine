@@ -91,7 +91,6 @@ void D_SAPD(ld_prim_t *prim) {
             break;
         }
         default: {
-
             break;
         }
     }
@@ -103,8 +102,6 @@ void D_SAPD(ld_prim_t *prim) {
 
     switch (prim->prim_obj_typ) {
         case SN_TYP_FROM_LME: {
-
-
             lfqueue_put(d_entity->cos_oqueue[DLS_COS_7], snp_pdu);
             break;
         }
@@ -212,7 +209,9 @@ void M_SAPC_D_cb(ld_prim_t *prim) {
                     cc_rl_alloc_t *rl_alloc = data_struct;
 
                     set_rl_param(rl_alloc->RPSO, rl_alloc->NRPS);
-                    dls_frag_func(dls_layer_objs.AS_DLS, rl_alloc->NRPS * RL_DATA_BLK_LEN_MAX);
+                    if (dls_frag_func(dls_layer_objs.AS_DLS, rl_alloc->NRPS * RL_DATA_BLK_LEN_MAX) != LD_OK) {
+                        log_warn("DLS FRAG FAILED");
+                    }
                     break;
                 }
                 case C_TYP_FL_ALLOC: {
@@ -228,7 +227,13 @@ void M_SAPC_D_cb(ld_prim_t *prim) {
                 }
                 case C_TYP_ACK: {
                     cc_ack_t *ack = data_struct;
-                    if (ack->AS_SAC != dls_layer_objs.AS_DLS->AS_SAC) break;
+                    if (dls_layer_objs.AS_DLS == NULL) {
+                        break;
+                    }
+
+                    if (ack->AS_SAC != dls_layer_objs.AS_DLS->AS_SAC) {
+                        break;
+                    }
                     recv_ack(dls_layer_objs.AS_DLS, ack->PID, ack->bitmap);
                     break;
                 }
