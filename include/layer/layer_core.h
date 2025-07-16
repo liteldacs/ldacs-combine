@@ -16,13 +16,13 @@
 #define CO_MAX 1 << 9
 
 #define BC_BLK_N 3
-#define BC_BLK_LEN_1_3  528 >> 3  //66 Bytes
-#define BC_BLK_LEN_2    1000 >> 3 //125 Bytes
-#define BC_BLK_FORCE_REMAIN 272 >> 8 // 272 = 4 + 256 + 4 + 8
+#define BC_BLK_LEN_1_3      (528 >> 3)  //66 Bytes
+#define BC_BLK_LEN_2        (1000 >> 3) //125 Bytes
+#define BC_BLK_FORCE_REMAIN (272 >> 8) // 272 = 4 + 256 + 4 + 8
 
 #define CC_BLK_N 1
 #define CC_BLK_LEN_MAX  728         // 728b * 8(phy-pdus) / 8 == 728Bytes
-#define CC_BLK_LEN_MIN  728 >> 3    // 728b / 8 == 91Bytes
+#define CC_BLK_LEN_MIN  (728 >> 3)    // 728b / 8 == 91Bytes
 
 #define RA_BLK_N 2
 #define RA_BLK_LEN  ((54 >> 3) + 1)
@@ -41,7 +41,7 @@
 #define RL_SLOT_MAX 160                 // (58.32/0.72) = (81(double slots) - 1(sync slot)) * 2 = 160(single slot)
 #define RL_DATA_BLK_LEN_MAX 14   //(112b / 8)
 
-#define CMS_1_PER_LEN 728 >> 3
+#define CMS_1_PER_LEN (728 >> 3)
 
 enum ELE_TYP {
     ELE_TYP_RESERVED = 0x00,

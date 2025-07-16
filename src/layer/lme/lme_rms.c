@@ -32,7 +32,7 @@ typedef struct lme_rms_obj_s {
     ld_drr_t *rl_drr,
             *fl_drr;
 
-    size_t cc_sz;
+    // size_t cc_sz;
     size_t BO;
 
     stimer_ev_t stimer[10];
@@ -101,7 +101,7 @@ static void trans_cc_must_timer_func(evutil_socket_t fd, short event, void *arg)
 }
 
 static void trans_cc_func(void *args) {
-    lme_rms_obj.cc_sz = 0;
+    // lme_rms_obj.cc_sz = 0;
     lme_rms_obj.BO = 0;
 
     /* start timer for cc mac. */
@@ -139,15 +139,20 @@ void trans_cc_sd_timer_func(void *args) {
     uint16_t highest_co = bs_get_highest(lme_rms_obj.CO_bitset);
 
     /* add slot_desc length and the hmac length */
-    lme_rms_obj.cc_sz += cc_format_descs[C_TYP_SLOT_DESC].desc_size + (get_sec_maclen(SEC_MACLEN_64) + 1);
+    // lme_rms_obj.cc_sz += cc_format_descs[C_TYP_SLOT_DESC].desc_size + (get_sec_maclen(SEC_MACLEN_64) + 1);
 
     /* TODO:  CCL更改 */
-    cc_slot_desc_t sd_n = {
-        .CCL = ((lme_rms_obj.cc_sz - 1) / CC_BLK_LEN_MIN) + 1,
-        .DCL = highest_co + 1 >= DCL_MAX ? DCL_MAX : highest_co + 1
-    };
+    // cc_slot_desc_t sd_n = {
+    //     // .CCL = ((lme_rms_obj.cc_sz - 1) / CC_BLK_LEN_MIN) + 1,
+    //     .CCL = 0,
+    //     .DCL = highest_co + 1 >= DCL_MAX ? DCL_MAX : highest_co + 1
+    // };
 
-    preempt_prim(&MAC_CCCH_REQ_PRIM, C_TYP_SLOT_DESC, &sd_n, NULL, 0, 0);
+    // preempt_prim(&MAC_CCCH_REQ_PRIM, C_TYP_SLOT_DESC, &sd_n, NULL, 0, 0);
+    cc_slot_desc_t *sd = calloc(1, sizeof(cc_slot_desc_t));
+    sd->DCL = highest_co + 1 >= DCL_MAX ? DCL_MAX : highest_co + 1;
+
+    preempt_prim(&MAC_CCCH_REQ_PRIM, C_TYP_SLOT_DESC, sd, NULL, 0, 0);
 }
 
 void trans_cc_sync_timer_func(void *args) {
@@ -357,7 +362,7 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
         }
         case MAC_CCCH_REQ: {
             if (prim->prim_obj_typ == C_TYP_CC_MAC) break;
-            lme_rms_obj.cc_sz += cc_format_descs[prim->prim_obj_typ].desc_size;
+            // lme_rms_obj.cc_sz += cc_format_descs[prim->prim_obj_typ].desc_size;
             break;
         }
         case MAC_DCCH_REQ: {

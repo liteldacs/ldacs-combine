@@ -160,10 +160,11 @@ static void upward_FL_CC_DCH_j(cJSON *j_node) {
         //CLONE_TO_CHUNK(*phy_json_obj.phy_obj->cc_dch_merge.data_next_mf[0], cc_dch_bufs[2]->ptr + cc_pdu_l, sdus_data->blks[2]->total - cc_pdu_l);
         preempt_prim(&PHY_DATA_IND_PRIM, E_TYP_FL, sdus_data, free_sdu_s, 0, 0);
     }
-    /* 8.6.2.5 "The physical layer must forward the received data contained in jointly interleaved PHY-PDUs to
-the MAC immediately after PHY-PDU 21."*/
-    size_t cc_pdu_l = CC_BLK_LEN_MIN; //use 1 cc-pdu when testing
-    {
+    /* 8.6.2.5 "The physical layer must forward the received data contained in jointly interleaved PHY-PDUs to the MAC immediately after PHY-PDU 21."*/
+    // size_t cc_pdu_l = CC_BLK_LEN_MAX; //use 1 cc-pdu when testing
+    cc_slot_desc_t *sd = parse_sdu(cc_dch_bufs[2], &cc_slot_desc, 2);
+    size_t cc_pdu_l = sd->CCL * CC_BLK_LEN_MIN; //use 1 cc-pdu when testing
+    free(sd); {
         sdu_s_t *sdus_cc = create_sdu_s(CC_BLK_N);
         INIT_BUF_ARRAY_UNPTR(sdus_cc->blks, CC_BLK_N);
         CLONE_TO_CHUNK_L(*sdus_cc->blks[0], cc_dch_bufs[2]->ptr, cc_pdu_l, cc_pdu_l);

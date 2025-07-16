@@ -471,15 +471,17 @@ void M_SAPC(ld_prim_t *prim) {
                     break;
                 }
                 case C_TYP_SLOT_DESC: {
-                    cc_slot_desc_t *cc_sd = prim->prim_objs;
-
-                    ld_lock(&mac_layer_objs.CCL.mutex);
-                    mac_layer_objs.CCL.value = cc_sd->CCL;
-                    ld_unlock(&mac_layer_objs.CCL.mutex);
+                    // cc_slot_desc_t *cc_sd = prim->prim_objs;
+                    //
+                    // ld_lock(&mac_layer_objs.CCL.mutex);
+                    // mac_layer_objs.CCL.value = cc_sd->CCL;
+                    // ld_unlock(&mac_layer_objs.CCL.mutex);
 
                     q_node->pri = cc_format_descs[C_TYP_SLOT_DESC].pri;
-                    q_node->n_data = gen_pdu(prim->prim_objs, cc_format_descs[C_TYP_SLOT_DESC].f_desc, "CCSD OUT");
-                    q_node->free_func = free_buffer;
+                    // q_node->n_data = gen_pdu(prim->prim_objs, cc_format_descs[C_TYP_SLOT_DESC].f_desc, "CCSD OUT");
+                    // q_node->free_func = free_buffer;
+                    q_node->n_data = prim->prim_objs;
+                    q_node->free_func = free;
                     break;
                 }
                 case C_TYP_DCCH_DESC: {
@@ -713,23 +715,29 @@ l_err generate_cc_pkt() {
     lfqueue_get(mac_layer_objs.cd_assemed_qs, (void **) &mac_layer_objs.cd_to_trans_node);
     ld_unlock(&mac_layer_objs.cd_assq_mutex);
 
-    sdu_s_t *sdus = create_sdu_s(CC_BLK_N);
-    sdus->blks[0] = init_buffer_ptr(CC_BLK_LEN_MAX);
+    buffer_t *cc_buf = init_buffer_ptr(CC_BLK_LEN_MAX);
+    cc_slot_desc_t *slot_desc = NULL;
 
     while (stop_flag == FALSE) {
         if (pqueue_empty(mac_layer_objs.cd_to_trans_node->cc_out_pq)) {
             log_warn("CC OUT PQUEUE EMPTY");
-            free_sdu_s(sdus);
+            // free_sdu_s(sdus);
+            free_buffer(cc_buf);
             return LD_ERR_QUEUE;
         }
         pqueue_pop(mac_layer_objs.cd_to_trans_node->cc_out_pq, (void **) &node);
         if (node == NULL || node->n_data == NULL) continue;
+
+        if (node->type == C_TYP_SLOT_DESC) {
+            slot_desc = (cc_slot_desc_t *) node->n_data;
+            continue;
+        }
         if (node->type == C_TYP_CC_MAC) {
             break;
         }
         buffer_t *buf = node->n_data;
 
-        cat_to_buffer(sdus->blks[0], buf->ptr, buf->len);
+        cat_to_buffer(cc_buf, buf->ptr, buf->len);
         free_queue_node(node);
     }
 
@@ -741,18 +749,18 @@ CC_Cal_Mac: {
             if (stop_flag == FALSE) {
                 log_warn("CC MAC NODE IS NULL");
             }
-            free_sdu_s(sdus);
+            free_sdu_s(cc_buf);
             return LD_ERR_NULL;
         }
         bc_mac_bd_t *mac_n = node->n_data;
 
-        calc_hmac_buffer(sdus->blks[0], mac_layer_objs.sm3_key, mac_n->mac, get_sec_maclen(mac_n->mac_len));
+        calc_hmac_buffer(cc_buf, mac_layer_objs.sm3_key, mac_n->mac, get_sec_maclen(mac_n->mac_len));
 
 
         init_pbs(&pbs, out_stream, sizeof(out_stream), "M_SAPC out");
         out_struct(mac_n, &cc_hmac_desc, &pbs, NULL);
         close_output_pbs(&pbs);
-        cat_to_buffer(sdus->blks[0], pbs.start, pbs_offset(&pbs));
+        cat_to_buffer(cc_buf, pbs.start, pbs_offset(&pbs));
 
         //        log_debug("GEN CC: CCL : %d", (*sdus->blks[0]->ptr) >> 5);
 
@@ -760,8 +768,33 @@ CC_Cal_Mac: {
     }
 CC_END:
 
+    if (slot_desc == NULL) {
+        free_buffer(cc_buf);
+        return LD_ERR_NULL;
+    }
+
+    sdu_s_t *sdus = create_sdu_s(CC_BLK_N);
+    sdus->blks[0] = init_buffer_ptr(CC_BLK_LEN_MAX);
+    size_t ccl_buf_len = cc_buf->len + cc_format_descs[C_TYP_SLOT_DESC].desc_size;
+
+    ld_lock(&mac_layer_objs.CCL.mutex);
+    mac_layer_objs.CCL.value = (ccl_buf_len / CC_BLK_LEN_MIN) + 1;
+    ld_unlock(&mac_layer_objs.CCL.mutex);
+    slot_desc->CCL = mac_layer_objs.CCL.value;
+
+    pb_stream slot_desc_pbs;
+    uint8_t sd_stream[512] = {0};
+    init_pbs(&slot_desc_pbs, sd_stream, sizeof(sd_stream), "SLOT DESC out");
+    out_struct(slot_desc, &cc_slot_desc, &slot_desc_pbs, NULL);
+    close_output_pbs(&slot_desc_pbs);
+
+    /* 先插入SLOT_DESC，再插入后续的内容 */
+    cat_to_buffer(sdus->blks[0], slot_desc_pbs.start, pbs_offset(&slot_desc_pbs));
+    cat_to_buffer(sdus->blks[0], cc_buf->ptr, cc_buf->len);
+
     /* 9.3.1.2  "The MAC time framing function shall adjust the size of the CC slot in each MF to the necessary minimum." */
-    change_buffer_len(sdus->blks[0], ((sdus->blks[0]->len / CC_BLK_LEN_MIN) + 1) * CC_BLK_LEN_MIN);
+    change_buffer_len(sdus->blks[0], slot_desc->CCL * CC_BLK_LEN_MIN);
+    free_buffer(cc_buf);
 
     preempt_prim(&PHY_CC_REQ_PRIM, E_TYP_ANY, sdus, free_sdu_s, 0, 0);
     return LD_OK;
