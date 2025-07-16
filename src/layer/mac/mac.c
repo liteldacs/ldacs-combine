@@ -727,9 +727,6 @@ l_err generate_cc_pkt() {
         if (node->type == C_TYP_CC_MAC) {
             break;
         }
-        // if (node->type == C_TYP_RL_ALLOC) {
-        //     log_info("RL ALLOC CC SEND");
-        // }
         buffer_t *buf = node->n_data;
 
         cat_to_buffer(sdus->blks[0], buf->ptr, buf->len);
@@ -944,12 +941,12 @@ l_err generate_data_pkt() {
         free_dls_data_req(dls_data_req);
 
 
+        log_info("===========RL DATA OUT=========== %d", mac_layer_objs.RPSO.value);
         ld_unlock(&mac_layer_objs.NRPS.mutex);
         ld_unlock(&mac_layer_objs.RPSO.mutex);
         ld_unlock(&mac_layer_objs.COL.mutex);
 
         set_rl_param(0, 0);
-        // log_info("===========RL DATA OUT===========");
         preempt_prim(&PHY_DATA_REQ_PRIM, E_TYP_RL, sdus, free_sdu_s, 0, 0);
     }
     return LD_OK;
@@ -1051,6 +1048,7 @@ void P_SAPD_cb(ld_prim_t *prim) {
             uint8_t C_TYP;
             lfqueue_t *queue = lfqueue_init();
 
+            // log_buf(LOG_ERROR, "TTTT", sdus->blks[0]->ptr, sdus->blks[0]->len);
 
             //读取SLOT_DESC
             {
@@ -1218,19 +1216,21 @@ void P_SAPD_cb(ld_prim_t *prim) {
         }
         case PHY_DATA_IND:
             if (prim->prim_obj_typ == E_TYP_RL) {
+                // log_warn("======================= %d", lfqueue_size( mac_layer_objs.rpso_queue));
                 if (lfqueue_size(mac_layer_objs.rpso_queue) == 0) {
                     break;
                 }
                 ld_rpso_t *rpso_sac = NULL;
                 lfqueue_get(mac_layer_objs.rpso_queue, (void **) &rpso_sac);
 
-                for (int i = 0, n = 1; i < rpso_sac->avail_start; i += n) {
+                for (int i = 0; i < rpso_sac->avail_start;) {
                     //TODO: avail_start长度对不上
                     if (sdus->blks[i] != NULL) {
                         channel_data_t *rl_data = init_channel_data(RL_CHANNEL, D_TYP_RL,
                                                                     rpso_sac->rpsos[i].SAC);
+                        int n = i;
 
-                        for (n = i; n < i + rpso_sac->rpsos[i].NRPS; n++) {
+                        for (; n < i + rpso_sac->rpsos[i].NRPS; n++) {
                             if (sdus->blks[n] != NULL) {
                                 cat_to_buffer(rl_data->buf, sdus->blks[n]->ptr, sdus->blks[n]->len);
                             }
@@ -1238,8 +1238,9 @@ void P_SAPD_cb(ld_prim_t *prim) {
 
                         ld_queue_node_t *q_node = init_queue_node(D_TYP_RL, rl_data, free_channel_data);
                         lfqueue_put(mac_layer_objs.rl_data_q, q_node);
+                        i = n;
                     } else {
-                        n = 1; /* step is 1 */
+                        i++;
                     }
                 }
                 free(rpso_sac);

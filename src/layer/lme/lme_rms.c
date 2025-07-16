@@ -245,13 +245,18 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
             void *data_struct = NULL;
             if ((data_struct = parse_sdu(channel_data->buf, desc->f_desc, desc->struct_size)) == NULL) {
                 log_warn("Parse SDU failed!");
-                desc->free_func(data_struct);
+                // desc->free_func(data_struct);
+                prim->prim_err = LD_ERR_NULL;
                 return;
             }
 
             switch (prim->prim_obj_typ) {
                 case C_TYP_CELL_RESP: {
                     cc_cell_resp_t *resp = data_struct;
+
+                    if (resp->UA != config.UA) {
+                        break;
+                    }
 
                     lme_as_man_t *as_man = lme_rms_obj.lme_obj->lme_as_man;
                     if (resp->UA != as_man->AS_UA) break;
@@ -326,6 +331,7 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                 }
                 case DC_TYP_RSC_RQST: {
                     dc_rsc_rqst_t *rsc_rqst = data_struct;
+                    log_warn("!!!!??????????? RSC RQST RECV %d %d", channel_data->SAC, rsc_rqst->REQ);
                     ld_req_update(lme_rms_obj.rl_drr, channel_data->SAC, rsc_rqst->REQ);
                     break;
                 }
@@ -393,6 +399,8 @@ static void resource_rl_alloc_cb(ld_drr_t *drr, size_t *map, void *args) {
             .CMS = CMS_TYP_1,
         };
 
+        log_warn("!!!!!!!!!=================== %d %d %d", rl_alloc.SAC, rl_alloc.RPSO, rl_alloc.NRPS);
+
         preempt_prim(&MAC_CCCH_REQ_PRIM, C_TYP_RL_ALLOC,
                      gen_pdu(&rl_alloc, cc_format_descs[C_TYP_RL_ALLOC].f_desc, "CC RL ALLOC OUT"), NULL, 0, 0);
 
@@ -412,6 +420,7 @@ static void resource_fl_alloc_cb(ld_drr_t *drr, size_t *map, void *args) {
         //          map[i],
         //          drr->req_entitys[i].DC,
         //          drr->req_entitys[i].req_sz);
+        log_warn("!!!!!!MAP!!! %d %d", i, map[i]);
 
         cc_fl_alloc_t rl_alloc = {
             .c_type = C_TYP_FL_ALLOC,

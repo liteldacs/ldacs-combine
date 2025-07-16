@@ -39,6 +39,8 @@ static void *acquire_cyc_func(void *args) {
                                          },
                                          dc_format_descs[DC_TYP_RSC_RQST].f_desc, "DC RSC RQST"), NULL, 0,
                                  1);
+
+                    log_warn("!!!!??????????? RSC RQST SEND %d", d_en->cos_req_res[i]);
                     break;
                 }
                 case LD_GS: {
