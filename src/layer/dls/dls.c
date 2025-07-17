@@ -210,7 +210,7 @@ void M_SAPC_D_cb(ld_prim_t *prim) {
 
                     if (rl_alloc->SAC != dls_layer_objs.AS_DLS->AS_SAC) break;
 
-                    log_warn("!!!!!!!!!=================== %d %d %d", rl_alloc->SAC, rl_alloc->RPSO, rl_alloc->NRPS);
+                    // log_warn("!!!!!!!!!=================== %d %d %d", rl_alloc->SAC, rl_alloc->RPSO, rl_alloc->NRPS);
 
                     set_rl_param(rl_alloc->RPSO, rl_alloc->NRPS);
                     if (dls_frag_func(dls_layer_objs.AS_DLS, rl_alloc->NRPS * RL_DATA_BLK_LEN_MAX) != LD_OK) {

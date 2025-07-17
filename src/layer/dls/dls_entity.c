@@ -40,7 +40,7 @@ static void *acquire_cyc_func(void *args) {
                                          dc_format_descs[DC_TYP_RSC_RQST].f_desc, "DC RSC RQST"), NULL, 0,
                                  1);
 
-                    log_warn("!!!!??????????? RSC RQST SEND %d", d_en->cos_req_res[i]);
+                    // log_warn("!!!!??????????? RSC RQST SEND %d", d_en->cos_req_res[i]);
                     break;
                 }
                 case LD_GS: {
@@ -86,11 +86,15 @@ static void *ack_cyc_func(void *args) {
             break;
         }
 
+
         // int highest_pos = bs_get_highest(d_en->ack_bitset);
         int lowest_pos = bs_get_lowest(d_en->ack_bitset);
         int alloced_map = bs_get_alloced(d_en->ack_bitset);
+
+        // log_warn("}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}} %d", bs_get_lowest(d_en->ack_bitset));
         if (lowest_pos >= 0 && alloced_map != 0) {
             uint16_t bitmap = get_bitmap(d_en->ack_bitset, lowest_pos);
+
 
             // log_fatal("LOWEST:  %d,  ALLOCED_MAP:  %d,  BITMAP:  %d", lowest_pos, alloced_map, bitmap);
             // log_buf(LOG_FATAL, "BITSET", d_en->ack_bitset->bitset, BITSET_SIZE(DLS_WINDOW_SIZE));
@@ -225,11 +229,24 @@ static void *lineup_func(void *args) {
 
         /* TODO： 重传记录obuf，重传资源申请也是obuf长度+DLS_HEAD_LEN,ld_window只需要保证是否被ACK，不关心重传 */
         uint8_t win_end = window_end(w);
-        if ((win_end < w->to_send_start && pos < win_end) || (pos >= w->to_send_start && pos < win_end) || (
-                win_end < w->to_send_start && pos >= w->to_send_start)) {
-            // res_req_t *res_req = create_res_req();
+        // if ((win_end < w->to_send_start && pos < win_end) || (pos >= w->to_send_start && pos < win_end) || (
+        //         win_end < w->to_send_start && pos >= w->to_send_start)) {
+        //     log_fatal("============ !???");
+        //     dls_resource_request(obuf->len + DATA_HEAD_LEN, cos, d_entity);
+        // }
+
+        // 更清晰的无效区域检测
+        int is_valid = (win_end >= w->to_send_start)
+                           ? (pos >= w->to_send_start && pos < win_end)
+                           : (pos < win_end || pos >= w->to_send_start);
+
+        // log_fatal("position: toack=%u, winsz=%u, seqsz=%u, pos=%u, win_end=%u, to_send_start=%u",
+        //           w->to_ack_start, w->win_size, w->seq_sz, pos, win_end, w->to_send_start);
+        if (is_valid) {
             dls_resource_request(obuf->len + DATA_HEAD_LEN, cos, d_entity);
-            // free(res_req);
+        } else {
+            log_fatal("position: pos=%u, win_end=%u, to_send_start=%u",
+                      pos, win_end, w->to_send_start);
         }
 
         free_buffer(obuf);
@@ -247,15 +264,14 @@ static l_err dls_resource_request(size_t req_size, DLS_COS cos, void *d_entity) 
 }
 
 l_err recv_ack(dls_entity_t *en, uint8_t PID, uint16_t bitmap) {
-    // uint8_t map[2] = {0};
-    // map[0] = ;
-    // map[1] = ;
-    // log_buf(LOG_INFO, "ACK!!", map, 2);
     uint8_t normal_endian = ((bitmap >> BITS_PER_BYTE) & 0xFF) << BITS_PER_BYTE | (bitmap & 0xFF);
-    int offset = 1;
+    // int offset = 1;
+    int offset = 0;
     while (TRUE) {
         if ((normal_endian >> offset) & 0x01) {
-            window_ack_item(en->owindow, PID + offset - 1);
+            // log_error("!!!!!!!!!!!!!!!!!!!!!!!!!");
+            // window_ack_item(en->owindow, PID + offset - 1);
+            window_ack_item(en->owindow, PID + offset);
         }
         if (normal_endian >> offset == 0) break;
         offset++;
@@ -360,6 +376,7 @@ static void *dls_reassy_func(void *args) {
                 if (ctx.is_lfr) {
                     /* send ACK by CCCH channel */
                     bs_record_by_index(d_entity->ack_bitset, ctx.pid);
+                    // log_warn("========= %d", bs_get_lowest(d_entity->ack_bitset));
                 } else {
                     preempt_prim(&MAC_CCCH_REQ_PRIM, C_TYP_ACK_FRAG,
                                  gen_pdu(&(cc_frag_ack_t){

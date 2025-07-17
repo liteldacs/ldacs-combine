@@ -23,10 +23,13 @@ static void send_user_data_terminal(int argc, char **argv);
 
 static void trigger_handover(int argc, char **argv);
 
-static const size_t funcs_sz = 2;
+static void send_multi_data_terminal(int argc, char **argv);
+
+static const size_t funcs_sz = 3;
 static terminal_func terminal_funcs[] = {
     send_user_data_terminal,
     trigger_handover,
+    send_multi_data_terminal,
 };
 
 ld_service_t terminal_service = {
@@ -125,4 +128,20 @@ static void trigger_handover(int argc, char **argv) {
     uint32_t UA = strtol(argv[1], NULL, 10);
     uint32_t GST_SAC = strtol(argv[2], NULL, 10);
     rcu_handover(UA, GST_SAC);
+}
+
+static void send_multi_data_terminal(int argc, char **argv) {
+    const char *test_msg = "Testing User Message for LDACS\0";
+    for (int i = 0; i < 50; i++) {
+        log_warn("Sending %d Packet===============", i);
+        send_user_data((uint8_t *) test_msg, strlen(test_msg), terminal_obj.AS_SAC);
+        usleep(250000);
+    }
+    // char *data = "ABBA";
+    // char pkt[2048] = {0};
+    // int pkt_len = construct_ipv6_udp_packet_to_char("2001:0:0:e304::141", config.addr,
+    //                                                 "5911", "5911", data, 4,
+    //                                                 pkt);
+    //
+    // send_user_data((uint8_t *) pkt, pkt_len, terminal_obj.AS_SAC);
 }

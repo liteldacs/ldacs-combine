@@ -974,7 +974,7 @@ l_err generate_data_pkt() {
         free_dls_data_req(dls_data_req);
 
 
-        log_info("===========RL DATA OUT=========== %d", mac_layer_objs.RPSO.value);
+        // log_info("===========RL DATA OUT=========== %d", mac_layer_objs.RPSO.value);
         ld_unlock(&mac_layer_objs.NRPS.mutex);
         ld_unlock(&mac_layer_objs.RPSO.mutex);
         ld_unlock(&mac_layer_objs.COL.mutex);

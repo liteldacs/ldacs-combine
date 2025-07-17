@@ -258,7 +258,7 @@ static void upward_RL_DCH_j(cJSON *j_node) {
         unmarshel_json(array_node, (void **) &rl_dch_pdu, &rl_dch_j_tmpl_desc);
         // log_error("%s", cJSON_Print(array_node));
 
-        log_warn("++++++++++++++++++++++++ %d %d", rl_dch_pdu.start, rl_dch_pdu.end);
+        // log_warn("++++++++++++++++++++++++ %d %d", rl_dch_pdu.start, rl_dch_pdu.end);
         buffer_t *bufs;
         if ((bufs = decode_b64_buffer(0, rl_dch_pdu.rl_dch->ptr, rl_dch_pdu.rl_dch->total)) == NULL) {
             log_warn("RL base64 decode failed");

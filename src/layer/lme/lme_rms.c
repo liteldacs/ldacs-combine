@@ -113,6 +113,7 @@ static void trans_cc_func(void *args) {
         zero(&cc_dd);
         trans_cc_dd_func(&cc_dd);
 
+
         /* 首先分配非混合的18个dc slot，剩下的混合槽考虑在cc_must_timer_func里最后分配 */
         drr_resource_alloc(lme_rms_obj.fl_drr, 200, FL_DATA_BLK_2_F_LEN_MAX * 3, 0, resource_fl_alloc_cb,
                            &lme_rms_obj.BO);
@@ -336,7 +337,7 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                 }
                 case DC_TYP_RSC_RQST: {
                     dc_rsc_rqst_t *rsc_rqst = data_struct;
-                    log_warn("!!!!??????????? RSC RQST RECV %d %d", channel_data->SAC, rsc_rqst->REQ);
+                    // log_warn("!!!!??????????? RSC RQST RECV %d %d", channel_data->SAC, rsc_rqst->REQ);
                     ld_req_update(lme_rms_obj.rl_drr, channel_data->SAC, rsc_rqst->REQ);
                     break;
                 }
@@ -389,6 +390,8 @@ static void resource_rl_alloc_cb(ld_drr_t *drr, size_t *map, void *args) {
         //          drr->req_entitys[i].DC,
         //          drr->req_entitys[i].req_sz);
 
+        // log_warn("!!!!!!MAP!!! %d %d", i, map[i]);
+
         /* while map[i] != 0 */
         size_t alloc_blks = ((map[i] - 1) / RL_DATA_BLK_LEN_MAX) + 1;
         if (alloc_blks > mac_rpso_sac->avail_sz) {
@@ -404,7 +407,7 @@ static void resource_rl_alloc_cb(ld_drr_t *drr, size_t *map, void *args) {
             .CMS = CMS_TYP_1,
         };
 
-        log_warn("!!!!!!!!!=================== %d %d %d", rl_alloc.SAC, rl_alloc.RPSO, rl_alloc.NRPS);
+        // log_warn("!!!!!!!!!=================== %d %d %d", rl_alloc.SAC, rl_alloc.RPSO, rl_alloc.NRPS);
 
         preempt_prim(&MAC_CCCH_REQ_PRIM, C_TYP_RL_ALLOC,
                      gen_pdu(&rl_alloc, cc_format_descs[C_TYP_RL_ALLOC].f_desc, "CC RL ALLOC OUT"), NULL, 0, 0);
@@ -425,7 +428,7 @@ static void resource_fl_alloc_cb(ld_drr_t *drr, size_t *map, void *args) {
         //          map[i],
         //          drr->req_entitys[i].DC,
         //          drr->req_entitys[i].req_sz);
-        log_warn("!!!!!!MAP!!! %d %d", i, map[i]);
+        // log_warn("!!!!!!MAP!!! %d %d", i, map[i]);
 
         cc_fl_alloc_t rl_alloc = {
             .c_type = C_TYP_FL_ALLOC,
