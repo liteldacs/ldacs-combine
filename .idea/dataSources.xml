@@ -4,22 +4,19 @@
     <data-source source="LOCAL" name="gs_sql.db" uuid="ed924fab-8251-45f5-be53-d8c33323e1ed">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
-      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/resources/gs_sql.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
     <data-source source="LOCAL" name="as_sql.db" uuid="a76d77e2-ba04-42c3-8c51-9d3676a6c601">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
-      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/resources/as_sql.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="sgw_sql" uuid="5bdd0f19-6395-493b-adef-695ae9069dfe">
+    <data-source source="LOCAL" name="sgw_keys_000010000.db" uuid="5bdd0f19-6395-493b-adef-695ae9069dfe">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
-      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/resources/sgw_sql.db</jdbc-url>
+      <jdbc-url>jdbc:sqlite:$USER_HOME$/.ldcauc/sgw_keys_000010000.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
       <libraries>
         <library>
