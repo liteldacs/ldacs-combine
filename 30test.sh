@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ldb_path="/home/jiaxv/C/test/combine/ldacs_combine/cmake-build-debug/bin"
+ldb_path="/home/jiaxv/ldacs/ldacs-combine/cmake-build-debug/bin"
 
 cb-as() {
   if [[ ! "$1" =~ ^[0-9]+$ ]]; then
@@ -10,14 +10,20 @@ cb-as() {
   echo "clear && ./ldacs-combine -c \"../../config/ldacs_config_as_$1.yaml\""
 }
 
-for i in {1..10}; do
+for i in {1..30}; do
 
   cmd=$(cb-as $i)
   echo $cmd
 
-  gnome-terminal -- bash -l -c \
-    "cd '$ldb_path' && \
-     $cmd && \
-     exec bash" &
+#  gnome-terminal -- bash -l -c \
+#    "cd '$ldb_path' && \
+#     $cmd && \
+#     exec bash" &
+#
+#
+  konsole  --geometry 1000x500--hold -e bash -l -c \
+         "cd '$ldb_path' && \
+          $cmd && \
+          exec bash" &
   sleep 2
 done
