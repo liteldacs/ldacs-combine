@@ -133,7 +133,7 @@ static void trigger_handover(int argc, char **argv) {
 static void send_multi_data_terminal(int argc, char **argv) {
     const char *test_msg = "Testing User Message for LDACS\0";
     for (int i = 0; i < 50; i++) {
-        log_warn("Sending %d Packet===============", i);
+        log_warn("Sending %d Packet===============", i+1);
         send_user_data((uint8_t *) test_msg, strlen(test_msg), terminal_obj.AS_SAC);
         usleep(250000);
     }
