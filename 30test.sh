@@ -13,17 +13,17 @@ cb-as() {
 for i in {1..30}; do
 
   cmd=$(cb-as $i)
-  echo $cmd
+  echo $i $cmd
 
 #  gnome-terminal -- bash -l -c \
 #    "cd '$ldb_path' && \
 #     $cmd && \
 #     exec bash" &
 #
-#
-  konsole  --geometry 1000x500--hold -e bash -l -c \
+
+  konsole  --geometry 1000x500 --hold -e bash -l -c \
          "cd '$ldb_path' && \
           $cmd && \
           exec bash" &
-  sleep 2
+  sleep 0.5
 done

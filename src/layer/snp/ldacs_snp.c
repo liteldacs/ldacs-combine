@@ -234,7 +234,6 @@ void D_SAPD_cb(ld_prim_t *prim) {
             zero(&pbs);
             snp_pdu_t pdu;
 
-            log_buf(LOG_INFO, "SNP IN", snp_in->ptr, snp_in->len);
 
             /* TODO: 搞出更多的错误代码，然后再网关显示 */
             if (snpsub_vfy_hmac(o_sdu->AS_SAC, snp_layer_objs.SEC, snp_in->ptr, snp_in->len) != LDCAUC_OK) {

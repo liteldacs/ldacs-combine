@@ -160,6 +160,8 @@ void M_SAPD_cb(ld_prim_t *prim) {
                 return;
             }
 
+            log_warn("=========== %d", rl_data->SAC);
+
             // log_buf(LOG_INFO, "buf", rl_data->buf->ptr, rl_data->buf->len);
             buffer_t *rbuffer = init_buffer_unptr();
             CLONE_BY_BUFFER_UNFREE(*rbuffer, *rl_data->buf);
@@ -208,6 +210,10 @@ void M_SAPC_D_cb(ld_prim_t *prim) {
                 case C_TYP_RL_ALLOC: {
                     cc_rl_alloc_t *rl_alloc = data_struct;
 
+                    if (dls_layer_objs.AS_DLS == NULL) {
+                        log_warn("AS has not DLS currently");
+                        break;
+                    }
                     if (rl_alloc->SAC != dls_layer_objs.AS_DLS->AS_SAC) break;
 
                     // log_warn("!!!!!!!!!=================== %d %d %d", rl_alloc->SAC, rl_alloc->RPSO, rl_alloc->NRPS);
@@ -221,6 +227,10 @@ void M_SAPC_D_cb(ld_prim_t *prim) {
                 case C_TYP_FL_ALLOC: {
                     cc_fl_alloc_t *fl_alloc = data_struct;
                     // log_warn("========== %d %d", fl_alloc->SAC, lme_layer_objs.lme_as_man->AS_SAC);
+                    if (dls_layer_objs.AS_DLS == NULL) {
+                        log_warn("AS has not DLS currently");
+                        break;
+                    }
                     if (fl_alloc->SAC == dls_layer_objs.AS_DLS->AS_SAC) {
                         fl_alloc_record_t *record = malloc(sizeof(fl_alloc_record_t));
                         record->BO = fl_alloc->BO;
