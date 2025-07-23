@@ -9,7 +9,7 @@ SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 cmake_host_system_information(RESULT PRETTY_NAME QUERY DISTRIB_PRETTY_NAME)
 #        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -L/opt/rh/devtoolset-8/root/lib/gcc/x86_64-redhat-linux/8/ -g")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=leak -g")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=leak -g")
 #message(${CMAKE_C_COMPILER})
 
 
