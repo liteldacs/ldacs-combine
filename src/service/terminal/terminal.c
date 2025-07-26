@@ -3,6 +3,9 @@
 //
 
 #include "service/terminal.h"
+
+#include <crypto/secure_core.h>
+
 #include "ipv6_parse.h"
 
 terminal_obj_t terminal_obj = {
@@ -19,17 +22,20 @@ static void handle_as_info_upd_terminal(as_info_upd_t *as_info);
 
 static void handle_user_msg_terminal(user_msg_t *umsg);
 
-static void send_user_data_terminal(int argc, char **argv);
+static void send_singal_data_terminal(int argc, char **argv);
 
 static void trigger_handover(int argc, char **argv);
 
 static void send_multi_data_terminal(int argc, char **argv);
 
-static const size_t funcs_sz = 3;
+static void send_specific_data_terminal(int argc, char **argv);
+
+static const size_t funcs_sz = 4;
 static terminal_func terminal_funcs[] = {
-    send_user_data_terminal,
+    send_singal_data_terminal,
     trigger_handover,
     send_multi_data_terminal,
+    send_specific_data_terminal,
 };
 
 ld_service_t terminal_service = {
@@ -104,7 +110,7 @@ static void handle_user_msg_terminal(user_msg_t *umsg) {
     log_fatal("USER MESSAGE %s", umsg->msg->ptr);
 }
 
-static void send_user_data_terminal(int argc, char **argv) {
+static void send_singal_data_terminal(int argc, char **argv) {
     // char *test_msg = "Testing User Message for LDACS";
     // send_user_data((uint8_t *) test_msg, strlen(test_msg), terminal_obj.AS_SAC);
     char *data = "ABBA";
@@ -144,4 +150,20 @@ static void send_multi_data_terminal(int argc, char **argv) {
     //                                                 pkt);
     //
     // send_user_data((uint8_t *) pkt, pkt_len, terminal_obj.AS_SAC);
+}
+
+static void send_specific_data_terminal(int argc, char **argv) {
+    if (argc != 2) {
+        log_warn("Wrong paras");
+        return;
+    }
+    uint32_t size = strtol(argv[1], NULL, 10);
+    if (size > 2000) {
+        log_warn("Too long");
+        return;
+    }
+    uint8_t rand[2000] = {0};
+    generate_nrand(rand, size);
+
+    send_user_data(rand, size, terminal_obj.AS_SAC);
 }
