@@ -10,7 +10,7 @@ cb-as() {
   echo "clear && ./ldacs-combine -c \"../../config/ldacs_config_as_$1.yaml\""
 }
 
-for i in {1..30}; do
+for i in {1..10}; do
 
   cmd=$(cb-as $i)
   echo $i $cmd
