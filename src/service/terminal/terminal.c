@@ -30,12 +30,15 @@ static void send_multi_data_terminal(int argc, char **argv);
 
 static void send_specific_data_terminal(int argc, char **argv);
 
-static const size_t funcs_sz = 4;
+static void send_bdsbas_data_terminal(int argc, char **argv);
+
+static const size_t funcs_sz = 5;
 static terminal_func terminal_funcs[] = {
     send_singal_data_terminal,
     trigger_handover,
     send_multi_data_terminal,
     send_specific_data_terminal,
+    send_bdsbas_data_terminal,
 };
 
 ld_service_t terminal_service = {
@@ -166,4 +169,12 @@ static void send_specific_data_terminal(int argc, char **argv) {
     generate_nrand(rand, size);
 
     send_user_data(rand, size, terminal_obj.AS_SAC);
+}
+
+static void send_bdsbas_data_terminal(int argc, char **argv) {
+    uint8_t bdsbas_data[32] = {
+        0x53, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x34, 0x74, 0x3E, 0x00
+    };
+    send_user_data(bdsbas_data, sizeof(bdsbas_data), terminal_obj.AS_SAC);
 }
