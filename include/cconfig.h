@@ -2,7 +2,7 @@
 #define CCONFIG_H
 
 // 定义安装路径宏
-#define INSTALL_PREFIX "/usr/local/ldacs-cauc"
+#define INSTALL_PREFIX "/usr/local"
 #define DEFAULT_CONFIG_PATH "config"
 #define DEFAULT_LOG_PATH "log"
 
