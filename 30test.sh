@@ -10,20 +10,37 @@ cb-as() {
   echo "clear && ./ldacs-combine -c \"../../config/ldacs_config_as_$1.yaml\""
 }
 
-for i in {1..10}; do
-
-  cmd=$(cb-as $i)
-  echo $i $cmd
-
-#  gnome-terminal -- bash -l -c \
-#    "cd '$ldb_path' && \
-#     $cmd && \
-#     exec bash" &
+#for i in {1..30}; do
 #
+#  cmd=$(cb-as $i)
+#  echo $i $cmd
+#
+#  konsole  --geometry 1000x500 --hold -e bash -l -c \
+#         "cd '$ldb_path' && \
+#          $cmd && \
+#          exec bash" &
+#  sleep 0.2
+#done
+for i in {1..20}; do
 
+  new_i1=$((i * 2 - 1))
+  new_i2=$((i * 2 ))
+  cmd1=$(cb-as $new_i1)
+  cmd2=$(cb-as $new_i2)
+
+  echo $new_i1 $cmd1
   konsole  --geometry 1000x500 --hold -e bash -l -c \
          "cd '$ldb_path' && \
-          $cmd && \
+          $cmd1 && \
           exec bash" &
-  sleep 0.5
+
+  sleep 0.2
+
+  echo $new_i2 $cmd2
+  konsole  --geometry 1000x500 --hold -e bash -l -c \
+         "cd '$ldb_path' && \
+          $cmd2 && \
+          exec bash" &
+
+  sleep 0.2
 done
