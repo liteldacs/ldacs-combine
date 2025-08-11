@@ -21,7 +21,7 @@ cb-as() {
 #          exec bash" &
 #  sleep 0.2
 #done
-for i in {1..20}; do
+for i in {1..12}; do
 
   new_i1=$((i * 2 - 1))
   new_i2=$((i * 2 ))
@@ -34,13 +34,11 @@ for i in {1..20}; do
           $cmd1 && \
           exec bash" &
 
-  sleep 0.2
-
   echo $new_i2 $cmd2
   konsole  --geometry 1000x500 --hold -e bash -l -c \
          "cd '$ldb_path' && \
           $cmd2 && \
           exec bash" &
 
-  sleep 0.2
+  sleep 0.24
 done
