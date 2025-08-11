@@ -25,5 +25,5 @@ for i in {1..30}; do
          "cd '$ldb_path' && \
           $cmd && \
           exec bash" &
-  sleep 0.5
+  sleep 0.2
 done
