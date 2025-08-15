@@ -14,19 +14,12 @@ l_err set_device(const char *dev_name, ld_dev_entity_t *dev_en) {
     memset(dev_en->freq_table, 0, CHANNEL_MAX);
 
     if (!strncmp(dev_name, "UDP", name_len)) {
-        set_udp_device(dev_en);
+        dev_en->dev_para = set_udp_device(dev_en);
     } else if (!strncmp(dev_name, "USRP", name_len)) {
         log_warn("USRP has not been implied");
         return LD_ERR_WRONG_PARA;
     } else {
         return LD_ERR_WRONG_PARA;
-    }
-
-    if (!set_new_freq(dev_en, config.init_fl_freq, FL)) {
-        return LD_ERR_INTERNAL;
-    }
-    if (!set_new_freq(dev_en, config.init_rl_freq, RL)) {
-        return LD_ERR_INTERNAL;
     }
 
     return LD_OK;
@@ -36,7 +29,7 @@ void *start_recv(void *args) {
     ld_recv_args_t *recv_args = args;
     ld_dev_entity_t *dev_en = recv_args->dev_en;
 
-    if (pthread_create(&dev_en->recv_th, NULL, dev_en->recv_pkt, NULL) != 0) {
+    if (pthread_create(&dev_en->recv_th, NULL, dev_en->recv_pkt, dev_en->dev_para) != 0) {
         pthread_exit(NULL);
     }
     pthread_detach(dev_en->recv_th);
@@ -85,7 +78,7 @@ double set_new_freq(ld_dev_entity_t *dev_en, double new_f, ld_orient ori) {
     dev_en->freq_table[new_channel] = 1;
 
     // Set the frequency
-    if (dev_en->set_freq(new_channel, ori) != LD_OK) {
+    if (dev_en->set_freq(dev_en->dev_para, new_channel, ori) != LD_OK) {
         return INVALID_FREQ; // Failed to set frequency
     }
 

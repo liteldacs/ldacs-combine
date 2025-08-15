@@ -4,8 +4,6 @@
 
 #include "device/device_udp.h"
 
-static ld_dev_udp_para_t udp_para;
-
 static int init_udp_bd_send(struct sockaddr_in *addr_p, int send_port) {
     int on = 1;
     int bd_fd;
@@ -57,12 +55,13 @@ static int init_udp_bd_recv(int recv_port) {
     return bd_fd;
 }
 
-static l_err udp_send_msg(buffer_t *buf, ld_orient ori) {
+static l_err udp_send_msg(void *arg, buffer_t *buf, ld_orient ori) {
+    ld_dev_udp_para_t *udp_para = arg;
     if (buf->len == 0) {
         return LD_ERR_NULL;
     }
-    if (sendto(ori == FL ? udp_para.fl_send_fd : udp_para.rl_send_fd, buf->ptr, buf->len, 0,
-               (struct sockaddr *) (ori == FL ? &udp_para.fl_send_addr : &udp_para.rl_send_addr),
+    if (sendto(ori == FL ? udp_para->fl_send_fd : udp_para->rl_send_fd, buf->ptr, buf->len, 0,
+               (struct sockaddr *) (ori == FL ? &udp_para->fl_send_addr : &udp_para->rl_send_addr),
                sizeof(struct sockaddr)) == ERROR) {
         return LD_ERR_INTERNAL;
     }
@@ -71,8 +70,16 @@ static l_err udp_send_msg(buffer_t *buf, ld_orient ori) {
 
 
 static void *udp_recving_msgs(void *arg) {
-    lfqueue_t *queue = udp_para.dev->msg_queue;
-    int recv_fd = *(int *) arg;
+    ld_dev_udp_para_t *udp_para = arg;
+    lfqueue_t *queue = udp_para->dev->msg_queue;
+    int recv_fd;
+
+    if (config.role != LD_GS) {
+        recv_fd = udp_para->fl_recv_fd;
+    } else {
+        recv_fd = udp_para->rl_recv_fd;
+    }
+
     while (stop_flag == FALSE) {
         uint8_t str[MAX_INPUT_BUFFER_SIZE] = {0};
         size_t len = recvfrom(recv_fd, str, MAX_INPUT_BUFFER_SIZE, 0, NULL, NULL);
@@ -87,15 +94,16 @@ static void *udp_recving_msgs(void *arg) {
 }
 
 static void *udp_recv_msg(void *arg) {
+    ld_dev_udp_para_t *udp_para = arg;
     pthread_t fl_th, rl_th;
     // int *recv_fd = (config.role == LD_AS) ? &udp_para.fl_fd : &udp_para.rl_fd;
     if (config.role != LD_GS) {
-        if (pthread_create(&fl_th, NULL, udp_recving_msgs, &udp_para.fl_recv_fd) != 0) {
+        if (pthread_create(&fl_th, NULL, udp_recving_msgs, udp_para) != 0) {
             log_error("Attacker FL Receiving thread create failed");
         }
         pthread_join(fl_th, NULL);
     } else if (config.role != LD_AS) {
-        if (pthread_create(&rl_th, NULL, udp_recving_msgs, &udp_para.rl_recv_fd) != 0) {
+        if (pthread_create(&rl_th, NULL, udp_recving_msgs, udp_para) != 0) {
             log_error("Attacker RL Receiving thread create failed");
         }
         pthread_join(rl_th, NULL);
@@ -107,42 +115,44 @@ static void *udp_recv_msg(void *arg) {
 
 /**
  * set new port by frequency
+ * @param arg
  * @param channel_num
  * @param ori
  * @return
  */
-static l_err set_freq_port(int channel_num, ld_orient ori) {
+static l_err set_freq_port(void *arg, int channel_num, ld_orient ori) {
+    ld_dev_udp_para_t *udp_para = arg;
     int port = REF_PORT + channel_num;
     switch (config.role) {
         case LD_AS: {
             if (ori == FL) {
-                if (udp_para.fl_recv_fd != -1) {
-                    close(udp_para.fl_recv_fd);
+                if (udp_para->fl_recv_fd != -1) {
+                    close(udp_para->fl_recv_fd);
                 }
-                udp_para.fl_recv_fd = init_udp_bd_recv(port);
-                log_error("FL recv port %d, fd: %d", port, udp_para.fl_recv_fd);
+                udp_para->fl_recv_fd = init_udp_bd_recv(port);
+                log_error("FL recv port %d, fd: %d", port, udp_para->fl_recv_fd);
             } else {
-                if (udp_para.rl_send_fd != -1) {
-                    close(udp_para.rl_send_fd);
+                if (udp_para->rl_send_fd != -1) {
+                    close(udp_para->rl_send_fd);
                 }
-                udp_para.rl_send_fd = init_udp_bd_send(&udp_para.rl_send_addr, port);
-                log_error("RL send port %d, fd: %d", port, udp_para.rl_send_fd);
+                udp_para->rl_send_fd = init_udp_bd_send(&udp_para->rl_send_addr, port);
+                log_error("RL send port %d, fd: %d", port, udp_para->rl_send_fd);
             }
             break;
         }
         case LD_GS: {
             if (ori == FL) {
-                if (udp_para.fl_send_fd != -1) {
-                    close(udp_para.fl_send_fd);
+                if (udp_para->fl_send_fd != -1) {
+                    close(udp_para->fl_send_fd);
                 }
-                udp_para.fl_send_fd = init_udp_bd_send(&udp_para.fl_send_addr, port);
-                log_error("FL send port %d, fd: %d", port, udp_para.fl_send_fd);
+                udp_para->fl_send_fd = init_udp_bd_send(&udp_para->fl_send_addr, port);
+                log_error("FL send port %d, fd: %d", port, udp_para->fl_send_fd);
             } else {
-                if (udp_para.rl_recv_fd != -1) {
-                    close(udp_para.rl_recv_fd);
+                if (udp_para->rl_recv_fd != -1) {
+                    close(udp_para->rl_recv_fd);
                 }
-                udp_para.rl_recv_fd = init_udp_bd_recv(port);
-                log_error("RL recv port %d, fd: %d", port, udp_para.rl_recv_fd);
+                udp_para->rl_recv_fd = init_udp_bd_recv(port);
+                log_error("RL recv port %d, fd: %d", port, udp_para->rl_recv_fd);
             }
             break;
         }
@@ -157,18 +167,19 @@ static l_err set_freq_port(int channel_num, ld_orient ori) {
  * @param en
  * @return
  */
-l_err set_udp_device(ld_dev_entity_t *en) {
+ld_dev_udp_para_t *set_udp_device(ld_dev_entity_t *en) {
     /** mutual binding */
-    udp_para.dev = en;
-    udp_para.fl_send_fd = -1;
-    udp_para.fl_recv_fd = -1;
-    udp_para.rl_send_fd = -1;
-    udp_para.rl_recv_fd = -1;
+    ld_dev_udp_para_t *udp_para = calloc(1, sizeof(ld_dev_udp_para_t));
 
-    en->dev_para = &udp_para;
+    udp_para->dev = en;
+    udp_para->fl_send_fd = -1;
+    udp_para->fl_recv_fd = -1;
+    udp_para->rl_send_fd = -1;
+    udp_para->rl_recv_fd = -1;
+
     en->send_pkt = udp_send_msg;
     en->recv_pkt = udp_recv_msg;
     en->set_freq = set_freq_port;
 
-    return LD_OK;
+    return udp_para;
 }

@@ -33,11 +33,11 @@ typedef struct ld_dev_entity_s {
 
     bool freq_table[CHANNEL_MAX];
 
-    l_err (*send_pkt)(buffer_t *, ld_orient);
+    l_err (*send_pkt)(void *, buffer_t *, ld_orient);
 
     void *(*recv_pkt)(void *);
 
-    l_err (*set_freq)(int, ld_orient);
+    l_err (*set_freq)(void *, int, ld_orient);
 } ld_dev_entity_t;
 
 typedef struct ld_recv_args_s {
