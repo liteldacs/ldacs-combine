@@ -55,8 +55,8 @@ int init_udp_bd_recv(int recv_port) {
     return bd_fd;
 }
 
-static l_err udp_send_msg(void *arg, buffer_t *buf, ld_orient ori) {
-    ld_dev_udp_para_t *udp_para = arg;
+static l_err udp_send_msg(ld_dev_entity_t *arg, buffer_t *buf, ld_orient ori) {
+    ld_dev_udp_para_t *udp_para = (ld_dev_udp_para_t *)arg;
     if (buf->len == 0) {
         return LD_ERR_NULL;
     }
@@ -70,8 +70,8 @@ static l_err udp_send_msg(void *arg, buffer_t *buf, ld_orient ori) {
 
 
 static void *udp_recving_msgs(void *arg) {
-    ld_dev_udp_para_t *udp_para = arg;
-    lfqueue_t *queue = udp_para->dev->msg_queue;
+    ld_dev_udp_para_t *udp_para = (ld_dev_udp_para_t *)arg;
+    lfqueue_t *queue = udp_para->dev.msg_queue;
     int recv_fd;
 
     if (config.role != LD_GS) {
@@ -94,7 +94,7 @@ static void *udp_recving_msgs(void *arg) {
 }
 
 static void *udp_recv_msg(void *arg) {
-    ld_dev_udp_para_t *udp_para = arg;
+    ld_dev_udp_para_t *udp_para = (ld_dev_udp_para_t *)arg;
     pthread_t fl_th, rl_th;
     // int *recv_fd = (config.role == LD_AS) ? &udp_para.fl_fd : &udp_para.rl_fd;
     if (config.role != LD_GS) {
@@ -120,8 +120,8 @@ static void *udp_recv_msg(void *arg) {
  * @param ori
  * @return
  */
-static l_err set_freq_port(void *arg, int channel_num, ld_orient ori) {
-    ld_dev_udp_para_t *udp_para = arg;
+static l_err set_freq_port(ld_dev_entity_t *arg, int channel_num, ld_orient ori) {
+    ld_dev_udp_para_t *udp_para = (ld_dev_udp_para_t *)arg;
     int port = REF_PORT + channel_num;
     switch (config.role) {
         case LD_AS: {
@@ -164,22 +164,19 @@ static l_err set_freq_port(void *arg, int channel_num, ld_orient ori) {
 
 /**
  * init udp simulation
- * @param en
  * @return
  */
-ld_dev_udp_para_t *setup_udp_device(ld_dev_entity_t *en) {
+ld_dev_udp_para_t *setup_udp_device() {
     /** mutual binding */
     ld_dev_udp_para_t *udp_para = calloc(1, sizeof(ld_dev_udp_para_t));
-
-    udp_para->dev = en;
     udp_para->fl_send_fd = -1;
     udp_para->fl_recv_fd = -1;
     udp_para->rl_send_fd = -1;
     udp_para->rl_recv_fd = -1;
 
-    en->send_pkt = udp_send_msg;
-    en->recv_pkt = udp_recv_msg;
-    en->set_freq = set_freq_port;
+    udp_para->dev.send_pkt = udp_send_msg;
+    udp_para->dev.recv_pkt = udp_recv_msg;
+    udp_para->dev.set_freq = set_freq_port;
 
     return udp_para;
 }

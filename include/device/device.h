@@ -29,24 +29,23 @@ typedef struct ld_dev_entity_s {
     lfqueue_t *msg_queue;
     pthread_t send_th;
     pthread_t recv_th;
-    void *dev_para;
 
     bool freq_table[CHANNEL_MAX];
 
-    l_err (*send_pkt)(void *, buffer_t *, ld_orient);
-
+    l_err (*send_pkt)(struct ld_dev_entity_s *, buffer_t *, ld_orient);
     void *(*recv_pkt)(void *);
+    l_err (*set_freq)(struct ld_dev_entity_s *, int, ld_orient);
 
-    l_err (*set_freq)(void *, int, ld_orient);
+    void (*process_func)(void *);
 } ld_dev_entity_t;
 
-typedef struct ld_recv_args_s {
-    ld_dev_entity_t *dev_en;
-
-    void (*process_pkt)(void *);
-} ld_recv_args_t;
-
-l_err set_device(const char *dev_name, ld_dev_entity_t *dev_en);
+// typedef struct ld_recv_args_s {
+//     ld_dev_entity_t *dev_en;
+//
+//     void (*process_pkt)(void *);
+// } ld_recv_args_t;
+//
+ld_dev_entity_t *set_device(const char *dev_name, void (*process_func)(void *));
 
 void *start_recv(void *args);
 

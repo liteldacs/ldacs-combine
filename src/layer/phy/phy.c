@@ -50,10 +50,10 @@ phy_layer_objs_t phy_layer_objs = {
         .mutex = PTHREAD_MUTEX_INITIALIZER,
     },
 
-    .device_args = {
-        .dev_en = &phy_layer_objs.device,
-        .process_pkt = process_phy_pkt,
-    },
+    // .device_args = {
+    //     .dev_en = phy_layer_objs.device,
+    //     .process_pkt = process_phy_pkt,
+    // },
 };
 
 static void free_malloced_ptr(void *ptr) {
@@ -87,18 +87,18 @@ l_err make_phy_layer(enum PHY_SIM_LEVEL level) {
             phy_layer_objs.sim->init_sim(&phy_layer_objs);
 
             /* GS start recieve directly */
-            if (set_device("UDP", &phy_layer_objs.device)) {
+            if ((phy_layer_objs.device = set_device("UDP", process_phy_pkt)) == NULL) {
                 exit(0);
             }
 
-            if (!set_new_freq(&phy_layer_objs.device, config.init_fl_freq, FL)) {
+            if (!set_new_freq(phy_layer_objs.device, config.init_fl_freq, FL)) {
                 return LD_ERR_INTERNAL;
             }
-            if (!set_new_freq(&phy_layer_objs.device, config.init_rl_freq, RL)) {
+            if (!set_new_freq(phy_layer_objs.device, config.init_rl_freq, RL)) {
                 return LD_ERR_INTERNAL;
             }
 
-            pthread_create(&phy_layer_objs.recv_th, NULL, start_recv, &phy_layer_objs.device_args);
+            pthread_create(&phy_layer_objs.recv_th, NULL, start_recv, phy_layer_objs.device);
             pthread_detach(phy_layer_objs.recv_th);
             break;
         }
@@ -474,20 +474,20 @@ void P_SAPC(ld_prim_t *prim) {
         }
         case PHY_CSCAN_REQ: {
             /* setting device and start getting BC from FL */
-            if (set_device("UDP", &phy_layer_objs.device)) {
+            if ((phy_layer_objs.device = set_device("UDP", process_phy_pkt)) == NULL) {
                 exit(0);
             }
-            if (!set_new_freq(&phy_layer_objs.device, config.init_fl_freq, FL)) {
+            if (!set_new_freq(phy_layer_objs.device, config.init_fl_freq, FL)) {
                 log_error("Cannot set new frequency");
                 prim->prim_err = LD_ERR_INTERNAL;
                 return;
             }
-            if (!set_new_freq(&phy_layer_objs.device, config.init_rl_freq, RL)) {
+            if (!set_new_freq(phy_layer_objs.device, config.init_rl_freq, RL)) {
                 log_error("Cannot set new frequency");
                 prim->prim_err = LD_ERR_INTERNAL;
                 return;
             }
-            if (pthread_create(&phy_layer_objs.recv_th, NULL, start_recv, &phy_layer_objs.device_args) != 0) {
+            if (pthread_create(&phy_layer_objs.recv_th, NULL, start_recv, phy_layer_objs.device) != 0) {
                 prim->prim_err = LD_ERR_THREAD;
             }
             pthread_detach(phy_layer_objs.recv_th);
@@ -499,11 +499,11 @@ void P_SAPC(ld_prim_t *prim) {
         case PHY_CONF_REQ: {
             if (prim->prim_obj_typ == PHY_TYP_HO) {
                 //默认为1111.0和965.0,未来频率会被指定在Obj中
-                if (!set_new_freq(&phy_layer_objs.device, 1112.0, FL)) {
+                if (!set_new_freq(phy_layer_objs.device, 1112.0, FL)) {
                     log_error("Cannot set new Freqency for FL.");
                     prim->prim_err = LD_ERR_INTERNAL;
                 }
-                if (!set_new_freq(&phy_layer_objs.device, 966.0, RL)) {
+                if (!set_new_freq(phy_layer_objs.device, 966.0, RL)) {
                     log_error("Cannot set new Freqency for RL.");
                     prim->prim_err = LD_ERR_INTERNAL;
                 }
@@ -545,7 +545,7 @@ void P_SAPD(ld_prim_t *prim) {
 
     if ((prim->prim_err = phy_layer_objs.sim->downward_process(prim, in_bufs, &out_buf)) == LD_OK) {
         if (out_buf) {
-            prim->prim_err = phy_layer_objs.device.send_pkt(phy_layer_objs.device.dev_para, out_buf, (config.role == LD_AS) ? RL : FL);
+            prim->prim_err = phy_layer_objs.device->send_pkt(phy_layer_objs.device, out_buf, (config.role == LD_AS) ? RL : FL);
         }
     }
 
@@ -569,7 +569,7 @@ void P_SAPS(ld_prim_t *prim) {
     buffer_t *out_buf = NULL;
     if ((prim->prim_err = phy_layer_objs.sim->downward_process(prim, NULL, &out_buf)) == LD_OK) {
         if (out_buf) {
-            prim->prim_err = phy_layer_objs.device.send_pkt(phy_layer_objs.device.dev_para, out_buf, (config.role == LD_AS) ? RL : FL);
+            prim->prim_err = phy_layer_objs.device->send_pkt(phy_layer_objs.device, out_buf, (config.role == LD_AS) ? RL : FL);
         }
     }
 

@@ -5,31 +5,36 @@
 #include "device.h"
 
 
-l_err set_device(const char *dev_name, ld_dev_entity_t *dev_en) {
+ld_dev_entity_t *set_device(const char *dev_name, void (*process_func)(void *)) {
     size_t name_len = sizeof(dev_name);
+
+    ld_dev_entity_t *dev_en = NULL;
+    if (!strncmp(dev_name, "UDP", name_len)) {
+        dev_en = (ld_dev_entity_t *)setup_udp_device();
+    } else if (!strncmp(dev_name, "USRP", name_len)) {
+        log_warn("USRP has not been implied");
+        return NULL;
+    } else {
+        return NULL;
+    }
+    if (!dev_en) {
+        log_error("Cannot initialize device");
+        return NULL;
+    }
 
     dev_en->name = dev_name;
     dev_en->msg_queue = lfqueue_init();
-
+    dev_en->process_func = process_func;
     memset(dev_en->freq_table, 0, CHANNEL_MAX);
 
-    if (!strncmp(dev_name, "UDP", name_len)) {
-        dev_en->dev_para = setup_udp_device(dev_en);
-    } else if (!strncmp(dev_name, "USRP", name_len)) {
-        log_warn("USRP has not been implied");
-        return LD_ERR_WRONG_PARA;
-    } else {
-        return LD_ERR_WRONG_PARA;
-    }
-
-    return LD_OK;
+    return dev_en;
 }
 
 void *start_recv(void *args) {
-    ld_recv_args_t *recv_args = args;
-    ld_dev_entity_t *dev_en = recv_args->dev_en;
+    ld_dev_entity_t *dev_en = args;
+    if (!dev_en)    return NULL;
 
-    if (pthread_create(&dev_en->recv_th, NULL, dev_en->recv_pkt, dev_en->dev_para) != 0) {
+    if (pthread_create(&dev_en->recv_th, NULL, dev_en->recv_pkt, dev_en) != 0) {
         pthread_exit(NULL);
     }
     pthread_detach(dev_en->recv_th);
@@ -37,7 +42,9 @@ void *start_recv(void *args) {
     while (stop_flag == FALSE) {
         buffer_t *buf;
         if (lfqueue_get_wait(dev_en->msg_queue, (void **) &buf) == LD_OK) {
-            recv_args->process_pkt(buf);
+            if (dev_en->process_func) {
+                dev_en->process_func(buf);
+            }
         }
     }
     return LD_OK;
@@ -78,7 +85,7 @@ double set_new_freq(ld_dev_entity_t *dev_en, double new_f, ld_orient ori) {
     dev_en->freq_table[new_channel] = 1;
 
     // Set the frequency
-    if (dev_en->set_freq(dev_en->dev_para, new_channel, ori) != LD_OK) {
+    if (dev_en->set_freq(dev_en, new_channel, ori) != LD_OK) {
         return INVALID_FREQ; // Failed to set frequency
     }
 

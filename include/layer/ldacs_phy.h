@@ -70,9 +70,9 @@ struct phy_layer_objs_s {
     cc_dch_merge_t cc_dch_merge;
 
     /* device */
-    ld_dev_entity_t device;
+    ld_dev_entity_t *device;
     pthread_t recv_th;
-    ld_recv_args_t device_args;
+    // ld_recv_args_t device_args;
 
     bool need_sync;
 
