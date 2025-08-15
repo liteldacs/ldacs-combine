@@ -44,7 +44,7 @@ config_t config = {
     .UA = 0,
     .is_merged = FALSE,
     .role = LD_UNDEFINED,
-
+    .direct_snp = FALSE,
 };
 
 
@@ -76,7 +76,7 @@ static int init_config_path() {
 
 int opt_parse(int argc, char *const *argv) {
     int c;
-    while ((c = getopt(argc, argv, "p:dt:w:c:AGWHMBE")) != -1) {
+    while ((c = getopt(argc, argv, "p:dt:w:c:AGWHMBED")) != -1) {
         switch (c) {
             case 'p': {
                 config.port = strtol(optarg, NULL, 10);
@@ -135,11 +135,8 @@ int opt_parse(int argc, char *const *argv) {
                 config.use_http = TRUE;
                 break;
             }
-            case 'M': {
-                // if (config.role == LD_SGW) {
-                //     config.port = strtol("55551", NULL, 10);
-                // }
-                // config.is_merged = TRUE;
+            case 'T': {
+                config.direct_snp = TRUE;
                 break;
             }
             case 'B': {

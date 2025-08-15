@@ -96,6 +96,7 @@ l_err make_snp_layer() {
             break;
         }
     }
+    snp_layer_objs.udp_para = setup_udp_device(sn)
     return LD_OK;
 }
 

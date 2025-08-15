@@ -4,7 +4,7 @@
 
 #include "device/device_udp.h"
 
-static int init_udp_bd_send(struct sockaddr_in *addr_p, int send_port) {
+int init_udp_bd_send(struct sockaddr_in *addr_p, int send_port) {
     int on = 1;
     int bd_fd;
 
@@ -27,7 +27,7 @@ static int init_udp_bd_send(struct sockaddr_in *addr_p, int send_port) {
     return bd_fd;
 }
 
-static int init_udp_bd_recv(int recv_port) {
+int init_udp_bd_recv(int recv_port) {
     int on = 1;
     int bd_fd;
 
@@ -167,7 +167,7 @@ static l_err set_freq_port(void *arg, int channel_num, ld_orient ori) {
  * @param en
  * @return
  */
-ld_dev_udp_para_t *set_udp_device(ld_dev_entity_t *en) {
+ld_dev_udp_para_t *setup_udp_device(ld_dev_entity_t *en) {
     /** mutual binding */
     ld_dev_udp_para_t *udp_para = calloc(1, sizeof(ld_dev_udp_para_t));
 

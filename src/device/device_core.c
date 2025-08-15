@@ -14,7 +14,7 @@ l_err set_device(const char *dev_name, ld_dev_entity_t *dev_en) {
     memset(dev_en->freq_table, 0, CHANNEL_MAX);
 
     if (!strncmp(dev_name, "UDP", name_len)) {
-        dev_en->dev_para = set_udp_device(dev_en);
+        dev_en->dev_para = setup_udp_device(dev_en);
     } else if (!strncmp(dev_name, "USRP", name_len)) {
         log_warn("USRP has not been implied");
         return LD_ERR_WRONG_PARA;
