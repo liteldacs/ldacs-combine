@@ -24,7 +24,7 @@ typedef struct ld_dev_th_node_s {
     int channel_num;
 } ld_dev_th_node_t;
 
-typedef struct ld_dev_entity_s {
+typedef struct device_entity_s {
     const char *name;
     lfqueue_t *msg_queue;
     pthread_t send_th;
@@ -32,12 +32,12 @@ typedef struct ld_dev_entity_s {
 
     bool freq_table[CHANNEL_MAX];
 
-    l_err (*send_pkt)(struct ld_dev_entity_s *, buffer_t *, ld_orient);
+    l_err (*send_pkt)(struct device_entity_s *, buffer_t *, ld_orient);
     void *(*recv_pkt)(void *);
-    l_err (*set_freq)(struct ld_dev_entity_s *, int, ld_orient);
+    l_err (*set_freq)(struct device_entity_s *, int, ld_orient);
 
     void (*process_func)(void *);
-} ld_dev_entity_t;
+} device_entity_t;
 
 // typedef struct ld_recv_args_s {
 //     ld_dev_entity_t *dev_en;
@@ -45,7 +45,7 @@ typedef struct ld_dev_entity_s {
 //     void (*process_pkt)(void *);
 // } ld_recv_args_t;
 //
-ld_dev_entity_t *set_device(const char *dev_name, void (*process_func)(void *));
+device_entity_t *set_device(const char *dev_name, void (*process_func)(void *));
 
 void *start_recv(void *args);
 
@@ -54,7 +54,7 @@ void *start_recv(void *args);
  * @param new_f new frequency assigned
  * @return real new freq
  */
-double set_new_freq(ld_dev_entity_t *dev_en, double new_f, ld_orient ori);
+double set_new_freq(device_entity_t *dev_en, double new_f, ld_orient ori);
 
 
 #include "device_udp.h"

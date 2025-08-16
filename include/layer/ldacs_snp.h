@@ -46,7 +46,7 @@ typedef struct snp_layer_objs_s {
     uint32_t T_SQN;
     sm_statemachine_t snp_fsm;
 
-    ld_dev_udp_para_t *udp_para;
+    device_entity_t *device;
 } snp_layer_objs_t;
 
 enum snp_fsm_event_type {

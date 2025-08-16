@@ -4,42 +4,56 @@
 
 #include "device/device_udp.h"
 
-int init_udp_bd_send(struct sockaddr_in *addr_p, int send_port) {
+l_err init_udp_bd_send(ld_dev_udp_para_t *udp_para, int send_port) {
     int on = 1;
-    int bd_fd;
 
-    bd_fd = socket(AF_INET, SOCK_DGRAM, 0);
+    int bd_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (bd_fd == ERROR) {
         log_error("Create broadcast socket failed !\n");
-        return ERROR;
+        return LD_ERR_INTERNAL;
     }
 
     if (setsockopt(bd_fd, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on)) == ERROR) {
         log_error("setsockopt failed!\n");
-        return ERROR;
+        return LD_ERR_INTERNAL;
     }
 
-    bzero(addr_p, sizeof(struct sockaddr_in));
-    addr_p->sin_family = AF_INET;
-    addr_p->sin_port = htons(send_port);
-    addr_p->sin_addr.s_addr = inet_addr("255.255.255.255");
 
-    return bd_fd;
+    struct sockaddr_in *addr = NULL;
+    if (config.role == LD_AS) {
+        addr = &udp_para->rl_send_addr;
+        udp_para->rl_send_fd = bd_fd;
+    }else {
+        addr = &udp_para->fl_send_addr;
+        udp_para->fl_send_fd = bd_fd;
+    }
+
+    bzero(addr, sizeof(struct sockaddr_in));
+    addr->sin_family = AF_INET;
+    addr->sin_port = htons(send_port);
+    addr->sin_addr.s_addr = inet_addr("255.255.255.255");
+
+    return LD_OK;
 }
 
-int init_udp_bd_recv(int recv_port) {
+l_err init_udp_bd_recv(ld_dev_udp_para_t *udp_para, int recv_port) {
     int on = 1;
-    int bd_fd;
 
-    bd_fd = socket(AF_INET, SOCK_DGRAM, 0);
+    int bd_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (bd_fd == ERROR) {
         log_error("Create broadcast socket failed !\n");
-        return ERROR;
+        return LD_ERR_INTERNAL;
     }
 
     if (setsockopt(bd_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == ERROR) {
         log_error("setsockopt failed!\n");
-        return ERROR;
+        return LD_ERR_INTERNAL;
+    }
+
+    if (config.role == LD_AS) {
+        udp_para->fl_recv_fd = bd_fd;
+    }else {
+        udp_para->rl_recv_fd = bd_fd;
     }
 
     struct sockaddr_in addr;
@@ -52,10 +66,10 @@ int init_udp_bd_recv(int recv_port) {
         return ERROR;
     }
 
-    return bd_fd;
+    return LD_OK;
 }
 
-static l_err udp_send_msg(ld_dev_entity_t *arg, buffer_t *buf, ld_orient ori) {
+static l_err udp_send_msg(device_entity_t *arg, buffer_t *buf, ld_orient ori) {
     ld_dev_udp_para_t *udp_para = (ld_dev_udp_para_t *)arg;
     if (buf->len == 0) {
         return LD_ERR_NULL;
@@ -120,7 +134,7 @@ static void *udp_recv_msg(void *arg) {
  * @param ori
  * @return
  */
-static l_err set_freq_port(ld_dev_entity_t *arg, int channel_num, ld_orient ori) {
+static l_err set_freq_port(device_entity_t *arg, int channel_num, ld_orient ori) {
     ld_dev_udp_para_t *udp_para = (ld_dev_udp_para_t *)arg;
     int port = REF_PORT + channel_num;
     switch (config.role) {
@@ -129,13 +143,13 @@ static l_err set_freq_port(ld_dev_entity_t *arg, int channel_num, ld_orient ori)
                 if (udp_para->fl_recv_fd != -1) {
                     close(udp_para->fl_recv_fd);
                 }
-                udp_para->fl_recv_fd = init_udp_bd_recv(port);
+                init_udp_bd_recv(udp_para, port);
                 log_error("FL recv port %d, fd: %d", port, udp_para->fl_recv_fd);
             } else {
                 if (udp_para->rl_send_fd != -1) {
                     close(udp_para->rl_send_fd);
                 }
-                udp_para->rl_send_fd = init_udp_bd_send(&udp_para->rl_send_addr, port);
+                init_udp_bd_send(udp_para, port);
                 log_error("RL send port %d, fd: %d", port, udp_para->rl_send_fd);
             }
             break;
@@ -145,14 +159,14 @@ static l_err set_freq_port(ld_dev_entity_t *arg, int channel_num, ld_orient ori)
                 if (udp_para->fl_send_fd != -1) {
                     close(udp_para->fl_send_fd);
                 }
-                udp_para->fl_send_fd = init_udp_bd_send(&udp_para->fl_send_addr, port);
-                log_error("FL send port %d, fd: %d", port, udp_para->fl_send_fd);
+                init_udp_bd_send(udp_para, port);
+                log_info("FL send port %d, fd: %d", port, udp_para->fl_send_fd);
             } else {
                 if (udp_para->rl_recv_fd != -1) {
                     close(udp_para->rl_recv_fd);
                 }
-                udp_para->rl_recv_fd = init_udp_bd_recv(port);
-                log_error("RL recv port %d, fd: %d", port, udp_para->rl_recv_fd);
+                init_udp_bd_recv(udp_para, port);
+                log_info("RL recv port %d, fd: %d", port, udp_para->rl_recv_fd);
             }
             break;
         }
@@ -166,7 +180,7 @@ static l_err set_freq_port(ld_dev_entity_t *arg, int channel_num, ld_orient ori)
  * init udp simulation
  * @return
  */
-ld_dev_udp_para_t *setup_udp_device() {
+ld_dev_udp_para_t *setup_udp_device(void (*process_func)(void *)) {
     /** mutual binding */
     ld_dev_udp_para_t *udp_para = calloc(1, sizeof(ld_dev_udp_para_t));
     udp_para->fl_send_fd = -1;
@@ -177,6 +191,12 @@ ld_dev_udp_para_t *setup_udp_device() {
     udp_para->dev.send_pkt = udp_send_msg;
     udp_para->dev.recv_pkt = udp_recv_msg;
     udp_para->dev.set_freq = set_freq_port;
+
+    udp_para->dev.name = "UDP";
+    udp_para->dev.msg_queue = lfqueue_init();
+    udp_para->dev.process_func = process_func;
+    memset(udp_para->dev.freq_table, 0, CHANNEL_MAX);
+
 
     return udp_para;
 }

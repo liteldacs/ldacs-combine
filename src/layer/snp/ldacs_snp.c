@@ -96,7 +96,19 @@ l_err make_snp_layer() {
             break;
         }
     }
-    // snp_layer_objs.udp_para = setup_udp_device();
+
+    // if (config.direct_snp) {
+    //     snp_layer_objs.device = set_device("UDP", NULL);
+    //
+    //     if (config.role == LD_AS) {
+    //         snp_layer_objs.udp_para->rl_send_fd =  init_udp_bd_send(&snp_layer_objs.udp_para->rl_send_addr, 26789);
+    //         snp_layer_objs.udp_para->fl_recv_fd =  init_udp_bd_recv(27789);
+    //     }else {
+    //         snp_layer_objs.udp_para->fl_send_fd =  init_udp_bd_send(&snp_layer_objs.udp_para->fl_send_addr, 27789);
+    //         snp_layer_objs.udp_para->rl_recv_fd =  init_udp_bd_recv(26789);
+    //     }
+    //
+    // }
     return LD_OK;
 }
 
@@ -220,6 +232,8 @@ void SN_SAPD(ld_prim_t *prim) {
     CLONE_TO_CHUNK(*orient_sdu_to->buf, snp_pbs.start, pbs_offset(&snp_pbs));
     log_buf(LOG_INFO, "SNP OUT", orient_sdu_to->buf->ptr, orient_sdu_to->buf->len);
     preempt_prim(&DLS_DATA_REQ_PRIM, prim->prim_obj_typ, orient_sdu_to, free_orient_sdus, 0, 0);
+
+    // snp_layer_objs.udp_para->dev.send_pkt()
 
     free_buffer(enc_buf);
     clear_dup_prim_data(orient_sdu_from, free);

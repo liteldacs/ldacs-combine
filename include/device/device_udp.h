@@ -10,7 +10,7 @@
 #define REF_PORT 10000
 
 typedef struct ld_dev_udp_para_s {
-    ld_dev_entity_t dev;
+    device_entity_t dev;
     int rl_send_fd;
     int rl_recv_fd;
     int fl_send_fd;
@@ -20,9 +20,5 @@ typedef struct ld_dev_udp_para_s {
 } ld_dev_udp_para_t;
 
 ld_dev_udp_para_t *setup_udp_device();
-
-int init_udp_bd_send(struct sockaddr_in *addr_p, int send_port);
-
-int init_udp_bd_recv(int recv_port);
 
 #endif //LDACS_SIM_DEVICE_UDP_H

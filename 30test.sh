@@ -21,7 +21,7 @@ cb-as() {
 #          exec bash" &
 #  sleep 0.2
 #done
-for i in {1..15}; do
+for i in {1..3}; do
 
   new_i1=$((i * 2 - 1))
   new_i2=$((i * 2 ))

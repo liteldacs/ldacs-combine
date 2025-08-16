@@ -5,12 +5,12 @@
 #include "device.h"
 
 
-ld_dev_entity_t *set_device(const char *dev_name, void (*process_func)(void *)) {
+device_entity_t *set_device(const char *dev_name, void (*process_func)(void *)) {
     size_t name_len = sizeof(dev_name);
 
-    ld_dev_entity_t *dev_en = NULL;
+    device_entity_t *dev_en = NULL;
     if (!strncmp(dev_name, "UDP", name_len)) {
-        dev_en = (ld_dev_entity_t *)setup_udp_device();
+        dev_en = (device_entity_t *)setup_udp_device(process_func);
     } else if (!strncmp(dev_name, "USRP", name_len)) {
         log_warn("USRP has not been implied");
         return NULL;
@@ -22,16 +22,11 @@ ld_dev_entity_t *set_device(const char *dev_name, void (*process_func)(void *)) 
         return NULL;
     }
 
-    dev_en->name = dev_name;
-    dev_en->msg_queue = lfqueue_init();
-    dev_en->process_func = process_func;
-    memset(dev_en->freq_table, 0, CHANNEL_MAX);
-
     return dev_en;
 }
 
 void *start_recv(void *args) {
-    ld_dev_entity_t *dev_en = args;
+    device_entity_t *dev_en = args;
     if (!dev_en)    return NULL;
 
     if (pthread_create(&dev_en->recv_th, NULL, dev_en->recv_pkt, dev_en) != 0) {
@@ -51,7 +46,7 @@ void *start_recv(void *args) {
 }
 
 
-double set_new_freq(ld_dev_entity_t *dev_en, double new_f, ld_orient ori) {
+double set_new_freq(device_entity_t *dev_en, double new_f, ld_orient ori) {
     if (!dev_en) {
         return INVALID_FREQ;
     }
