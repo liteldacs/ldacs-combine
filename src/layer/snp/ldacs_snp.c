@@ -10,6 +10,10 @@
 #include <ldacs_def.h>
 #include <snp_sub.h>
 
+l_err process_direct_snp(void *args);
+
+l_err process_snp(orient_sdu_t *o_sdu);
+
 const enum_names snp_pdu_ctrl_names = {USER_PLANE_PACKET, CONTROL_PLANE_PACKET, snp_ctrl_name, NULL};
 const enum_names snp_pdu_sec_names = {SEC_MACLEN_INVAILD, SEC_MACLEN_256, snp_sec_name, NULL};
 
@@ -109,6 +113,26 @@ l_err make_snp_layer() {
     //     }
     //
     // }
+
+    if (config.direct_snp) {
+        if ((snp_layer_objs.device = set_device("UDP", process_direct_snp)) == NULL) {
+            log_error("Cannot set SNP device");
+            return LD_ERR_INTERNAL;
+        }
+        if (!set_new_freq(snp_layer_objs.device, config.init_fl_freq + 50.0, FL)) {
+            log_error("Cannot set new frequency");
+            return LD_ERR_INTERNAL;
+        }
+        if (!set_new_freq(snp_layer_objs.device, config.init_rl_freq + 50.0, RL)) {
+            log_error("Cannot set new frequency");
+            return LD_ERR_INTERNAL;
+        }
+        if (pthread_create(&snp_layer_objs.recv_th, NULL, start_recv, snp_layer_objs.device) != 0) {
+            return LD_ERR_THREAD;
+        }
+        pthread_detach(snp_layer_objs.recv_th);
+    }
+
     return LD_OK;
 }
 
@@ -231,9 +255,23 @@ void SN_SAPD(ld_prim_t *prim) {
 
     CLONE_TO_CHUNK(*orient_sdu_to->buf, snp_pbs.start, pbs_offset(&snp_pbs));
     log_buf(LOG_INFO, "SNP OUT", orient_sdu_to->buf->ptr, orient_sdu_to->buf->len);
-    preempt_prim(&DLS_DATA_REQ_PRIM, prim->prim_obj_typ, orient_sdu_to, free_orient_sdus, 0, 0);
 
-    // snp_layer_objs.udp_para->dev.send_pkt()
+    if (config.direct_snp) {
+
+        snp_direct_t direct = {
+            .AS_SAC = orient_sdu_to->AS_SAC,
+            .GB_SAC = orient_sdu_to->GS_SAC,
+            .snp_pdu = init_buffer_unptr(),
+        };
+
+        CLONE_TO_CHUNK(*direct.snp_pdu, snp_pbs.start, pbs_offset(&snp_pbs));
+        snp_layer_objs.device->send_pkt(snp_layer_objs.device, gen_pdu(&direct, &snp_direct_desc, "SNP DIRECT"), config.role == LD_AS ? RL : FL);
+        free_buffer(direct.snp_pdu);
+    }else {
+        preempt_prim(&DLS_DATA_REQ_PRIM, prim->prim_obj_typ, orient_sdu_to, free_orient_sdus, 0, 0);
+    }
+
+
 
     free_buffer(enc_buf);
     clear_dup_prim_data(orient_sdu_from, free);
@@ -244,62 +282,8 @@ void D_SAPD_cb(ld_prim_t *prim) {
         case DLS_DATA_IND:
         case DLS_UDATA_IND: {
             orient_sdu_t *o_sdu = prim->prim_objs;
-            buffer_t *snp_in = o_sdu->buf;
-            pb_stream pbs;
-            zero(&pbs);
-            snp_pdu_t pdu;
-
-
-            /* TODO: 搞出更多的错误代码，然后再网关显示 */
-            if (snpsub_vfy_hmac(o_sdu->AS_SAC, snp_layer_objs.SEC, snp_in->ptr, snp_in->len) != LDCAUC_OK) {
-                log_warn("HMAC verify failed");
-                preempt_prim(&SN_DATA_IND_PRIM, VER_WRONG_MAC, o_sdu, NULL, 0, 0);
-                prim->prim_err = LD_ERR_INVALID_MAC;
-                return;
-            }
-
-            pdu.sdu = init_buffer_ptr(snp_in->len - get_sec_maclen(snp_layer_objs.SEC) - (SNP_HEAD_LEN >> 3));
-            init_pbs(&pbs, snp_in->ptr, snp_in->len, "SNP IN");
-            if (!in_struct(&pdu, &snp_pdu_desc, &pbs, NULL)) {
-                log_warn("Cant deserialize");
-                prim->prim_err = LD_ERR_INTERNAL;
-                free_buffer(pdu.sdu);
-                return;
-            }
-
-            uint32_t *check_sqn = get_SQN(o_sdu->AS_SAC, FALSE);
-            if (abs((int) pdu.sqn - *check_sqn) < SNP_RANGE) {
-                (*check_sqn) = pdu.sqn;
-            } else {
-                log_warn("The received sqn is out of range.");
-                preempt_prim(&SN_DATA_IND_PRIM, VER_WRONG_SQN, o_sdu, NULL, 0, 0);
-                prim->prim_err = LD_ERR_INVALID;
-                free_buffer(pdu.sdu);
-                return;
-            }
-
-            /* free the previous orient buffer, and set the new one */
-            free_buffer(o_sdu->buf);
-
-            uint8_t dec_arr[2048] = {0};
-            size_t dec_sz = 0;
-            o_sdu->buf = init_buffer_unptr();
-
-            // log_buf(LOG_INFO, "TO DEC", pdu.sdu->ptr, pdu.sdu->len);
-            if (snpsub_crypto(o_sdu->AS_SAC, pdu.sdu->ptr, pdu.sdu->len, dec_arr, &dec_sz, FALSE) != LDCAUC_OK) {
-                free_buffer(pdu.sdu);
-                prim->prim_err = LD_ERR_INTERNAL;
-                return;
-            }
-            CLONE_TO_CHUNK(*(o_sdu->buf), dec_arr, dec_sz);
-
-            free_buffer(pdu.sdu);
-            if (pdu.ctrl == CONTROL_PLANE_PACKET) {
-                preempt_prim(&SN_DATA_IND_PRIM, VER_PASS, o_sdu, NULL, 0, 0);
-            } else {
-                preempt_prim(&SN_DATA_IND_PRIM, VER_PASS, o_sdu, NULL, 0, 1);
-            }
-            break;
+            prim->prim_err = process_snp(o_sdu);
+            return;
         }
         case DLS_DATA_REQ:
         case DLS_UDATA_REQ: {
@@ -308,4 +292,84 @@ void D_SAPD_cb(ld_prim_t *prim) {
         default:
             break;
     }
+}
+
+l_err process_direct_snp(void *args) {
+    buffer_t *buf = args;
+    snp_direct_t *direct = calloc(1, sizeof(snp_direct_t));
+    PARSE_DSTR_PKT(buf, direct, snp_pdu, snp_direct_desc, 3, 0);
+
+
+    if (config.role == LD_AS) {
+        if (direct->AS_SAC != lme_layer_objs.lme_as_man->AS_SAC) {
+            free_buffer(direct->snp_pdu);
+            free(direct);
+            return LD_OK;
+        }
+    }
+
+
+    orient_sdu_t *o_sdu = create_orient_sdus(direct->AS_SAC, direct->GB_SAC);
+    CLONE_TO_CHUNK(*o_sdu->buf, direct->snp_pdu->ptr, direct->snp_pdu->len);
+
+    free_buffer(direct->snp_pdu);
+    free(direct);
+
+    const l_err err = process_snp(o_sdu);
+    free_orient_sdus(o_sdu);
+    return err;
+}
+
+l_err process_snp(orient_sdu_t *o_sdu) {
+    buffer_t *snp_in = o_sdu->buf;
+    pb_stream pbs;
+    zero(&pbs);
+    snp_pdu_t pdu;
+
+    /* TODO: 搞出更多的错误代码，然后再网关显示 */
+    if (snpsub_vfy_hmac(o_sdu->AS_SAC, snp_layer_objs.SEC, snp_in->ptr, snp_in->len) != LDCAUC_OK) {
+        log_warn("HMAC verify failed");
+        preempt_prim(&SN_DATA_IND_PRIM, VER_WRONG_MAC, o_sdu, NULL, 0, 0);
+        return LD_ERR_INVALID_MAC;
+    }
+
+    pdu.sdu = init_buffer_ptr(snp_in->len - get_sec_maclen(snp_layer_objs.SEC) - (SNP_HEAD_LEN >> 3));
+    init_pbs(&pbs, snp_in->ptr, snp_in->len, "SNP IN");
+    if (!in_struct(&pdu, &snp_pdu_desc, &pbs, NULL)) {
+        log_warn("Cant deserialize");
+        free_buffer(pdu.sdu);
+        return LD_ERR_INTERNAL;
+    }
+
+    uint32_t *check_sqn = get_SQN(o_sdu->AS_SAC, FALSE);
+    if (abs((int) pdu.sqn - *check_sqn) < SNP_RANGE) {
+        (*check_sqn) = pdu.sqn;
+    } else {
+        log_warn("The received sqn is out of range.");
+        preempt_prim(&SN_DATA_IND_PRIM, VER_WRONG_SQN, o_sdu, NULL, 0, 0);
+        free_buffer(pdu.sdu);
+        return LD_ERR_INVALID;
+    }
+
+    /* free the previous orient buffer, and set the new one */
+    free_buffer(o_sdu->buf);
+
+    uint8_t dec_arr[2048] = {0};
+    size_t dec_sz = 0;
+    o_sdu->buf = init_buffer_unptr();
+
+    // log_buf(LOG_INFO, "TO DEC", pdu.sdu->ptr, pdu.sdu->len);
+    if (snpsub_crypto(o_sdu->AS_SAC, pdu.sdu->ptr, pdu.sdu->len, dec_arr, &dec_sz, FALSE) != LDCAUC_OK) {
+        free_buffer(pdu.sdu);
+        return LD_ERR_INTERNAL;
+    }
+    CLONE_TO_CHUNK(*(o_sdu->buf), dec_arr, dec_sz);
+
+    free_buffer(pdu.sdu);
+    if (pdu.ctrl == CONTROL_PLANE_PACKET) {
+        preempt_prim(&SN_DATA_IND_PRIM, VER_PASS, o_sdu, NULL, 0, 0);
+    } else {
+        preempt_prim(&SN_DATA_IND_PRIM, VER_PASS, o_sdu, NULL, 0, 1);
+    }
+    return LD_OK;
 }

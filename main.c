@@ -135,7 +135,7 @@ int opt_parse(int argc, char *const *argv) {
                 config.use_http = TRUE;
                 break;
             }
-            case 'T': {
+            case 'D': {
                 config.direct_snp = TRUE;
                 break;
             }

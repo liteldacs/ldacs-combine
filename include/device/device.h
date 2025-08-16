@@ -36,7 +36,7 @@ typedef struct device_entity_s {
     void *(*recv_pkt)(void *);
     l_err (*set_freq)(struct device_entity_s *, int, ld_orient);
 
-    void (*process_func)(void *);
+    l_err (*process_func)(void *);
 } device_entity_t;
 
 // typedef struct ld_recv_args_s {
@@ -45,7 +45,7 @@ typedef struct device_entity_s {
 //     void (*process_pkt)(void *);
 // } ld_recv_args_t;
 //
-device_entity_t *set_device(const char *dev_name, void (*process_func)(void *));
+device_entity_t *set_device(const char *dev_name, l_err (*process_func)(void *));
 
 void *start_recv(void *args);
 

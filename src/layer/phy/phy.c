@@ -578,8 +578,8 @@ void P_SAPS(ld_prim_t *prim) {
     }
 }
 
-void process_phy_pkt(void *data) {
-    phy_layer_objs.sim->upward_process(data);
+l_err process_phy_pkt(void *data) {
+    return phy_layer_objs.sim->upward_process(data);
 }
 
 static l_err start_fast_scanning(fscanning_freqs_t *freqs) {

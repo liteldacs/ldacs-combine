@@ -19,6 +19,6 @@ typedef struct ld_dev_udp_para_s {
     struct sockaddr_in rl_send_addr;
 } ld_dev_udp_para_t;
 
-ld_dev_udp_para_t *setup_udp_device();
+ld_dev_udp_para_t *setup_udp_device(l_err (*process_func)(void *));
 
 #endif //LDACS_SIM_DEVICE_UDP_H

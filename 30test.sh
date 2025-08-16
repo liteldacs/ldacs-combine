@@ -7,26 +7,15 @@ cb-as() {
     echo "错误：请提供一个正整数参数（例如：cb-as 1）"
     return 1
   fi
-  echo "clear && ./ldacs-combine -c \"../../config/ldacs_config_as_$1.yaml\""
+  echo "clear && ./ldacs-combine -c \"../../config/ldacs_config_as_$1.yaml\" -D"
 }
 
-#for i in {1..30}; do
-#
-#  cmd=$(cb-as $i)
-#  echo $i $cmd
-#
-#  konsole  --geometry 1000x500 --hold -e bash -l -c \
-#         "cd '$ldb_path' && \
-#          $cmd && \
-#          exec bash" &
-#  sleep 0.2
-#done
-for i in {1..3}; do
+for i in {1..15}; do
 
   new_i1=$((i * 2 - 1))
   new_i2=$((i * 2 ))
-  cmd1=$(cb-as $new_i1)
-  cmd2=$(cb-as $new_i2)
+  cmd1=$(cb-as $new_i1 )
+  cmd2=$(cb-as $new_i2 )
 
   echo $new_i1 $cmd1
   konsole  --geometry 1000x500 --hold -e bash -l -c \

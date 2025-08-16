@@ -180,7 +180,7 @@ static l_err set_freq_port(device_entity_t *arg, int channel_num, ld_orient ori)
  * init udp simulation
  * @return
  */
-ld_dev_udp_para_t *setup_udp_device(void (*process_func)(void *)) {
+ld_dev_udp_para_t *setup_udp_device(l_err (*process_func)(void *)) {
     /** mutual binding */
     ld_dev_udp_para_t *udp_para = calloc(1, sizeof(ld_dev_udp_para_t));
     udp_para->fl_send_fd = -1;

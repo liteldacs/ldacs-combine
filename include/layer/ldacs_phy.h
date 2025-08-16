@@ -177,7 +177,7 @@ void P_SAPT(ld_prim_t *);
 
 void P_SAPS(ld_prim_t *);
 
-void process_phy_pkt(void *data);
+l_err process_phy_pkt(void *data);
 
 l_err init_sim_json(phy_layer_objs_t *obj_p);
 

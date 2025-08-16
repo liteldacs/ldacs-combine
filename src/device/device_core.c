@@ -5,7 +5,7 @@
 #include "device.h"
 
 
-device_entity_t *set_device(const char *dev_name, void (*process_func)(void *)) {
+device_entity_t *set_device(const char *dev_name, l_err (*process_func)(void *)) {
     size_t name_len = sizeof(dev_name);
 
     device_entity_t *dev_en = NULL;
