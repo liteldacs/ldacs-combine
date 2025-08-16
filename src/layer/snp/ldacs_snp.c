@@ -119,20 +119,37 @@ l_err make_snp_layer() {
             log_error("Cannot set SNP device");
             return LD_ERR_INTERNAL;
         }
-        if (!set_new_freq(snp_layer_objs.device, config.init_fl_freq + 50.0, FL)) {
-            log_error("Cannot set new frequency");
+        // if (!set_new_freq(snp_layer_objs.device, config.init_fl_freq + 50.0, FL)) {
+        //     log_error("Cannot set new frequency");
+        //     return LD_ERR_INTERNAL;
+        // }
+        // if (!set_new_freq(snp_layer_objs.device, config.init_rl_freq + 50.0, RL)) {
+        //     log_error("Cannot set new frequency");
+        //     return LD_ERR_INTERNAL;
+        // }
+
+        if (set_new_snp_frequency(config.init_fl_freq, config.init_rl_freq) != LD_OK) {
             return LD_ERR_INTERNAL;
         }
-        if (!set_new_freq(snp_layer_objs.device, config.init_rl_freq + 50.0, RL)) {
-            log_error("Cannot set new frequency");
-            return LD_ERR_INTERNAL;
-        }
+
         if (pthread_create(&snp_layer_objs.recv_th, NULL, start_recv, snp_layer_objs.device) != 0) {
             return LD_ERR_THREAD;
         }
         pthread_detach(snp_layer_objs.recv_th);
     }
 
+    return LD_OK;
+}
+
+l_err set_new_snp_frequency(double fl_freq, double rl_freq) {
+    if (!set_new_freq(snp_layer_objs.device, fl_freq + 50.0, FL)) {
+        log_error("Cannot set new frequency");
+        return LD_ERR_INTERNAL;
+    }
+    if (!set_new_freq(snp_layer_objs.device, rl_freq + 50.0, RL)) {
+        log_error("Cannot set new frequency");
+        return LD_ERR_INTERNAL;
+    }
     return LD_OK;
 }
 

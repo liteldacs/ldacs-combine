@@ -292,6 +292,8 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                     cc_ho_com_t *ho_com = data_struct;
                     //HO2不需要CELL_EXIT！！！！除非信号特别差得手动退出
 
+                    set_new_snp_frequency(1112.0, 966.0);
+
                     /* Tell MAC change to HO2 state */
                     if ((prim->prim_err = preempt_prim(&MAC_HO_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0)) != LD_OK) {
                         log_error("LME can not call MAC layers manipulate HO2");

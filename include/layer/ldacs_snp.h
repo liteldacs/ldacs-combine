@@ -103,6 +103,8 @@ l_err make_snp_layer();
 
 void init_snp_fsm(snp_layer_objs_t *snp_obj, enum SNP_FSM_STATES_E init_state);
 
+l_err set_new_snp_frequency(double fl_freq, double rl_freq);
+
 void SN_SAPC(ld_prim_t *prim);
 
 void SN_SAPD(ld_prim_t *prim);
