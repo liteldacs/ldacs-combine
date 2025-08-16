@@ -88,7 +88,7 @@ static void *udp_recving_msgs(void *arg) {
     lfqueue_t *queue = udp_para->dev.msg_queue;
     int recv_fd;
 
-    if (config.role != LD_GS) {
+    if (config.role == LD_AS) {
         recv_fd = udp_para->fl_recv_fd;
     } else {
         recv_fd = udp_para->rl_recv_fd;
@@ -101,6 +101,8 @@ static void *udp_recving_msgs(void *arg) {
         if (len) {
             CLONE_TO_CHUNK(*buf, str, len)
             lfqueue_put(queue, buf);
+        }else {
+            free_buffer(buf);
         }
         zero(str);
     }
@@ -111,12 +113,12 @@ static void *udp_recv_msg(void *arg) {
     ld_dev_udp_para_t *udp_para = (ld_dev_udp_para_t *)arg;
     pthread_t fl_th, rl_th;
     // int *recv_fd = (config.role == LD_AS) ? &udp_para.fl_fd : &udp_para.rl_fd;
-    if (config.role != LD_GS) {
+    if (config.role == LD_AS) {
         if (pthread_create(&fl_th, NULL, udp_recving_msgs, udp_para) != 0) {
             log_error("Attacker FL Receiving thread create failed");
         }
         pthread_join(fl_th, NULL);
-    } else if (config.role != LD_AS) {
+    } else if (config.role == LD_GS) {
         if (pthread_create(&rl_th, NULL, udp_recving_msgs, udp_para) != 0) {
             log_error("Attacker RL Receiving thread create failed");
         }
