@@ -11,3 +11,6 @@ http:
   http_port: 9456
   auto_auth: 1
 
+# direct snp
+AS-SAC: 301
+GS-SAC: 16

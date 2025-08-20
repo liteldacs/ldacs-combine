@@ -49,6 +49,11 @@ l_err start_mms() {
     switch (config.role) {
         case LD_AS:
             register_gtimer_event(&gtimer, &lme_mms_obj.lme_obj->gtimer[2]);
+
+            if (config.direct_snp) {
+                // TODO: 应在这里发送认证第一条
+                lme_layer_objs.finish_status = LME_CONNECTING_FINISHED;
+            }
             break;
         case LD_GS:
             register_gtimer_event(&gtimer, &lme_mms_obj.lme_obj->gtimer[0]);
@@ -208,6 +213,11 @@ void M_SAPR_cb(ld_prim_t *prim) {
         }
         switch (prim->prim_obj_typ) {
             case R_TYP_CR: {
+
+                if (config.direct_snp) {
+                    // 如果是测试版本，直接跳过处理
+                    break;
+                }
                 //TODO: 应更改！！！！！
                 // if (times++ != 0) return;
 
@@ -219,28 +229,13 @@ void M_SAPR_cb(ld_prim_t *prim) {
 
                 // 北航merge、无GSC模式
                 if (config.is_beihang || config.is_merged == false) {
-                    /* simulate sac alloc procession */
-                    // uint16_t sac = generate_urand(SAC_LEN);
-                    // if (has_lme_as_enode(sac) == FALSE) {
-                    //     set_lme_as_enode(init_as_man(sac, cr->UA, lme_layer_objs.GS_SAC));
-                    // }
-                    // if (register_snf_en(LD_GS, sac, cr->UA, lme_layer_objs.GS_SAC) != LDCAUC_OK) {
-                    //     log_warn("Can not register snf");
-                    //     break;
-                    // }
-                    // dls_en_data_t *dls_en_data = &(dls_en_data_t){
-                    //     .GS_SAC = lme_layer_objs.GS_SAC,
-                    //     .AS_UA = cr->UA,
-                    //     .AS_SAC = sac, //和GSC共同协商分配给AS的SAC 10.6.4.5
-                    // };
-                    //
-                    // preempt_prim(&DLS_OPEN_REQ_PRIM, DL_TYP_GS_INIT, dls_en_data, NULL, 0, 0);
                     mms_setup_entity(generate_urand(SAC_LEN), cr->UA);
                 } else {
                     // 内部merge
                     inside_combine_sac_request(cr->UA);
                     // setup_entity(generate_urand(SAC_LEN), cr->UA);
                 }
+
 
                 break;
             }

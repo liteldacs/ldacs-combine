@@ -31,3 +31,33 @@ for i in {1..15}; do
 
   sleep 0.2
 done
+
+#for i in {1..10}; do
+#
+#  new_i1=$((i * 3 - 2))
+#  new_i2=$((i * 3 - 1))
+#  new_i3=$((i * 3 ))
+#  cmd1=$(cb-as $new_i1 )
+#  cmd2=$(cb-as $new_i2 )
+#  cmd3=$(cb-as $new_i3 )
+#
+#  echo $new_i1 $cmd1
+#  konsole  --geometry 1000x500 --hold -e bash -l -c \
+#         "cd '$ldb_path' && \
+#          $cmd1 && \
+#          exec bash" &
+#
+#  echo $new_i2 $cmd2
+#  konsole  --geometry 1000x500 --hold -e bash -l -c \
+#         "cd '$ldb_path' && \
+#          $cmd2 && \
+#          exec bash" &
+#
+#  echo $new_i3 $cmd3
+#  konsole  --geometry 1000x500 --hold -e bash -l -c \
+#         "cd '$ldb_path' && \
+#          $cmd3 && \
+#          exec bash" &
+#
+#  sleep 0.2
+#done

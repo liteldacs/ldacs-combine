@@ -133,10 +133,16 @@ l_err make_lme_layer() {
         case LD_GS: {
             switch (config.role) {
                 case LD_AS: {
-                    /* AS set the initial state 'FSCANNING' */
-                    init_lme_fsm(&lme_layer_objs, LME_FSCANNING);
-                    lme_layer_objs.lme_as_man = init_as_man(DEFAULT_SAC, config.UA, DEFAULT_SAC);
-                    init_as_snf_layer(as_finish_auth_func, trans_snp_data, register_snf_failed);
+                    if (config.direct_snp) {
+                        init_lme_fsm(&lme_layer_objs, LME_FSCANNING);
+                        lme_layer_objs.lme_as_man = init_as_man(config.AS_SAC, config.UA, config.GS_SAC);
+                        init_as_snf_layer(as_finish_auth_func, trans_snp_data, register_snf_failed);
+                    } else {
+                        /* AS set the initial state 'FSCANNING' */
+                        init_lme_fsm(&lme_layer_objs, LME_FSCANNING);
+                        lme_layer_objs.lme_as_man = init_as_man(DEFAULT_SAC, config.UA, DEFAULT_SAC);
+                        init_as_snf_layer(as_finish_auth_func, trans_snp_data, register_snf_failed);
+                    }
                     break;
                 }
                 case LD_GS: {
@@ -144,25 +150,25 @@ l_err make_lme_layer() {
                         &lme_layer_objs.to_sync.lpointer, &lme_layer_objs.to_sync.lpointer
                     };
                     lme_layer_objs.to_sync_head = &lme_layer_objs.to_sync.lpointer;
-                    if (config.is_merged) {
-                        if (config.is_beihang) {
-                            init_gs_snf_layer(&config, trans_snp_data, register_snf_failed,
-                                              gst_handover_complete_key);
-                        } else if (config.is_e304) {
-                            init_gs_snf_layer_inside(&config, trans_snp_data, register_snf_failed,
-                                                     gst_handover_complete_key, mms_setup_entity);
+
+                    if (config.direct_snp) {
+
+                        //TODO: 选择一个GS 的init方法,应首选 is_e304同款，但是需要在这里就做好三十个AS的mms_setup_entity，相当于弃用最后一个函数指针
+                    }else {
+                        if (config.is_merged) {
+                            if (config.is_beihang) {
+                                init_gs_snf_layer(&config, trans_snp_data, register_snf_failed,
+                                                  gst_handover_complete_key);
+                            } else if (config.is_e304) {
+                                init_gs_snf_layer_inside(&config, trans_snp_data, register_snf_failed,
+                                                         gst_handover_complete_key, mms_setup_entity);
+                            }
+                        } else {
+                            init_gs_snf_layer_unmerged(&config, trans_snp_data, register_snf_failed,
+                                                       gst_handover_complete_key);
                         }
-                    } else {
-                        init_gs_snf_layer_unmerged(&config, trans_snp_data, register_snf_failed,
-                                                   gst_handover_complete_key);
                     }
-                    // config.is_merged == TRUE
-                    //     ? init_gs_snf_layer(config.GS_SAC, config.gsnf_addr_v6, config.gsnf_remote_port,
-                    //                         config.gsnf_local_port, trans_snp_data, register_snf_failed,
-                    //                         gst_handover_complete_key)
-                    //     : init_gs_snf_layer_unmerged(config.GS_SAC, config.gsnf_addr, config.gsnf_remote_port,
-                    //                                  config.gsnf_local_port,
-                    //                                  trans_snp_data, register_snf_failed, gst_handover_complete_key);
+
 
                     /* GS set the initial state 'OPEN' */
                     init_lme_fsm(&lme_layer_objs, LME_OPEN);
