@@ -1,212 +1,317 @@
-//
-// Created by jiaxv on 25-8-22.
+// Created by jiaxv on 25-8-14.
 //
 
 #include "ev_net.h"
-// 服务端读取回调
-static void server_read_cb(struct bufferevent *bev, void *ctx) {
-    ev_server_context_t *server = (ev_server_context_t *)ctx;
+
+
+
+
+static void default_tcp_accept_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address,
+                                  int socklen, void *ctx);
+
+static void default_tcpv6_accept_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address,
+                                  int socklen, void *ctx);
+
+
+
+l_err default_send_pkt2(client_info_t *info, buffer_t *in_buf, l_err (*mid_func)(buffer_t *, void *),
+                       void *args) {
+    if (!info) {
+        log_error("Client info is null");
+        return LD_ERR_NULL;
+    }
+
+    struct evbuffer *output = bufferevent_get_output(info->bev);
+    buffer_t *buf = init_buffer_unptr();
+    if (mid_func) {
+        mid_func(buf, args);
+    }
+    cat_to_buffer(buf, in_buf->ptr, in_buf->len);
+    // log_buf(LOG_INFO, "Send OUT", buf->ptr, buf->len);
+
+    evbuffer_add(output, buf->ptr, buf->len);
+
+    return LD_OK;
+}
+
+// 读事件回调函数
+void default_read_cb(struct bufferevent *bev, void *ctx) {
+    client_info_t *client = ctx;
     struct evbuffer *input = bufferevent_get_input(bev);
-    char buffer[BUFFER_SIZE];
 
-    while (evbuffer_get_length(input)) {
-        int n = evbuffer_remove(input, buffer, sizeof(buffer) - 1);
-        if (n > 0) {
-            buffer[n] = '\0';
-            log_info("[%s] 收到数据: %s", server->name, buffer);
+    char buffer[MAX_LINE];
+    size_t len;
 
-            if (server->recv_handler) {
-                server->recv_handler(server->arg);
-            }
-        }
+    // 读取所有可用数据
+    while ((len = evbuffer_remove(input, buffer, sizeof(buffer) - 1)) > 0) {
+        buffer[len] = '\0';
+
+        buffer_t *read_buf = init_buffer_unptr();
+        CLONE_TO_CHUNK(*read_buf, buffer, len);
+        log_buf(LOG_INFO, "Read", read_buf->ptr, read_buf->len);
+        client->net_ctx->recv_handler2(read_buf);
     }
 }
 
-// 客户端读取回调
-static void client_read_cb(struct bufferevent *bev, void *ctx) {
-    ev_client_context_t *client = (ev_client_context_t *)ctx;
-    struct evbuffer *input = bufferevent_get_input(bev);
-    char buffer[BUFFER_SIZE];
+// 写事件回调函数
+static void default_write_cb(struct bufferevent *bev, void *ctx) {
+    client_info_t *client = (client_info_t *)ctx;
+    struct evbuffer *output = bufferevent_get_output(bev);
 
-    while (evbuffer_get_length(input)) {
-        int n = evbuffer_remove(input, buffer, sizeof(buffer) - 1);
-        if (n > 0) {
-            buffer[n] = '\0';
-            if (client->recv_handler) {
-                client->recv_handler(client->arg);
-            }
-            // printf("[%s] 收到回复: %s", client->name, buffer);
-        }
+    // 检查输出缓冲区是否已清空
+    if (evbuffer_get_length(output) == 0) {
+        log_info("Send Finish");
     }
 }
 
-
-// 服务端事件回调
-static void server_event_cb(struct bufferevent *bev, short events, void *ctx) {
-    ev_server_context_t *server = (ev_server_context_t *)ctx;
-
-    if (events & BEV_EVENT_ERROR) {
-        log_error("[%s] 连接错误\n", server->name);
+// 事件回调函数（处理错误和连接关闭）
+static void default_event_cb(struct bufferevent *bev, short events, void *ctx) {
+    client_info_t *client = (client_info_t *)ctx;
+    if (!client) {
+        bufferevent_free(bev);
+        log_warn("Client NUll");
+        return;
     }
+
     if (events & BEV_EVENT_EOF) {
-        log_info("[%s] 客户端断开连接\n", server->name);
-    }
-
-    bufferevent_free(bev);
-}
-
-static void client_event_cb(struct bufferevent *bev, short events, void *ctx) {
-    ev_client_context_t *client = (ev_client_context_t *)ctx;
-
-    if (events & BEV_EVENT_CONNECTED) {
-        log_info("[%s] 成功连接到 %s\n", client->name, client->peer_ip);
+        log_warn("client %d closed", client->id);
     } else if (events & BEV_EVENT_ERROR) {
-        log_error("[%s] 连接错误\n", client->name);
-    } else if (events & BEV_EVENT_EOF) {
-        log_warn("[%s] 连接关闭\n", client->name);
+        log_error("client %d connect fatal: %s",
+               client->id, strerror(errno));
+    } else if (events & BEV_EVENT_TIMEOUT) {
+        log_warn("client %d time out", client->id);
+    } else if (events & BEV_EVENT_CONNECTED) {
+        log_info("client %d connect successful", client->id);
+        return;
     }
+
+    // 清理资源
+    bufferevent_free(bev);
+    free(client);
+    client->net_ctx->client_count--;
+    log_info("Current client: %d", client->net_ctx->client_count);
+}
+
+// 监听错误回调
+static void default_accept_error_cb(struct evconnlistener *listener, void *ctx) {
+    struct event_base *base = ctx;
+    int err = EVUTIL_SOCKET_ERROR();
+
+    fprintf(stderr, "监听器错误 %d: %s\n", err,
+            evutil_socket_error_to_string(err));
+
+    event_base_loopexit(base, NULL);
+}
+
+// 信号处理函数
+static void default_signal_cb(evutil_socket_t sig, short events, void *user_data) {
+    struct event_base *base = user_data;
+    struct timeval delay = { 1, 0 };
+
+    log_fatal("Catch signal %d，exiting...", sig);
+    event_base_loopexit(base, &delay);
+}
+
+static l_err init_std_tcp_server_handler(uint16_t port, net_ctx_t *ctx) {
+    memset(&ctx->sin, 0, sizeof(ctx->sin));
+    ctx->sin.sin_family = AF_INET;
+    ctx->sin.sin_addr.s_addr = htonl(INADDR_ANY);
+    ctx->sin.sin_port = htons(port);
+    ctx->listener = evconnlistener_new_bind(ctx->base, default_tcp_accept_cb, ctx,
+                                       LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE,
+                                       -1,  // backlog，-1表示使用默认值
+                                       (struct sockaddr *)&ctx->sin,
+                                       sizeof(ctx->sin));
+
+    if (!ctx->listener) {
+        log_error("create listener failed");
+        event_base_free(ctx->base);
+        return LD_ERR_INTERNAL;
+    }
+
+    evconnlistener_set_error_cb(ctx->listener, default_accept_error_cb);
+    return LD_OK;
+}
+
+static l_err init_std_tcpv6_server_handler(uint16_t port, net_ctx_t *ctx) {
+    memset(&ctx->sin6, 0, sizeof(ctx->sin6));
+    ctx->sin6.sin6_family = AF_INET6;
+    ctx->sin6.sin6_addr = in6addr_any;
+    ctx->sin6.sin6_port = htons(port);
+    ctx->listener = evconnlistener_new_bind(ctx->base, default_tcpv6_accept_cb, ctx,
+                                       LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE,
+                                       -1,  // backlog，-1表示使用默认值
+                                       (struct sockaddr *)&ctx->sin6,
+                                       sizeof(ctx->sin6));
+
+    if (!ctx->listener) {
+        log_error("create listener failed");
+        event_base_free(ctx->base);
+        return LD_ERR_INTERNAL;
+    }
+
+    evconnlistener_set_error_cb(ctx->listener, default_accept_error_cb);
+    return LD_OK;
+}
+
+const struct role_propt2 role_propts[] = {
+    {LD_TCP_CLIENT, NULL},
+    {LD_TCPV6_CLIENT, NULL},
+    {LD_TCP_SERVER, init_std_tcp_server_handler},
+    {LD_TCPV6_SERVER, init_std_tcpv6_server_handler},
+    {0, 0},
+};
+
+const struct role_propt2 *get_role_propt2(int s_r) {
+    for (int i = 0; role_propts[i].s_r != 0; i++) {
+        if (role_propts[i].s_r == s_r)
+            return role_propts + i;
+    }
+    return NULL;
+}
+
+l_err server_entity_setup2(uint16_t port, net_ctx_t *ctx, int s_r) {
+    ctx->base = event_base_new();
+    if (!ctx->base) {
+        log_error(stderr, "init event_base failed");
+        return LD_ERR_INTERNAL;
+    }
+
+    log_info("Server using I/O method: %s", event_base_get_method(ctx->base));
+
+    const struct role_propt2 *rp = get_role_propt2(s_r);
+    if (rp->server_make) {
+        ctx->server_fd = rp->server_make(port, ctx);
+    }
+
+    // 注册信号处理事件（SIGINT）
+    ctx->signal_event = evsignal_new(ctx->base, SIGINT, default_signal_cb, ctx->base);
+    if (!ctx->signal_event || event_add(ctx->signal_event, NULL) < 0) {
+        log_error("can not add signal event.");
+        evconnlistener_free(ctx->listener);
+        event_base_free(ctx->base);
+        return LD_ERR_INTERNAL;
+    }
+
+    log_info("TCP server start successfully, listening on port: %d.", port);
+    // 进入事件循环
+    event_base_dispatch(ctx->base);
+
+    // 清理资源
+    log_info("server closing...");
+
+    if (ctx->signal_event) {
+        event_free(ctx->signal_event);
+    }
+    if (ctx->listener) {
+        evconnlistener_free(ctx->listener);
+    }
+    if (ctx->base) {
+        event_base_free(ctx->base);
+    }
+
+    log_info("server closed");
+    return LD_OK;
 }
 
 
 
-// 服务端接受连接回调
-static void accept_conn_cb(struct evconnlistener *listener, evutil_socket_t fd,
-                          struct sockaddr *address, int socklen, void *ctx) {
-    ev_server_context_t *server = (ev_server_context_t *)ctx;
-    struct event_base *base = evconnlistener_get_base(listener);
-    struct bufferevent *bev;
+static void default_tcp_accept_cb(struct evconnlistener *listener,
+                     evutil_socket_t fd,
+                     struct sockaddr *address,
+                     int socklen,
+                     void *ctx) {
+    net_ctx_t *net_ctx = ctx;
+    struct sockaddr_in *sin = (struct sockaddr_in *)address;
 
-    // 创建bufferevent
-    bev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
-    if (!bev) {
-        log_warn("[%s] 创建bufferevent失败\n", server->name);
+    // 创建客户端信息结构
+    client_info_t *client = malloc(sizeof(client_info_t));
+    if (!client) {
+        printf("分配客户端结构失败\n");
         close(fd);
         return;
     }
 
-    // 设置回调
-    bufferevent_setcb(bev, server_read_cb, NULL, server_event_cb, server);
-    bufferevent_enable(bev, EV_READ | EV_WRITE);
-}
+    client->fd = fd;
+    client->addr = *sin;
+    client->id = ++ net_ctx->client_id_counter;
+    client->net_ctx = net_ctx;
 
-static void *run_server(void *args) {
-    ev_server_context_t *server = args;
-    // 运行事件循环
-    event_base_dispatch(server->base);
+    printf("[客户端 %d] 新连接来自 %s:%d\n",
+           client->id,
+           inet_ntoa(sin->sin_addr),
+           ntohs(sin->sin_port));
 
-    // 清理
-    evconnlistener_free(server->listener);
-    event_base_free(server->base);
+    // 设置socket为非阻塞模式
+    evutil_make_socket_nonblocking(fd);
 
-    return NULL;
-}
-
-static void *run_client(void *args) {
-    ev_client_context_t *client = args;
-    // 运行事件循环
-    event_base_dispatch(client->base);
-
-    if (client->bev) {
-        bufferevent_free(client->bev);
-    }
-    event_base_free(client->base);
-
-    return NULL;
-}
-
-
-l_err setup_server(ev_server_context_t *server) {
-    evthread_use_pthreads();
-    server->base = event_base_new();
-    if (!server->base) {
-        log_info("[%s] 创建event_base失败\n", server->name);
-        return LD_ERR_INTERNAL;
+    // 创建bufferevent
+    client->bev = bufferevent_socket_new(net_ctx->base, fd, BEV_OPT_CLOSE_ON_FREE);
+    if (!client->bev) {
+        printf("创建bufferevent失败\n");
+        free(client);
+        close(fd);
+        return;
     }
 
-    struct sockaddr_in sin = {0};
 
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = htonl(INADDR_ANY);
-    sin.sin_port = htons(server->port);
+    // 设置回调函数
+    bufferevent_setcb(client->bev, default_read_cb, default_write_cb, default_event_cb, client);
 
-    // 创建监听器
-    server->listener = evconnlistener_new_bind(
-        server->base, accept_conn_cb, server,
-        LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE,
-        -1, (struct sockaddr*)&sin, sizeof(sin));
-
-    if (!server->listener) {
-        log_error("[%s] 创建监听器失败\n", server->name);
-        event_base_free(server->base);
-        return LD_ERR_INTERNAL;
-    }
-
-    log_info("Setting up server... listening on port: %d", server->port);
-
-    pthread_create(&server->th, NULL, run_server, server);
-    pthread_detach(server->th);
-    return LD_OK;
-}
-
-l_err setup_client(ev_client_context_t *client) {
-    evthread_use_pthreads();
-    client->base = event_base_new();
-    if (!client->base) {
-        log_error("[%s] 创建event_base失败\n", client->name);
-        return LD_ERR_INTERNAL;
-    }
-
-    // 创建 socket
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0) {
-        log_error("[%s] 创建socket失败\n", client->name);
-        event_base_free(client->base);
-        return LD_ERR_INTERNAL;
-    }
-
-    // 设置 socket 选项，允许地址重用
-    int on = 1;
-    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
-
-    // 绑定本地地址和端口
-    struct sockaddr_in local_sin = {0};
-    local_sin.sin_family = AF_INET;
-    local_sin.sin_addr.s_addr = INADDR_ANY;  // 或者指定具体的本地IP
-    local_sin.sin_port = htons(client->local_port);  // 使用固定的本地端口
-
-    if (bind(sock, (struct sockaddr *)&local_sin, sizeof(local_sin)) < 0) {
-        log_error("[%s] 绑定本地端口 %d 失败: %s\n",
-                  client->name, client->local_port, strerror(errno));
-        close(sock);
-        event_base_free(client->base);
-        return LD_ERR_INTERNAL;
-    }
-
-    // 设置为非阻塞模式
-    evutil_make_socket_nonblocking(sock);
-
-
-    client->bev = bufferevent_socket_new(client->base, sock, BEV_OPT_CLOSE_ON_FREE);
-    bufferevent_setcb(client->bev, client_read_cb, NULL, client_event_cb, client);
+    // 启用读写事件
     bufferevent_enable(client->bev, EV_READ | EV_WRITE);
 
-    struct sockaddr_in sin = {0};
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = inet_addr(client->peer_ip);
-    sin.sin_port = htons(client->peer_port);
+    net_ctx->client_count++;
+    printf("当前在线客户端数: %d\n", net_ctx->client_count);
+}
 
-    if (bufferevent_socket_connect(client->bev,
-        (struct sockaddr *)&sin, sizeof(sin)) < 0) {
-        log_error("[%s] 连接服务端\n", client->name);
-        bufferevent_free(client->bev);
-        client->bev = NULL;
-        return LD_ERR_INTERNAL;
+static void default_tcpv6_accept_cb(struct evconnlistener *listener,
+                     evutil_socket_t fd,
+                     struct sockaddr *address,
+                     int socklen,
+                     void *ctx) {
+    net_ctx_t *net_ctx = ctx;
+    struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)address;
+    char ip_str[INET6_ADDRSTRLEN];
+
+    // 创建客户端信息结构
+    client_info_t *client = malloc(sizeof(client_info_t));
+    if (!client) {
+        printf("分配客户端结构失败\n");
+        close(fd);
+        return;
     }
 
-    log_info("Setting up client... listening on port: %d", client->local_port);
+    client->fd = fd;
+    client->addr6 = *sin6;
+    client->id = ++ net_ctx->client_id_counter;
+    client->net_ctx = net_ctx;
 
-    pthread_create(&client->th, NULL, run_client, client);
-    pthread_detach(client->th);
+    inet_ntop(AF_INET6, &sin6->sin6_addr, ip_str, INET6_ADDRSTRLEN);
+    printf("[客户端 %d] 新连接来自 %s:%d\n",
+           client->id,
+           ip_str,
+           ntohs(sin6->sin6_port));
 
-    return LD_OK;
+    // 设置socket为非阻塞模式
+    evutil_make_socket_nonblocking(fd);
+
+    // 创建bufferevent
+    client->bev = bufferevent_socket_new(net_ctx->base, fd, BEV_OPT_CLOSE_ON_FREE);
+    if (!client->bev) {
+        printf("创建bufferevent失败\n");
+        free(client);
+        close(fd);
+        return;
+    }
+
+
+    // 设置回调函数
+    bufferevent_setcb(client->bev, default_read_cb, default_write_cb, default_event_cb, client);
+
+    // 启用读写事件
+    bufferevent_enable(client->bev, EV_READ | EV_WRITE);
+
+    net_ctx->client_count++;
+    printf("当前在线客户端数: %d\n", net_ctx->client_count);
 }
