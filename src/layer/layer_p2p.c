@@ -39,16 +39,16 @@ void *p2p_conn_connect(net_ctx_t *ctx, char *remote_addr, int remote_port, int l
     peer_propt->bc.remote_port = remote_port;
     peer_propt->bc.local_port = local_port;
 
-    if (init_basic_conn(&peer_propt->bc, ctx, LD_TCP_CLIENT) == FALSE) {
+    if (init_basic_conn_client(&peer_propt->bc, ctx, LD_TCP_CLIENT) == FALSE) {
         return NULL;
     }
     return peer_propt;
 }
 
-l_err p2p_conn_accept(net_ctx_t *ctx) {
+l_err p2p_conn_accept(net_ctx_t *ctx, int fd, struct sockaddr_storage *saddr) {
     peer_propt_t *peer_propt = malloc(sizeof(peer_propt_t));
 
-    if (init_basic_conn(&peer_propt->bc, ctx, LD_TCP_SERVER) == FALSE) {
+    if (init_basic_conn_server(&peer_propt->bc, ctx, LD_TCP_SERVER, fd, saddr) == FALSE) {
         log_error("Cannot initialize connection!");
         free(peer_propt);
         return LD_ERR_INTERNAL;

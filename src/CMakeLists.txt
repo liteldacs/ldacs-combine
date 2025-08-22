@@ -8,6 +8,5 @@ add_subdirectory(roles)
 add_subdirectory(layer)
 add_subdirectory(device)
 add_subdirectory(service)
-add_subdirectory(tools)
 
 
