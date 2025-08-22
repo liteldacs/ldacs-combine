@@ -151,9 +151,20 @@ l_err make_lme_layer() {
                     };
                     lme_layer_objs.to_sync_head = &lme_layer_objs.to_sync.lpointer;
 
-                    if (config.direct_snp) {
+                    /* GS set the initial state 'OPEN' */
+                    init_lme_fsm(&lme_layer_objs, LME_OPEN);
+                    lme_layer_objs.GS_SAC = config.GS_SAC;
+                    lme_layer_objs.LME_GS_AUTH_AS = init_lme_sac_map();
 
+
+                    if (config.direct_snp) {
                         //TODO: 选择一个GS 的init方法,应首选 is_e304同款，但是需要在这里就做好三十个AS的mms_setup_entity，相当于弃用最后一个函数指针
+                        init_gs_snf_layer_inside(&config, trans_snp_data, register_snf_failed,
+                                                 gst_handover_complete_key, mms_setup_entity);
+                         for (int i = 0; i < 30; i++) {
+                             mms_setup_entity(301 + i, 1012345 + i * 10000);
+                         }
+
                     }else {
                         if (config.is_merged) {
                             if (config.is_beihang) {
@@ -169,11 +180,6 @@ l_err make_lme_layer() {
                         }
                     }
 
-
-                    /* GS set the initial state 'OPEN' */
-                    init_lme_fsm(&lme_layer_objs, LME_OPEN);
-                    lme_layer_objs.GS_SAC = config.GS_SAC;
-                    lme_layer_objs.LME_GS_AUTH_AS = init_lme_sac_map();
 
                     init_p2p_service(config.peer_server_port, config.peers, config.peer_count, send_ho_com);
                     break;

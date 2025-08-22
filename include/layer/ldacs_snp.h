@@ -75,7 +75,7 @@ typedef struct snp_pdu_s {
 
 typedef struct snp_direct_s {
     uint16_t AS_SAC;
-    uint16_t GB_SAC;
+    uint16_t GS_SAC;
     buffer_t *snp_pdu;
 }snp_direct_t;
 

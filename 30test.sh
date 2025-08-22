@@ -7,7 +7,7 @@ cb-as() {
     echo "错误：请提供一个正整数参数（例如：cb-as 1）"
     return 1
   fi
-  echo "clear && ./ldacs-combine -c \"../../config/ldacs_config_as_$1.yaml\" -D"
+  echo "clear && ./ldacs-combine -c \"../../config/ldacs_config_as_$1.yaml\" -E -D"
 }
 
 for i in {1..15}; do

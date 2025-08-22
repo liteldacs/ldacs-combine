@@ -11,3 +11,5 @@ http:
   http_port: 9123
   auto_auth: 1
 
+AS-SAC: 302
+GS-SAC: 16

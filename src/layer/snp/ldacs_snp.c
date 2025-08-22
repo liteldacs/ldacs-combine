@@ -211,6 +211,8 @@ void SN_SAPD(ld_prim_t *prim) {
     }
 
     orient_sdu_t *orient_sdu_from = dup_prim_data(prim->prim_objs, sizeof(orient_sdu_t));
+
+        log_warn("?????????/ %d %d", orient_sdu_from->AS_SAC, orient_sdu_from->GS_SAC);
     orient_sdu_t *orient_sdu_to = create_orient_sdus(orient_sdu_from->AS_SAC, orient_sdu_from->GS_SAC);
     buffer_t *buf = orient_sdu_from->buf;
 
@@ -277,9 +279,10 @@ void SN_SAPD(ld_prim_t *prim) {
 
         snp_direct_t direct = {
             .AS_SAC = orient_sdu_to->AS_SAC,
-            .GB_SAC = orient_sdu_to->GS_SAC,
+            .GS_SAC = orient_sdu_to->GS_SAC,
             .snp_pdu = init_buffer_unptr(),
         };
+
 
         CLONE_TO_CHUNK(*direct.snp_pdu, snp_pbs.start, pbs_offset(&snp_pbs));
         snp_layer_objs.device->send_pkt(snp_layer_objs.device, gen_pdu(&direct, &snp_direct_desc, "SNP DIRECT"), config.role == LD_AS ? RL : FL);
@@ -316,6 +319,8 @@ l_err process_direct_snp(void *args) {
     snp_direct_t *direct = calloc(1, sizeof(snp_direct_t));
     PARSE_DSTR_PKT(buf, direct, snp_pdu, snp_direct_desc, 3, 0);
 
+    log_warn("?????????/ %d %d", direct->AS_SAC, direct->GS_SAC);
+
 
     if (config.role == LD_AS) {
         if (direct->AS_SAC != lme_layer_objs.lme_as_man->AS_SAC) {
@@ -326,7 +331,7 @@ l_err process_direct_snp(void *args) {
     }
 
 
-    orient_sdu_t *o_sdu = create_orient_sdus(direct->AS_SAC, direct->GB_SAC);
+    orient_sdu_t *o_sdu = create_orient_sdus(direct->AS_SAC, direct->GS_SAC);
     CLONE_TO_CHUNK(*o_sdu->buf, direct->snp_pdu->ptr, direct->snp_pdu->len);
 
     free_buffer(direct->snp_pdu);
@@ -342,6 +347,7 @@ l_err process_snp(orient_sdu_t *o_sdu) {
     pb_stream pbs;
     zero(&pbs);
     snp_pdu_t pdu;
+
 
     /* TODO: 搞出更多的错误代码，然后再网关显示 */
     if (snpsub_vfy_hmac(o_sdu->AS_SAC, snp_layer_objs.SEC, snp_in->ptr, snp_in->len) != LDCAUC_OK) {

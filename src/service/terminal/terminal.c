@@ -87,6 +87,10 @@ static void monitor_terminal_input() {
 static l_err init_terminal_service() {
     log_info("The ldacs simulator is using 'UNUSE HTTP' mode.");
 
+    if (config.direct_snp) {
+        terminal_obj.AS_SAC = config.AS_SAC;
+    }
+
     rcu_power_on(config.role); //power on directly
     if (config.role == LD_AS) rcu_start_auth();
 
@@ -103,6 +107,7 @@ static void handle_as_info_key_upd_terminal(as_info_key_upd_t *as_upd) {
     const char *tag = "AS_SAC";
     if (as_upd->key->len >= strlen(tag) && !memcmp(as_upd->key->ptr, tag, strlen(tag))) {
         terminal_obj.AS_SAC = as_upd->value;
+
     }
 }
 

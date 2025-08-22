@@ -257,13 +257,17 @@ int8_t mms_setup_entity(uint16_t sac, uint32_t UA) {
         log_warn("Can not register snf");
         return LD_ERR_INTERNAL;
     }
-    dls_en_data_t *dls_en_data = &(dls_en_data_t){
-        .GS_SAC = lme_layer_objs.GS_SAC,
-        .AS_UA = UA,
-        .AS_SAC = sac, //和GSC共同协商分配给AS的SAC 10.6.4.5
-    };
 
-    preempt_prim(&DLS_OPEN_REQ_PRIM, DL_TYP_GS_INIT, dls_en_data, NULL, 0, 0);
+    if (!config.direct_snp) {
+
+        dls_en_data_t *dls_en_data = &(dls_en_data_t){
+            .GS_SAC = lme_layer_objs.GS_SAC,
+            .AS_UA = UA,
+            .AS_SAC = sac, //和GSC共同协商分配给AS的SAC 10.6.4.5
+        };
+
+        preempt_prim(&DLS_OPEN_REQ_PRIM, DL_TYP_GS_INIT, dls_en_data, NULL, 0, 0);
+    }
     return LD_OK;
 }
 
