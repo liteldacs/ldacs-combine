@@ -11,3 +11,5 @@ http:
   http_port: 25641
   auto_auth: 1
 
+AS-SAC: 305
+GS-SAC: 16

@@ -48,9 +48,9 @@ enum_names sib_cms_names = {CMS_TYP_1, CMS_TYP_8, sib_cms_name, NULL};
 l_err start_mms() {
     switch (config.role) {
         case LD_AS:
-            register_gtimer_event(&gtimer, &lme_mms_obj.lme_obj->gtimer[2]);
-
-            if (config.direct_snp) {
+            if (!config.direct_snp) {
+                register_gtimer_event(&gtimer, &lme_mms_obj.lme_obj->gtimer[2]);
+            }else{
                 // TODO: 应在这里发送认证第一条
                 lme_layer_objs.finish_status = LME_CONNECTING_FINISHED;
             }

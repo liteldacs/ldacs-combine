@@ -10,7 +10,7 @@ cb-as() {
   echo "clear && ./ldacs-combine -c \"../../config/ldacs_config_as_$1.yaml\" -E -D"
 }
 
-for i in {1..15}; do
+for i in {1..10}; do
 
   new_i1=$((i * 2 - 1))
   new_i2=$((i * 2 ))
@@ -29,7 +29,7 @@ for i in {1..15}; do
           $cmd2 && \
           exec bash" &
 
-  sleep 0.2
+#  sleep 0.1
 done
 
 #for i in {1..10}; do
