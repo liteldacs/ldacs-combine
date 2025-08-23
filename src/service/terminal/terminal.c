@@ -11,6 +11,35 @@
 terminal_obj_t terminal_obj = {
 
 };
+#pragma pack(1)
+typedef struct tcp_v6_s {
+    uint8_t version;
+    uint8_t traffic_class;
+    uint32_t flow_label;
+    uint16_t payload_len;
+    uint8_t next_header;
+    uint8_t hop_limit;
+    buffer_t *src_address;
+    buffer_t *dst_address;
+    buffer_t *data;
+} tcp_v6_t;
+#pragma pack()
+
+static field_desc tcp_v6_fields[] = {
+    {ft_set, 4, "VERSION", NULL},
+    {ft_set, 8, "TRAFFIC CLASS", NULL},
+    {ft_set, 20, "FLOW LABEL", NULL},
+    {ft_set, 16, "PAYLOAD LEN", NULL},
+    {ft_set, 8, "NEXT HEADER", NULL},
+    {ft_set, 8, "HOP LIMIT", NULL},
+    {ft_pad, 0, "PAD", NULL},
+    {ft_fl_str, 0, "IP SRC", &(pk_fix_length_t){.len = 16}},
+    {ft_fl_str, 0, "IP DST", &(pk_fix_length_t){.len = 16}},
+    {ft_dl_str, 0, "DATA", NULL},
+    {ft_pad, 0, "PAD", NULL},
+    {ft_end, 0, NULL, NULL},
+};
+struct_desc_t tcp_v6_desc = {"TCP V6", tcp_v6_fields};
 
 static l_err init_terminal_service();
 
@@ -98,9 +127,47 @@ static l_err init_terminal_service() {
     return LD_OK;
 }
 
+void *send_user_data_func(void *args) {
+    tcp_v6_t v6 = {
+        .version = 0x6,
+        .traffic_class = 0x3,
+        .flow_label = 0x1,
+        .payload_len = 11,
+        .next_header = 0x7,
+        .hop_limit = 0x10,
+        .src_address = init_buffer_unptr(),
+        .dst_address = init_buffer_unptr(),
+        .data = init_buffer_unptr()
+    };
+
+    struct in6_addr addr;
+    inet_pton(AF_INET6, "3::1", &addr);
+
+    CLONE_TO_CHUNK(*v6.src_address, addr.__in6_u.__u6_addr8, 16);
+    CLONE_TO_CHUNK(*v6.dst_address, addr.__in6_u.__u6_addr8, 16);
+
+    CLONE_TO_CHUNK(*v6.data, "hello world", 11);
+    buffer_t *buf = gen_pdu(&v6, &tcp_v6_desc, "TCP V6");
+
+    log_buf(LOG_INFO, "IPV6", buf->ptr, buf->len);
+    while (1) {
+        sleep(1);
+        send_user_data( buf->ptr, buf->len, terminal_obj.AS_SAC);
+    }
+
+    return NULL;
+}
+
 
 static void handle_st_chg_terminal(lme_state_chg_t *st_chg) {
-    // log_warn("The Current LME state is %d, by %.02x", st_chg->state, st_chg->sac);
+    log_warn("The Current LME state is %d, by %.02x", st_chg->state, st_chg->sac);
+
+    if (config.direct_snp) {
+        if (st_chg->state != LME_OPEN) return;
+
+        pthread_create(&terminal_obj.data_th, NULL, send_user_data_func, NULL);
+        pthread_detach(terminal_obj.data_th);
+    }
 }
 
 static void handle_as_info_key_upd_terminal(as_info_key_upd_t *as_upd) {
@@ -115,7 +182,11 @@ static void handle_as_info_upd_terminal(as_info_upd_t *as_info) {
 }
 
 static void handle_user_msg_terminal(user_msg_t *umsg) {
-    log_fatal("USER MESSAGE %s", umsg->msg->ptr);
+
+    char msg[100] = {0};
+    memcpy(msg, umsg->msg->ptr, umsg->msg->len);
+
+    log_fatal("USER MESSAGE %s", msg);
 }
 
 static void send_singal_data_terminal(int argc, char **argv) {
