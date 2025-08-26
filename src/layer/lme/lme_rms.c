@@ -262,7 +262,6 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
 
                     lme_as_man_t *as_man = lme_rms_obj.lme_obj->lme_as_man;
                     if (config.direct_snp) {
-                        // TODO: -E -D 退出不正常問題在這裏
                         add_co(&as_man->CO, resp->CO);
                     } else {
                         if (resp->UA != config.UA) {
