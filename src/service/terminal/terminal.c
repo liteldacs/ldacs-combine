@@ -151,7 +151,7 @@ void *send_user_data_func(void *args) {
 
     log_buf(LOG_INFO, "IPV6", buf->ptr, buf->len);
     while (1) {
-        sleep(1);
+        sleep(5);
         send_user_data( buf->ptr, buf->len, terminal_obj.AS_SAC);
     }
 

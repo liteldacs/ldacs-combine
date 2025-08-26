@@ -274,7 +274,7 @@ void SN_SAPD(ld_prim_t *prim) {
     close_output_pbs(&snp_pbs);
 
     CLONE_TO_CHUNK(*orient_sdu_to->buf, snp_pbs.start, pbs_offset(&snp_pbs));
-        log_buf(LOG_INFO, "SNP OUT", orient_sdu_to->buf->ptr, orient_sdu_to->buf->len);
+        // log_buf(LOG_INFO, "SNP OUT", orient_sdu_to->buf->ptr, orient_sdu_to->buf->len);
 
     if (config.direct_snp) {
 
@@ -350,7 +350,7 @@ l_err process_snp(orient_sdu_t *o_sdu) {
     zero(&pbs);
     snp_pdu_t pdu;
 
-        log_buf(LOG_FATAL, "SNP IN", snp_in->ptr, snp_in->len);
+        // log_buf(LOG_FATAL, "SNP IN", snp_in->ptr, snp_in->len);
 
 
     /* TODO: 搞出更多的错误代码，然后再网关显示 */

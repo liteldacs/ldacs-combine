@@ -272,6 +272,8 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                     as_man_update_key_handler(as_man, &as_man->AS_CURR_GS_SAC, lme_layer_objs.GS_SAC, sizeof(uint16_t),
                                               "GS_SAC");
 
+                    // TODO: -E -D 退出不正常問題在這裏
+                    log_warn("!!!!!!!!!!!");
                     add_co(&as_man->CO, resp->CO);
 
                     dls_en_data_t *dls_en_data = &(dls_en_data_t){

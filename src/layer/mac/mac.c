@@ -824,6 +824,7 @@ l_err generate_dc_pkt() {
     /* 9.1.1.2.4  The MAC sub-layer maps the DCCH into (a dedicated sub-slot of) the DC slot. */
     // ld_lock(&mac_layer_objs.CO.mutex);
     ld_lock(&lme_layer_objs.lme_as_man->CO.mutex);
+    // log_warn("!!!!!!!!!!! %d", lme_layer_objs.lme_as_man->CO.co_n);
     for (int i = 0; i < lme_layer_objs.lme_as_man->CO.co_n; i++) {
         ld_lock(&mac_layer_objs.COS.mutex);
         if (judge_co(lme_layer_objs.lme_as_man->CO.co[i])) {
@@ -848,6 +849,7 @@ l_err generate_dc_pkt() {
                 mac_layer_objs.dc_curr_sz = 0;
                 while (!pqueue_empty(mac_layer_objs.dc_pq) && mac_layer_objs.dc_curr_sz <= DC_SDU_LEN_MAX) {
                     pqueue_pop(mac_layer_objs.dc_pq, (void **) &node);
+
                     if (node == NULL) {
                         ld_unlock(&mac_layer_objs.COS.mutex);
                         ld_unlock(&lme_layer_objs.lme_as_man->CO.mutex);
