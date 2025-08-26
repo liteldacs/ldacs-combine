@@ -48,10 +48,9 @@ enum_names sib_cms_names = {CMS_TYP_1, CMS_TYP_8, sib_cms_name, NULL};
 l_err start_mms() {
     switch (config.role) {
         case LD_AS:
-            if (!config.direct_snp) {
-                register_gtimer_event(&gtimer, &lme_mms_obj.lme_obj->gtimer[2]);
-            }else{
-                // TODO: 应在这里发送认证第一条
+            register_gtimer_event(&gtimer, &lme_mms_obj.lme_obj->gtimer[2]);
+            if (config.direct_snp) {
+                // TODO: direct_snp 应在这里发送认证第一条
                 lme_layer_objs.finish_status = LME_CONNECTING_FINISHED;
             }
             break;
@@ -96,8 +95,10 @@ void *trans_lme_bc_timer_func(void *args) {
 
 void *trans_ra_cr_timer_func(void *args) {
     //only for LME_CONNECTING state
-    if (!in_state(&lme_mms_obj.lme_obj->lme_fsm, lme_fsm_states[LME_CONNECTING])) {
-        return NULL;
+    if (!config.direct_snp) {
+        if (!in_state(&lme_mms_obj.lme_obj->lme_fsm, lme_fsm_states[LME_CONNECTING])) {
+            return NULL;
+        }
     }
     ra_cell_rqst_t rqst = {
         .r_type = R_TYP_CR,
@@ -197,6 +198,8 @@ void M_SAPB_cb(ld_prim_t *prim) {
 
 // int times = 0;
 
+int cr_times = 0;
+
 void M_SAPR_cb(ld_prim_t *prim) {
     if (prim->prim_seq == MAC_RACH_IND) {
         ld_format_desc_t *desc = &ra_format_descs[prim->prim_obj_typ];
@@ -213,27 +216,34 @@ void M_SAPR_cb(ld_prim_t *prim) {
         }
         switch (prim->prim_obj_typ) {
             case R_TYP_CR: {
-
-                if (config.direct_snp) {
-                    // 如果是测试版本，直接跳过处理
-                    break;
-                }
                 //TODO: 应更改！！！！！
                 // if (times++ != 0) return;
 
                 ra_cell_rqst_t *cr = data_struct;
                 //判断是否存在该UA的连接
-                if (lme_map_has_ua(cr->UA)) {
-                    return;
+                if (!config.direct_snp) {
+                    if (lme_map_has_ua(cr->UA)) {
+                        return;
+                    }
                 }
 
                 // 北航merge、无GSC模式
                 if (config.is_beihang || config.is_merged == false) {
                     mms_setup_entity(generate_urand(SAC_LEN), cr->UA);
-                } else {
+                }
+                if (!config.direct_snp) {
                     // 内部merge
                     inside_combine_sac_request(cr->UA);
-                    // setup_entity(generate_urand(SAC_LEN), cr->UA);
+                } else {
+                    if (cr_times) break;
+                    dls_en_data_t *dls_en_data = &(dls_en_data_t){
+                        .GS_SAC = lme_layer_objs.GS_SAC,
+                        .AS_UA = cr->UA,
+                        .AS_SAC = cr->SAC, //和GSC共同协商分配给AS的SAC 10.6.4.5
+                    };
+
+                    preempt_prim(&DLS_OPEN_REQ_PRIM, DL_TYP_GS_INIT, dls_en_data, NULL, 0, 0);
+                    cr_times++;
                 }
 
 
@@ -259,7 +269,6 @@ int8_t mms_setup_entity(uint16_t sac, uint32_t UA) {
     }
 
     if (!config.direct_snp) {
-
         dls_en_data_t *dls_en_data = &(dls_en_data_t){
             .GS_SAC = lme_layer_objs.GS_SAC,
             .AS_UA = UA,
@@ -268,6 +277,7 @@ int8_t mms_setup_entity(uint16_t sac, uint32_t UA) {
 
         preempt_prim(&DLS_OPEN_REQ_PRIM, DL_TYP_GS_INIT, dls_en_data, NULL, 0, 0);
     }
+
     return LD_OK;
 }
 

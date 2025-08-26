@@ -118,6 +118,7 @@ void D_SAPD(ld_prim_t *prim) {
  * Control DLS entity open or not
  */
 void D_SAPC(ld_prim_t *prim) {
+    if (config.direct_snp) return;
     switch (prim->prim_seq) {
         case DLS_OPEN_REQ: {
             dls_en_data_t *en_data = prim->prim_objs;

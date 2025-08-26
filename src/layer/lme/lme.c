@@ -131,6 +131,8 @@ l_err make_lme_layer() {
     switch (config.role) {
         case LD_AS:
         case LD_GS: {
+            init_lme_mms(&lme_layer_objs);
+            init_lme_rms(&lme_layer_objs);
             switch (config.role) {
                 case LD_AS: {
                     if (config.direct_snp) {
@@ -188,8 +190,6 @@ l_err make_lme_layer() {
                     break;
                 }
             }
-            init_lme_mms(&lme_layer_objs);
-            init_lme_rms(&lme_layer_objs);
             break;
         }
         case LD_SGW: {

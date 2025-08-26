@@ -891,8 +891,10 @@ l_err generate_data_pkt() {
             return LD_ERR_NULL;
         }
         ld_lock(&mac_layer_objs.CCL.mutex);
-        size_t blk0_sz = FL_DATA_BLK_3_F_LEN_MAX - ((mac_layer_objs.CCL.value - 1) * CC_BLK_LEN_MIN);
+        ssize_t blk0_sz = FL_DATA_BLK_3_F_LEN_MAX - ((mac_layer_objs.CCL.value - 1) * CC_BLK_LEN_MIN);
         ld_unlock(&mac_layer_objs.CCL.mutex);
+
+        if (blk0_sz < 0) return LD_ERR_INVALID;
 
         buffer_t *sdu_buf = init_buffer_ptr(blk0_sz + FL_DATA_BLK_2_F_LEN_MAX * 3);
 

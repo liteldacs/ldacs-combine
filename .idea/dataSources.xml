@@ -16,7 +16,7 @@
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
     <data-source source="LOCAL" name="sgw_keys_000010000.db" uuid="5bdd0f19-6395-493b-adef-695ae9069dfe">
-      <driver-ref>7660ad73-0834-483d-ac20-ec9ea940a537</driver-ref>
+      <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$USER_HOME$/.ldcauc/sgw_keys_000010000.db</jdbc-url>

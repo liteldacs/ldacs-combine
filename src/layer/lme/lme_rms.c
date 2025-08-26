@@ -260,32 +260,37 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                 case C_TYP_CELL_RESP: {
                     cc_cell_resp_t *resp = data_struct;
 
-                    if (resp->UA != config.UA) {
-                        break;
+                    lme_as_man_t *as_man = lme_rms_obj.lme_obj->lme_as_man;
+                    if (config.direct_snp) {
+                        // TODO: -E -D 退出不正常問題在這裏
+                        add_co(&as_man->CO, resp->CO);
+                    } else {
+                        if (resp->UA != config.UA) {
+                            break;
+                        }
+
+                        if (resp->UA != as_man->AS_UA) break;
+
+                        /* set the AS SAC and GS SAC of AS LME  */
+                        as_man_update_key_handler(as_man, &as_man->AS_SAC, resp->SAC, sizeof(uint16_t), "AS_SAC");
+                        as_man_update_key_handler(as_man, &as_man->AS_CURR_GS_SAC, lme_layer_objs.GS_SAC,
+                                                  sizeof(uint16_t),
+                                                  "GS_SAC");
+
+                        add_co(&as_man->CO, resp->CO);
+
+                        dls_en_data_t *dls_en_data = &(dls_en_data_t){
+                            .GS_SAC = lme_layer_objs.GS_SAC,
+                            .AS_UA = resp->UA,
+                            .AS_SAC = resp->SAC,
+                        };
+
+                        // init as dls entity ,未来做切换的时候需要考虑可行性
+                        preempt_prim(&DLS_OPEN_REQ_PRIM, DL_TYP_AS_INIT, dls_en_data, NULL, 0, 0);
+
+                        lme_layer_objs.finish_status = LME_CONNECTING_FINISHED;
                     }
 
-                    lme_as_man_t *as_man = lme_rms_obj.lme_obj->lme_as_man;
-                    if (resp->UA != as_man->AS_UA) break;
-
-                    /* set the AS SAC and GS SAC of AS LME  */
-                    as_man_update_key_handler(as_man, &as_man->AS_SAC, resp->SAC, sizeof(uint16_t), "AS_SAC");
-                    as_man_update_key_handler(as_man, &as_man->AS_CURR_GS_SAC, lme_layer_objs.GS_SAC, sizeof(uint16_t),
-                                              "GS_SAC");
-
-                    // TODO: -E -D 退出不正常問題在這裏
-                    log_warn("!!!!!!!!!!!");
-                    add_co(&as_man->CO, resp->CO);
-
-                    dls_en_data_t *dls_en_data = &(dls_en_data_t){
-                        .GS_SAC = lme_layer_objs.GS_SAC,
-                        .AS_UA = resp->UA,
-                        .AS_SAC = resp->SAC,
-                    };
-
-                    // init as dls entity ,未来做切换的时候需要考虑可行性
-                    preempt_prim(&DLS_OPEN_REQ_PRIM, DL_TYP_AS_INIT, dls_en_data, NULL, 0, 0);
-
-                    lme_layer_objs.finish_status = LME_CONNECTING_FINISHED;
                     break;
                 }
                 case C_TYP_HO_COM: {
