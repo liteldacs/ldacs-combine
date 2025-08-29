@@ -261,7 +261,7 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                     cc_cell_resp_t *resp = data_struct;
 
                     lme_as_man_t *as_man = lme_rms_obj.lme_obj->lme_as_man;
-                    if (config.direct_snp) {
+                    if (config.direct) {
                         add_co(&as_man->CO, resp->CO);
                     } else {
                         if (resp->UA != config.UA) {
@@ -298,7 +298,7 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                     cc_ho_com_t *ho_com = data_struct;
                     //HO2不需要CELL_EXIT！！！！除非信号特别差得手动退出
 
-                    set_new_snp_frequency(1112.0, 966.0);
+                    set_new_dls_frequency(1112.0, 966.0);
 
                     /* Tell MAC change to HO2 state */
                     if ((prim->prim_err = preempt_prim(&MAC_HO_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0)) != LD_OK) {

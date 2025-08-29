@@ -135,7 +135,7 @@ l_err make_lme_layer() {
             init_lme_rms(&lme_layer_objs);
             switch (config.role) {
                 case LD_AS: {
-                    if (config.direct_snp) {
+                    if (config.direct) {
                         init_lme_fsm(&lme_layer_objs, LME_FSCANNING);
                         lme_layer_objs.lme_as_man = init_as_man(config.AS_SAC, config.UA, config.GS_SAC);
                         init_as_snf_layer(as_finish_auth_func, trans_snp_data, register_snf_failed);
@@ -159,15 +159,14 @@ l_err make_lme_layer() {
                     lme_layer_objs.LME_GS_AUTH_AS = init_lme_sac_map();
 
 
-                    if (config.direct_snp) {
+                    if (config.direct) {
                         //TODO: 选择一个GS 的init方法,应首选 is_e304同款，但是需要在这里就做好三十个AS的mms_setup_entity，相当于弃用最后一个函数指针
                         init_gs_snf_layer_inside(&config, trans_snp_data, register_snf_failed,
                                                  gst_handover_complete_key, mms_setup_entity);
-                         for (int i = 0; i < 30; i++) {
-                             mms_setup_entity(301 + i, 1012345 + i * 10000);
-                         }
-
-                    }else {
+                        for (int i = 0; i < 30; i++) {
+                            mms_setup_entity(301 + i, 1012345 + i * 10000);
+                        }
+                    } else {
                         if (config.is_merged) {
                             if (config.is_beihang) {
                                 init_gs_snf_layer(&config, trans_snp_data, register_snf_failed,
@@ -283,13 +282,13 @@ void L_SAPC(ld_prim_t *prim) {
                 peer_propt_t *peer = get_peer_propt(handover_opt->GST_SAC);
                 if (!peer) return;
 
-                peer->bc.opt->send_handler(&peer->bc, gen_pdu( &(ho_peer_ini_t){
-                                               .is_ACK = FALSE,
-                                               .AS_SAC = as_man->AS_SAC,
-                                               .AS_UA = as_man->AS_UA,
-                                               .GSS_SAC = snf_obj.GS_SAC,
-                                               .GST_SAC = handover_opt->GST_SAC
-                                           }, &handover_peer_ini_desc, "HO PEER INI"), NULL, NULL);
+                peer->bc.opt->send_handler(&peer->bc, gen_pdu(&(ho_peer_ini_t){
+                                                                  .is_ACK = FALSE,
+                                                                  .AS_SAC = as_man->AS_SAC,
+                                                                  .AS_UA = as_man->AS_UA,
+                                                                  .GSS_SAC = snf_obj.GS_SAC,
+                                                                  .GST_SAC = handover_opt->GST_SAC
+                                                              }, &handover_peer_ini_desc, "HO PEER INI"), NULL, NULL);
             }
 
             break;
@@ -573,14 +572,14 @@ int8_t gst_handover_complete_key(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_S
     if (!peer) return LD_ERR_INTERNAL;
 
     uint16_t next_co = get_CO();
-    peer->bc.opt->send_handler(&peer->bc, gen_pdu( &(ho_peer_ini_t){
-                                   .is_ACK = TRUE,
-                                   .AS_SAC = AS_SAC,
-                                   .AS_UA = 0, //useless in ACK, set 0
-                                   .GSS_SAC = GSS_SAC,
-                                   .GST_SAC = lme_layer_objs.GS_SAC,
-                                   .NEXT_CO = next_co,
-                               }, &handover_peer_ini_desc, "HO PEER INI"), NULL, NULL);
+    peer->bc.opt->send_handler(&peer->bc, gen_pdu(&(ho_peer_ini_t){
+                                                      .is_ACK = TRUE,
+                                                      .AS_SAC = AS_SAC,
+                                                      .AS_UA = 0, //useless in ACK, set 0
+                                                      .GSS_SAC = GSS_SAC,
+                                                      .GST_SAC = lme_layer_objs.GS_SAC,
+                                                      .NEXT_CO = next_co,
+                                                  }, &handover_peer_ini_desc, "HO PEER INI"), NULL, NULL);
 
 
     if (has_lme_as_enode(AS_SAC) == FALSE) {

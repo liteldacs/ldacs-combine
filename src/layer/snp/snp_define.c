@@ -36,11 +36,3 @@ static field_desc snp_pdu_fields[] = {
 };
 struct_desc_t snp_pdu_desc = {"SNP_PDU", snp_pdu_fields};
 
-static field_desc snp_direct_fields[] = {
-    {ft_set, 12, "AS SAC", NULL},
-    {ft_set, 12, "GS SAC", NULL},
-    {ft_pad, 0, "PAD", NULL},
-    {ft_dl_str, 0, "DATA", NULL},
-    {ft_end, 0, NULL, NULL},
-};
-struct_desc_t snp_direct_desc = {"SNP_PDU", snp_direct_fields};

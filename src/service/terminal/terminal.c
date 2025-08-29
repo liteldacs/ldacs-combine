@@ -137,7 +137,7 @@ static void monitor_terminal_input() {
 static l_err init_terminal_service() {
     log_info("The ldacs simulator is using 'UNUSE HTTP' mode.");
 
-    if (config.direct_snp) {
+    if (config.direct) {
         terminal_obj.AS_SAC = config.AS_SAC;
     }
 
@@ -193,7 +193,7 @@ void *send_user_data_func(void *args) {
 static void handle_st_chg_terminal(lme_state_chg_t *st_chg) {
     log_warn("The Current LME state is %d, by %.02x", st_chg->state, st_chg->sac);
 
-    if (config.direct_snp) {
+    if (config.direct) {
         if (st_chg->state != LME_OPEN) return;
 
         pthread_create(&terminal_obj.data_th, NULL, send_user_data_func, NULL);

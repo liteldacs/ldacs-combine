@@ -1,7 +1,12 @@
 //
 // Created by 邹嘉旭 on 2024/3/22.
 //
+
+#include <iso646.h>
+
 #include "ldacs_dls.h"
+
+l_err process_direct_dls(void *args);
 
 dls_layer_objs_t dls_layer_objs = {
 };
@@ -72,11 +77,55 @@ l_err make_dls_layer() {
         default:
             break;
     }
+    if (config.direct) {
+        if ((dls_layer_objs.device = set_device("UDP", process_direct_dls)) == NULL) {
+            log_error("Cannot set SNP device");
+            return LD_ERR_INTERNAL;
+        }
+
+        if (set_new_dls_frequency(config.init_fl_freq, config.init_rl_freq) != LD_OK) {
+            return LD_ERR_INTERNAL;
+        }
+
+        if (pthread_create(&dls_layer_objs.recv_th, NULL, start_recv, dls_layer_objs.device) != 0) {
+            return LD_ERR_THREAD;
+        }
+        pthread_detach(dls_layer_objs.recv_th);
+    }
+
     return LD_OK;
 }
 
 void D_SAPD(ld_prim_t *prim) {
     orient_sdu_t *ori_sdu = dup_prim_data(prim->prim_objs, sizeof(orient_sdu_t));
+
+    if (config.direct) {
+        dls_data_t data = {
+            .TYP = ACK_DATA,
+            .RST = 0,
+            .LFR = 0,
+            .SC = 0,
+            .PID = 0,
+            .SEQ2 = 0,
+            .DATA = ori_sdu->buf,
+        };
+        dls_direct_t direct = {
+            .AS_SAC = ori_sdu->AS_SAC,
+            .GS_SAC = ori_sdu->GS_SAC,
+            .dls_pdu = gen_pdu(&data, &dls_data_desc, "DLS DATA DIRECT"),
+        };
+
+        buffer_t *out = gen_pdu(&direct, &dls_direct_desc, "DLS DIRECT");
+
+        dls_layer_objs.device->send_pkt(dls_layer_objs.device, out,
+                                        config.role == LD_AS ? RL : FL);
+
+        free_buffer(direct.dls_pdu);
+        free_buffer(out);
+
+        return;
+    }
+
     buffer_t *snp_pdu = init_buffer_unptr();
     CLONE_BY_BUFFER(*snp_pdu, *ori_sdu->buf);
     const dls_entity_t *d_entity = NULL;
@@ -118,7 +167,7 @@ void D_SAPD(ld_prim_t *prim) {
  * Control DLS entity open or not
  */
 void D_SAPC(ld_prim_t *prim) {
-    if (config.direct_snp) return;
+    if (config.direct) return;
     switch (prim->prim_seq) {
         case DLS_OPEN_REQ: {
             dls_en_data_t *en_data = prim->prim_objs;
@@ -321,3 +370,43 @@ void L_SAPR_cb(ld_prim_t *prim) {
         }
     }
 }
+
+l_err process_direct_dls(void *args) {
+    buffer_t *buf = args;
+    dls_direct_t *direct = calloc(1, sizeof(dls_direct_t));
+    PARSE_DSTR_PKT(buf, direct, dls_pdu, dls_direct_desc, 3, 0);
+    dls_data_t *data = parse_sdu(direct->dls_pdu, &dls_data_desc, sizeof(dls_data_t));
+
+    if (config.role == LD_AS) {
+        if (direct->AS_SAC != lme_layer_objs.lme_as_man->AS_SAC) {
+            free_buffer(direct->dls_pdu);
+            free(direct);
+            return LD_OK;
+        }
+    }
+
+    orient_sdu_t *o_sdu = create_orient_sdus(direct->AS_SAC, direct->GS_SAC);
+    CLONE_TO_CHUNK(*o_sdu->buf, data->DATA->ptr, data->DATA->len);
+
+    free_buffer(direct->dls_pdu);
+    free(direct);
+    free_buffer(data->DATA);
+    free(data);
+
+    l_err err = preempt_prim(&DLS_DATA_IND_PRIM, E_TYP_ANY, o_sdu, free_orient_sdus, 0, 0);
+    // free_orient_sdus(o_sdu);
+    return err;
+}
+
+l_err set_new_dls_frequency(double fl_freq, double rl_freq) {
+    if (!set_new_freq(dls_layer_objs.device, fl_freq + 50.0, FL)) {
+        log_error("Cannot set new frequency");
+        return LD_ERR_INTERNAL;
+    }
+    if (!set_new_freq(dls_layer_objs.device, rl_freq + 50.0, RL)) {
+        log_error("Cannot set new frequency");
+        return LD_ERR_INTERNAL;
+    }
+    return LD_OK;
+}
+

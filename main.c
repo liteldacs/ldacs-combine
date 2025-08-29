@@ -44,7 +44,7 @@ config_t config = {
     .UA = 0,
     .is_merged = FALSE,
     .role = LD_UNDEFINED,
-    .direct_snp = FALSE,
+    .direct = FALSE,
 };
 
 
@@ -136,7 +136,7 @@ int opt_parse(int argc, char *const *argv) {
                 break;
             }
             case 'D': {
-                config.direct_snp = TRUE;
+                config.direct = TRUE;
                 break;
             }
             case 'B': {

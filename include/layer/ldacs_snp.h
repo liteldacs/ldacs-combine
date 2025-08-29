@@ -46,8 +46,8 @@ typedef struct snp_layer_objs_s {
     uint32_t T_SQN;
     sm_statemachine_t snp_fsm;
 
-    device_entity_t *device;
-    pthread_t recv_th;
+    // device_entity_t *device;
+    // pthread_t recv_th;
 } snp_layer_objs_t;
 
 enum snp_fsm_event_type {
@@ -73,12 +73,6 @@ typedef struct snp_pdu_s {
     uint32_t sqn;
 } snp_pdu_t;
 
-typedef struct snp_direct_s {
-    uint16_t AS_SAC;
-    uint16_t GS_SAC;
-    buffer_t *snp_pdu;
-}snp_direct_t;
-
 #pragma pack() //恢复（一定要恢复）
 
 extern const enum_names snp_pdu_ctrl_names;
@@ -88,7 +82,6 @@ extern const enum_names snp_pdu_sec_names;
 #define SNP_HEAD_LEN (1+3+4+24)
 
 extern struct_desc_t snp_pdu_desc;
-extern struct_desc_t snp_direct_desc;
 
 extern ld_prim_t SN_DATA_REQ_PRIM;
 extern ld_prim_t SN_DATA_IND_PRIM;
@@ -103,7 +96,6 @@ l_err make_snp_layer();
 
 void init_snp_fsm(snp_layer_objs_t *snp_obj, enum SNP_FSM_STATES_E init_state);
 
-l_err set_new_snp_frequency(double fl_freq, double rl_freq);
 
 void SN_SAPC(ld_prim_t *prim);
 

@@ -58,6 +58,8 @@ typedef struct dls_layer_objs_s {
     dls_entity_t *AS_DLS;
     struct hashmap *as_dls_map;
     sm_statemachine_t dls_fsm;
+    device_entity_t *device;
+    pthread_t recv_th;
 } dls_layer_objs_t;
 
 extern dls_layer_objs_t dls_layer_objs;
@@ -158,6 +160,13 @@ typedef struct dc_frag_ack_s {
     uint16_t SEQ1;
 } dc_frag_ack_t;
 
+
+typedef struct dls_direct_s {
+    uint16_t AS_SAC;
+    uint16_t GS_SAC;
+    buffer_t *dls_pdu;
+} dls_direct_t;
+
 #pragma pack()
 #define DATA_TYPE_LEN 1
 #define DATA_HEAD_LEN 9  /* (1b+1b+1b+3b+5b+11b+11b+7b+32b) / 8 = 9B */
@@ -176,6 +185,7 @@ extern struct_desc_t cc_ack_desc;
 extern struct_desc_t dc_ack_desc;
 extern struct_desc_t cc_frag_ack_desc;
 extern struct_desc_t dc_frag_ack_desc;
+extern struct_desc_t dls_direct_desc;
 
 l_err make_dls_layer();
 
@@ -260,4 +270,6 @@ static const void *dls_delete_map_node(const uint16_t SAC, l_err (*clear_func)(d
 
 
 void delete_dls_enode_by_ua(uint16_t ua_as);
+
+l_err set_new_dls_frequency(double fl_freq, double rl_freq);
 #endif //LDACS_SIM_LDACS_DLS_H

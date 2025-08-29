@@ -49,8 +49,8 @@ l_err start_mms() {
     switch (config.role) {
         case LD_AS:
             register_gtimer_event(&gtimer, &lme_mms_obj.lme_obj->gtimer[2]);
-            if (config.direct_snp) {
-                // TODO: direct_snp 应在这里发送认证第一条
+            if (config.direct) {
+                // TODO: direct 应在这里发送认证第一条
                 lme_layer_objs.finish_status = LME_CONNECTING_FINISHED;
             }
             break;
@@ -95,7 +95,7 @@ void *trans_lme_bc_timer_func(void *args) {
 
 void *trans_ra_cr_timer_func(void *args) {
     //only for LME_CONNECTING state
-    if (!config.direct_snp) {
+    if (!config.direct) {
         if (!in_state(&lme_mms_obj.lme_obj->lme_fsm, lme_fsm_states[LME_CONNECTING])) {
             return NULL;
         }
@@ -221,7 +221,7 @@ void M_SAPR_cb(ld_prim_t *prim) {
 
                 ra_cell_rqst_t *cr = data_struct;
                 //判断是否存在该UA的连接
-                if (!config.direct_snp) {
+                if (!config.direct) {
                     if (lme_map_has_ua(cr->UA)) {
                         return;
                     }
@@ -231,7 +231,7 @@ void M_SAPR_cb(ld_prim_t *prim) {
                 if (config.is_beihang || config.is_merged == false) {
                     mms_setup_entity(generate_urand(SAC_LEN), cr->UA);
                 }
-                if (!config.direct_snp) {
+                if (!config.direct) {
                     // 内部merge
                     inside_combine_sac_request(cr->UA);
                 } else {
@@ -268,7 +268,7 @@ int8_t mms_setup_entity(uint16_t sac, uint32_t UA) {
         return LD_ERR_INTERNAL;
     }
 
-    if (!config.direct_snp) {
+    if (!config.direct) {
         dls_en_data_t *dls_en_data = &(dls_en_data_t){
             .GS_SAC = lme_layer_objs.GS_SAC,
             .AS_UA = UA,

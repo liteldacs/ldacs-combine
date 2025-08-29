@@ -77,3 +77,12 @@ static field_desc dc_frag_ack_fields[] = {
 };
 
 struct_desc_t dc_frag_ack_desc = {"DC_FRAG_ACK_DESC", dc_frag_ack_fields};
+
+static field_desc dls_direct_fields[] = {
+    {ft_set, 12, "AS SAC", NULL},
+    {ft_set, 12, "GS SAC", NULL},
+    {ft_pad, 0, "PAD", NULL},
+    {ft_dl_str, 0, "DATA", NULL},
+    {ft_end, 0, NULL, NULL},
+};
+struct_desc_t dls_direct_desc = {"DLS_PDU", dls_direct_fields};

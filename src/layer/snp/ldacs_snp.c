@@ -10,7 +10,7 @@
 #include <ldacs_def.h>
 #include <snp_sub.h>
 
-l_err process_direct_snp(void *args);
+l_err process_direct(void *args);
 
 l_err process_snp(orient_sdu_t *o_sdu);
 
@@ -101,55 +101,22 @@ l_err make_snp_layer() {
         }
     }
 
-    // if (config.direct_snp) {
-    //     snp_layer_objs.device = set_device("UDP", NULL);
-    //
-    //     if (config.role == LD_AS) {
-    //         snp_layer_objs.udp_para->rl_send_fd =  init_udp_bd_send(&snp_layer_objs.udp_para->rl_send_addr, 26789);
-    //         snp_layer_objs.udp_para->fl_recv_fd =  init_udp_bd_recv(27789);
-    //     }else {
-    //         snp_layer_objs.udp_para->fl_send_fd =  init_udp_bd_send(&snp_layer_objs.udp_para->fl_send_addr, 27789);
-    //         snp_layer_objs.udp_para->rl_recv_fd =  init_udp_bd_recv(26789);
+    // if (config.direct) {
+    //     if ((snp_layer_objs.device = set_device("UDP", process_direct)) == NULL) {
+    //         log_error("Cannot set SNP device");
+    //         return LD_ERR_INTERNAL;
     //     }
     //
+    //     if (set_new_snp_frequency(config.init_fl_freq, config.init_rl_freq) != LD_OK) {
+    //         return LD_ERR_INTERNAL;
+    //     }
+    //
+    //     if (pthread_create(&snp_layer_objs.recv_th, NULL, start_recv, snp_layer_objs.device) != 0) {
+    //         return LD_ERR_THREAD;
+    //     }
+    //     pthread_detach(snp_layer_objs.recv_th);
     // }
 
-    if (config.direct_snp) {
-        if ((snp_layer_objs.device = set_device("UDP", process_direct_snp)) == NULL) {
-            log_error("Cannot set SNP device");
-            return LD_ERR_INTERNAL;
-        }
-        // if (!set_new_freq(snp_layer_objs.device, config.init_fl_freq + 50.0, FL)) {
-        //     log_error("Cannot set new frequency");
-        //     return LD_ERR_INTERNAL;
-        // }
-        // if (!set_new_freq(snp_layer_objs.device, config.init_rl_freq + 50.0, RL)) {
-        //     log_error("Cannot set new frequency");
-        //     return LD_ERR_INTERNAL;
-        // }
-
-        if (set_new_snp_frequency(config.init_fl_freq, config.init_rl_freq) != LD_OK) {
-            return LD_ERR_INTERNAL;
-        }
-
-        if (pthread_create(&snp_layer_objs.recv_th, NULL, start_recv, snp_layer_objs.device) != 0) {
-            return LD_ERR_THREAD;
-        }
-        pthread_detach(snp_layer_objs.recv_th);
-    }
-
-    return LD_OK;
-}
-
-l_err set_new_snp_frequency(double fl_freq, double rl_freq) {
-    if (!set_new_freq(snp_layer_objs.device, fl_freq + 50.0, FL)) {
-        log_error("Cannot set new frequency");
-        return LD_ERR_INTERNAL;
-    }
-    if (!set_new_freq(snp_layer_objs.device, rl_freq + 50.0, RL)) {
-        log_error("Cannot set new frequency");
-        return LD_ERR_INTERNAL;
-    }
     return LD_OK;
 }
 
@@ -200,7 +167,6 @@ void SN_SAPC(ld_prim_t *prim) {
 }
 
 void SN_SAPD(ld_prim_t *prim) {
-
     if (in_state(&snp_layer_objs.snp_fsm, snp_fsm_states[SNP_CLOSED])) {
         prim->prim_err = LD_ERR_WRONG_STATE;
         return;
@@ -274,24 +240,25 @@ void SN_SAPD(ld_prim_t *prim) {
     close_output_pbs(&snp_pbs);
 
     CLONE_TO_CHUNK(*orient_sdu_to->buf, snp_pbs.start, pbs_offset(&snp_pbs));
-        // log_buf(LOG_INFO, "SNP OUT", orient_sdu_to->buf->ptr, orient_sdu_to->buf->len);
+    // log_buf(LOG_INFO, "SNP OUT", orient_sdu_to->buf->ptr, orient_sdu_to->buf->len);
 
-    if (config.direct_snp) {
+    preempt_prim(&DLS_DATA_REQ_PRIM, prim->prim_obj_typ, orient_sdu_to, free_orient_sdus, 0, 0);
 
-        snp_direct_t direct = {
-            .AS_SAC = orient_sdu_to->AS_SAC,
-            .GS_SAC = orient_sdu_to->GS_SAC,
-            .snp_pdu = init_buffer_unptr(),
-        };
-
-
-        CLONE_TO_CHUNK(*direct.snp_pdu, snp_pbs.start, pbs_offset(&snp_pbs));
-        snp_layer_objs.device->send_pkt(snp_layer_objs.device, gen_pdu(&direct, &snp_direct_desc, "SNP DIRECT"), config.role == LD_AS ? RL : FL);
-        free_buffer(direct.snp_pdu);
-    }else {
-        preempt_prim(&DLS_DATA_REQ_PRIM, prim->prim_obj_typ, orient_sdu_to, free_orient_sdus, 0, 0);
-    }
-
+    // if (config.direct) {
+    //     snp_direct_t direct = {
+    //         .AS_SAC = orient_sdu_to->AS_SAC,
+    //         .GS_SAC = orient_sdu_to->GS_SAC,
+    //         .snp_pdu = init_buffer_unptr(),
+    //     };
+    //
+    //
+    //     CLONE_TO_CHUNK(*direct.snp_pdu, snp_pbs.start, pbs_offset(&snp_pbs));
+    //     snp_layer_objs.device->send_pkt(snp_layer_objs.device, gen_pdu(&direct, &snp_direct_desc, "SNP DIRECT"),
+    //                                     config.role == LD_AS ? RL : FL);
+    //     free_buffer(direct.snp_pdu);
+    // } else {
+    //     preempt_prim(&DLS_DATA_REQ_PRIM, prim->prim_obj_typ, orient_sdu_to, free_orient_sdus, 0, 0);
+    // }
 
 
     free_buffer(enc_buf);
@@ -315,42 +282,42 @@ void D_SAPD_cb(ld_prim_t *prim) {
     }
 }
 
-l_err process_direct_snp(void *args) {
-    buffer_t *buf = args;
-    snp_direct_t *direct = calloc(1, sizeof(snp_direct_t));
-    PARSE_DSTR_PKT(buf, direct, snp_pdu, snp_direct_desc, 3, 0);
-
-    // log_fatal("^^^ HAS RECV: %d", direct->AS_SAC);
-
-    if (config.role == LD_AS) {
-        if (direct->AS_SAC != lme_layer_objs.lme_as_man->AS_SAC) {
-            free_buffer(direct->snp_pdu);
-            free(direct);
-            return LD_OK;
-        }
-    }
-
-    // log_warn("?????????/ %d %d", direct->AS_SAC, direct->GS_SAC);
-
-
-    orient_sdu_t *o_sdu = create_orient_sdus(direct->AS_SAC, direct->GS_SAC);
-    CLONE_TO_CHUNK(*o_sdu->buf, direct->snp_pdu->ptr, direct->snp_pdu->len);
-
-    free_buffer(direct->snp_pdu);
-    free(direct);
-
-    const l_err err = process_snp(o_sdu);
-    free_orient_sdus(o_sdu);
-    return err;
-}
-
+// l_err process_direct(void *args) {
+//     buffer_t *buf = args;
+//     snp_direct_t *direct = calloc(1, sizeof(snp_direct_t));
+//     PARSE_DSTR_PKT(buf, direct, snp_pdu, snp_direct_desc, 3, 0);
+//
+//     // log_fatal("^^^ HAS RECV: %d", direct->AS_SAC);
+//
+//     if (config.role == LD_AS) {
+//         if (direct->AS_SAC != lme_layer_objs.lme_as_man->AS_SAC) {
+//             free_buffer(direct->snp_pdu);
+//             free(direct);
+//             return LD_OK;
+//         }
+//     }
+//
+//     // log_warn("?????????/ %d %d", direct->AS_SAC, direct->GS_SAC);
+//
+//
+//     orient_sdu_t *o_sdu = create_orient_sdus(direct->AS_SAC, direct->GS_SAC);
+//     CLONE_TO_CHUNK(*o_sdu->buf, direct->snp_pdu->ptr, direct->snp_pdu->len);
+//
+//     free_buffer(direct->snp_pdu);
+//     free(direct);
+//
+//     const l_err err = process_snp(o_sdu);
+//     free_orient_sdus(o_sdu);
+//     return err;
+// }
+//
 l_err process_snp(orient_sdu_t *o_sdu) {
     buffer_t *snp_in = o_sdu->buf;
     pb_stream pbs;
     zero(&pbs);
     snp_pdu_t pdu;
 
-        // log_buf(LOG_FATAL, "SNP IN", snp_in->ptr, snp_in->len);
+    // log_buf(LOG_FATAL, "SNP IN", snp_in->ptr, snp_in->len);
 
 
     /* TODO: 搞出更多的错误代码，然后再网关显示 */

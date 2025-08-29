@@ -351,7 +351,7 @@ static void *dls_reassy_func(void *args) {
         //以当前首位是否为0作为判断结束之标准， TODO：判断方法是临时的
         while (*pbs.start != 0x00) {
             dls_data_t dls_data;
-            dls_data.DATA = init_buffer_unptr();
+            // dls_data.DATA = init_buffer_unptr();
 
             if (in_struct(&dls_data, &dls_data_desc, &pbs, NULL) == FALSE) {
                 free_buffer(dls_data.DATA);
