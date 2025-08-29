@@ -275,20 +275,23 @@ void L_SAPC(ld_prim_t *prim) {
                 }
 
                 //TODO: GSG
-                if (config.is_merged == TRUE)
+                if (config.is_merged == TRUE) {
                     gss_handover_request_trigger(as_man->AS_SAC, snf_obj.GS_SAC,
                                                  handover_opt->GST_SAC);
+                }
+                if (config.is_beihang || config.is_merged == FALSE) {
+                    peer_propt_t *peer = get_peer_propt(handover_opt->GST_SAC);
+                    if (!peer) return;
 
-                peer_propt_t *peer = get_peer_propt(handover_opt->GST_SAC);
-                if (!peer) return;
-
-                peer->bc.opt->send_handler(&peer->bc, gen_pdu(&(ho_peer_ini_t){
-                                                                  .is_ACK = FALSE,
-                                                                  .AS_SAC = as_man->AS_SAC,
-                                                                  .AS_UA = as_man->AS_UA,
-                                                                  .GSS_SAC = snf_obj.GS_SAC,
-                                                                  .GST_SAC = handover_opt->GST_SAC
-                                                              }, &handover_peer_ini_desc, "HO PEER INI"), NULL, NULL);
+                    peer->bc.opt->send_handler(&peer->bc, gen_pdu(&(ho_peer_ini_t){
+                                                                      .is_ACK = FALSE,
+                                                                      .AS_SAC = as_man->AS_SAC,
+                                                                      .AS_UA = as_man->AS_UA,
+                                                                      .GSS_SAC = snf_obj.GS_SAC,
+                                                                      .GST_SAC = handover_opt->GST_SAC
+                                                                  }, &handover_peer_ini_desc, "HO PEER INI"), NULL,
+                                               NULL);
+                }
             }
 
             break;

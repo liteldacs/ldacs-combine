@@ -235,6 +235,7 @@ void M_SAPR_cb(ld_prim_t *prim) {
                     // 内部merge
                     inside_combine_sac_request(cr->UA);
                 } else {
+                    // 内部merge，无接入认证
                     if (cr_times) break;
                     dls_en_data_t *dls_en_data = &(dls_en_data_t){
                         .GS_SAC = lme_layer_objs.GS_SAC,
