@@ -29,7 +29,7 @@ for i in {1..15}; do
           $cmd2 && \
           exec bash" &
 
-  sleep 0.05
+  sleep 0.1
 done
 
 #for i in {1..10}; do
