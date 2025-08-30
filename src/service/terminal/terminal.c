@@ -4,6 +4,7 @@
 
 #include "service/terminal.h"
 
+#include <ld_net.h>
 #include <crypto/secure_core.h>
 
 #include "ipv6_parse.h"
@@ -171,11 +172,12 @@ void *send_user_data_func(void *args) {
         .data = init_buffer_unptr()
     };
 
-    struct in6_addr addr;
-    inet_pton(AF_INET6, "3::1", &addr);
+    struct in6_addr src_addr, dst_addr;
+    inet_pton(AF_INET6, config.addr, &src_addr);
+    CLONE_TO_CHUNK(*v6.src_address, src_addr.__in6_u.__u6_addr8, GEN_ADDRLEN);
 
-    CLONE_TO_CHUNK(*v6.src_address, addr.__in6_u.__u6_addr8, 16);
-    CLONE_TO_CHUNK(*v6.dst_address, addr.__in6_u.__u6_addr8, 16);
+    inet_pton(AF_INET6, "3::1", &dst_addr);
+    CLONE_TO_CHUNK(*v6.dst_address, dst_addr.__in6_u.__u6_addr8, GEN_ADDRLEN);
 
     CLONE_TO_CHUNK(*v6.data, "hello world", 11);
     buffer_t *buf = gen_pdu(&v6, &ipv6_tcp_desc, "TCP V6");
