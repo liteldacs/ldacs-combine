@@ -163,8 +163,10 @@ l_err make_lme_layer() {
                         //TODO: 选择一个GS 的init方法,应首选 is_e304同款，但是需要在这里就做好三十个AS的mms_setup_entity，相当于弃用最后一个函数指针
                         init_gs_snf_layer_inside(&config, trans_snp_data, register_snf_failed,
                                                  gst_handover_complete_key, mms_setup_entity);
-                        for (int i = 0; i < 30; i++) {
-                            mms_setup_entity(301 + i, 1012345 + i * 10000);
+                        if (config.GS_SAC == 16) {
+                            for (int i = 0; i < 30; i++) {
+                                mms_setup_entity(301 + i, 1012345 + i * 10000);
+                            }
                         }
                     } else {
                         if (config.is_merged) {

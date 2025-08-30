@@ -65,6 +65,7 @@ void p2p_conn_close(basic_conn_t *bc) {
     log_warn("Closing connection!");
 }
 
+// 北航
 l_err p2p_conn_recv(basic_conn_t *bc) {
     peer_propt_t *peer_propt = (peer_propt_t *) bc;
     log_buf(LOG_INFO, "RECV PEER", peer_propt->bc.read_pkt->ptr, peer_propt->bc.read_pkt->len);
@@ -79,6 +80,7 @@ l_err p2p_conn_recv(basic_conn_t *bc) {
         return LD_ERR_INTERNAL;
     }
     if (ini->is_ACK == FALSE) {
+        // 北航在这里向GST注册
         gst_handover_request_handle(ini->AS_SAC, ini->AS_UA, ini->GSS_SAC, ini->GST_SAC);
     } else {
         // TODO:  send HO by CCCH
