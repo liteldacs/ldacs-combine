@@ -573,7 +573,7 @@ int8_t register_snf_failed(uint16_t AS_SAC) {
 
 int8_t gst_handover_complete_key(uint16_t AS_SAC, uint32_t AS_UA, uint16_t GSS_SAC) {
     uint16_t next_co = get_CO();
-    if (!config.direct) {
+    if (!config.is_e304) {
         peer_propt_t *peer = get_peer_propt(GSS_SAC);
         if (!peer) return LD_ERR_INTERNAL;
         peer->bc.opt->send_handler(&peer->bc, gen_pdu(&(ho_peer_ini_t){

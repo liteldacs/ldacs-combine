@@ -2,7 +2,7 @@ role: as
 UA: 1242345
 port: 8081
 debug: 1
-ipv6_address: 2001:da8:a012:389:7bf3:43b7:9c07:4f03
+ipv6_address: 2001:da8:a012:389:7bf3:43b7:9c07:4f24
 
 init_fl_freq: 1110.0
 init_rl_freq: 964.0

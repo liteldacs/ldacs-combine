@@ -12,56 +12,7 @@
 terminal_obj_t terminal_obj = {
 
 };
-#pragma pack(1)
-typedef struct ipv6_tcp_s {
-    uint8_t version;
-    uint8_t traffic_class;
-    uint32_t flow_label;
-    uint16_t payload_len;
-    uint8_t next_header;
-    uint8_t hop_limit;
-    buffer_t *src_address;
-    buffer_t *dst_address;
-    uint16_t src_port;
-    uint16_t dst_port;
-    uint32_t sqn;
-    uint32_t ack;
-    uint8_t bias;
-    uint8_t reserve;
-    uint16_t flag;
-    uint16_t window;
-    uint16_t checksum;
-    uint16_t urgent;
-    buffer_t *data;
-} ipv6_tcp_t;
-#pragma pack()
 
-static field_desc ipv6_tcp_fields[] = {
-    {ft_set, 4, "VERSION", NULL},
-    {ft_set, 8, "TRAFFIC CLASS", NULL},
-    {ft_set, 20, "FLOW LABEL", NULL},
-    {ft_set, 16, "PAYLOAD LEN", NULL},
-    {ft_set, 8, "NEXT HEADER", NULL},
-    {ft_set, 8, "HOP LIMIT", NULL},
-    {ft_pad, 0, "PAD", NULL},
-    {ft_fl_str, 0, "IP SRC", &(pk_fix_length_t){.len = 16}},
-    {ft_fl_str, 0, "IP DST", &(pk_fix_length_t){.len = 16}},
-    {ft_set, 16, "SRC PORT", NULL},
-    {ft_set, 16, "DST PORT", NULL},
-    {ft_set, 32, "SQN", NULL},
-    {ft_set, 32, "ACK", NULL},
-    {ft_set, 4, "BIAS", NULL},
-    {ft_set, 3, "PRESERVE", NULL},
-    {ft_set, 9, "FLAG", NULL},
-    {ft_set, 16, "WINDOW", NULL},
-    {ft_set, 16, "CHECKSUM", NULL},
-    {ft_set, 16, "URGENT", NULL},
-    {ft_pad, 0, "PAD", NULL},
-    {ft_dl_str, 0, "DATA", NULL},
-    {ft_pad, 0, "PAD", NULL},
-    {ft_end, 0, NULL, NULL},
-};
-struct_desc_t ipv6_tcp_desc = {"TCP V6", ipv6_tcp_fields};
 
 static l_err init_terminal_service();
 
@@ -149,7 +100,7 @@ static l_err init_terminal_service() {
     return LD_OK;
 }
 
-void *send_user_data_func(void *args) {
+buffer_t *gen_ipv6_pkt() {
     ipv6_tcp_t v6 = {
         .version = 0x6,
         .traffic_class = 0x3,
@@ -176,12 +127,16 @@ void *send_user_data_func(void *args) {
     inet_pton(AF_INET6, config.addr, &src_addr);
     CLONE_TO_CHUNK(*v6.src_address, src_addr.__in6_u.__u6_addr8, GEN_ADDRLEN);
 
-    inet_pton(AF_INET6, "3::1", &dst_addr);
+    inet_pton(AF_INET6, "2001::E304", &dst_addr);
     CLONE_TO_CHUNK(*v6.dst_address, dst_addr.__in6_u.__u6_addr8, GEN_ADDRLEN);
 
     CLONE_TO_CHUNK(*v6.data, "hello world", 11);
-    buffer_t *buf = gen_pdu(&v6, &ipv6_tcp_desc, "TCP V6");
 
+    return gen_pdu(&v6, &ipv6_tcp_desc, "TCP V6");
+}
+
+void *send_user_data_func(void *args) {
+    buffer_t *buf = gen_ipv6_pkt();
     log_buf(LOG_INFO, "IPV6", buf->ptr, buf->len);
     while (1) {
         sleep(5);
@@ -221,19 +176,9 @@ static void handle_user_msg_terminal(user_msg_t *umsg) {
 }
 
 static void send_singal_data_terminal(int argc, char **argv) {
-    // char *test_msg = "Testing User Message for LDACS";
-    // send_user_data((uint8_t *) test_msg, strlen(test_msg), terminal_obj.AS_SAC);
-    char *data = "ABBA";
-    char pkt[2048] = {0};
-    // int pkt_len = construct_ipv6_udp_packet_to_char(config.addr,
-    //                                                 "2001:da8:a012:389:7bf3:43b7:9c07:4f01", "5911", "5911", data, 4,
-    //                                                 pkt);
+    buffer_t *buf = gen_ipv6_pkt();
 
-    int pkt_len = construct_ipv6_udp_packet_to_char("2001:0:0:e304::141", config.addr,
-                                                    "5911", "5911", data, 4,
-                                                    pkt);
-
-    send_user_data((uint8_t *) pkt, pkt_len, terminal_obj.AS_SAC);
+    send_user_data(buf->ptr, buf->len, terminal_obj.AS_SAC);
 }
 
 static void trigger_handover(int argc, char **argv) {
@@ -247,19 +192,13 @@ static void trigger_handover(int argc, char **argv) {
 }
 
 static void send_multi_data_terminal(int argc, char **argv) {
-    const char *test_msg = "Testing User Message for LDACS\0";
+    // const char *test_msg = "Testing User Message for LDACS\0";
+    buffer_t *buf = gen_ipv6_pkt();
     for (int i = 0; i < 50; i++) {
         log_warn("Sending %d Packet===============", i+1);
-        send_user_data((uint8_t *) test_msg, strlen(test_msg), terminal_obj.AS_SAC);
+        send_user_data(buf->ptr, buf->len, terminal_obj.AS_SAC);
         usleep(250000);
     }
-    // char *data = "ABBA";
-    // char pkt[2048] = {0};
-    // int pkt_len = construct_ipv6_udp_packet_to_char("2001:0:0:e304::141", config.addr,
-    //                                                 "5911", "5911", data, 4,
-    //                                                 pkt);
-    //
-    // send_user_data((uint8_t *) pkt, pkt_len, terminal_obj.AS_SAC);
 }
 
 static void send_specific_data_terminal(int argc, char **argv) {
