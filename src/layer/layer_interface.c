@@ -19,9 +19,13 @@ void SN_SAPD_U_cb(ld_prim_t *prim) {
     }
     orient_sdu_t *o_sdu = prim->prim_objs;
     passert(int_obj.msg_handler != NULL);
-    if (config.is_e304) {
-        inside_combine_update_user_msg(o_sdu->AS_SAC, o_sdu->buf->ptr, o_sdu->buf->len);
+
+    if (config.role == LD_GS) {
+        if (config.is_e304) {
+            inside_combine_update_user_msg(o_sdu->AS_SAC, o_sdu->buf->ptr, o_sdu->buf->len);
+        }
     }
+
     int_obj.msg_handler(&(user_msg_t){
         .AS_SAC = o_sdu->AS_SAC,
         .GS_SAC = o_sdu->GS_SAC,

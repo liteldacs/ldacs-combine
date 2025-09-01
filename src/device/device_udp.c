@@ -13,11 +13,21 @@ l_err init_udp_bd_send(ld_dev_udp_para_t *udp_para, int send_port) {
         return LD_ERR_INTERNAL;
     }
 
+    if (setsockopt(bd_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == ERROR) {
+        log_warn("setsockopt SO_REUSEADDR failed!\n");
+        // 失败不返回，只是警告，因为不是所有平台都严格支持（如某些BSD）
+    }
+
+#ifdef SO_REUSEPORT
+    if (setsockopt(bd_fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) == ERROR) {
+        log_warn("setsockopt SO_REUSEPORT failed! (not critical)\n");
+    }
+#endif
+
     if (setsockopt(bd_fd, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on)) == ERROR) {
         log_error("setsockopt failed!\n");
         return LD_ERR_INTERNAL;
     }
-
 
     struct sockaddr_in *addr = NULL;
     if (config.role == LD_AS) {
@@ -32,6 +42,11 @@ l_err init_udp_bd_send(ld_dev_udp_para_t *udp_para, int send_port) {
     addr->sin_family = AF_INET;
     addr->sin_port = htons(send_port);
     addr->sin_addr.s_addr = inet_addr("255.255.255.255");
+
+    if (bind(bd_fd, (struct sockaddr *) addr, sizeof(struct sockaddr_in)) == ERROR) {
+        log_warn("bind failed on port: %d!", send_port);
+        return ERROR;
+    }
 
     return LD_OK;
 }
@@ -111,20 +126,18 @@ static void *udp_recving_msgs(void *arg) {
 
 static void *udp_recv_msg(void *arg) {
     ld_dev_udp_para_t *udp_para = (ld_dev_udp_para_t *)arg;
-    pthread_t fl_th, rl_th;
     // int *recv_fd = (config.role == LD_AS) ? &udp_para.fl_fd : &udp_para.rl_fd;
     if (config.role == LD_AS) {
-        if (pthread_create(&fl_th, NULL, udp_recving_msgs, udp_para) != 0) {
+        if (pthread_create(&udp_para->fl_th, NULL, udp_recving_msgs, udp_para) != 0) {
             log_error("Attacker FL Receiving thread create failed");
         }
-        pthread_join(fl_th, NULL);
+        pthread_join(udp_para->fl_th, NULL);
     } else if (config.role == LD_GS) {
-        if (pthread_create(&rl_th, NULL, udp_recving_msgs, udp_para) != 0) {
+        if (pthread_create(&udp_para->rl_th, NULL, udp_recving_msgs, udp_para) != 0) {
             log_error("Attacker RL Receiving thread create failed");
         }
-        pthread_join(rl_th, NULL);
+        pthread_join(udp_para->rl_th, NULL);
     }
-
 
     return NULL;
 }
