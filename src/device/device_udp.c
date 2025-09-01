@@ -160,6 +160,14 @@ static l_err set_freq_port(device_entity_t *arg, int channel_num, ld_orient ori)
                 }
                 init_udp_bd_recv(udp_para, port);
                 log_error("FL recv port %d, fd: %d", port, udp_para->fl_recv_fd);
+
+                if (udp_para->rl_th) {
+                    pthread_kill(udp_para->fl_th, 0);
+                }
+                if (pthread_create(&udp_para->fl_th, NULL, udp_recving_msgs, udp_para) != 0) {
+                    log_error("Attacker FL Receiving thread create failed");
+                }
+                pthread_detach(udp_para->fl_th);
             } else {
                 if (udp_para->rl_send_fd != -1) {
                     close(udp_para->rl_send_fd);
@@ -182,6 +190,14 @@ static l_err set_freq_port(device_entity_t *arg, int channel_num, ld_orient ori)
                 }
                 init_udp_bd_recv(udp_para, port);
                 log_info("RL recv port %d, fd: %d", port, udp_para->rl_recv_fd);
+
+                if (udp_para->rl_th) {
+                    pthread_kill(udp_para->rl_th, 0);
+                }
+                if (pthread_create(&udp_para->rl_th, NULL, udp_recving_msgs, udp_para) != 0) {
+                    log_error("Attacker RL Receiving thread create failed");
+                }
+                pthread_detach(udp_para->rl_th);
             }
             break;
         }

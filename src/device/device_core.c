@@ -29,10 +29,10 @@ void *start_recv(void *args) {
     device_entity_t *dev_en = args;
     if (!dev_en)    return NULL;
 
-    if (pthread_create(&dev_en->recv_th, NULL, dev_en->recv_pkt, dev_en) != 0) {
-        pthread_exit(NULL);
-    }
-    pthread_detach(dev_en->recv_th);
+    // if (pthread_create(&dev_en->recv_th, NULL, dev_en->recv_pkt, dev_en) != 0) {
+    //     pthread_exit(NULL);
+    // }
+    // pthread_detach(dev_en->recv_th);
 
     while (stop_flag == FALSE) {
         buffer_t *buf;

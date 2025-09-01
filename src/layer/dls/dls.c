@@ -118,7 +118,6 @@ void D_SAPD(ld_prim_t *prim) {
         buffer_t *out = gen_pdu(&direct, &dls_direct_desc, "DLS DIRECT");
 
         ld_dev_udp_para_t *upara = (ld_dev_udp_para_t *)dls_layer_objs.device;
-        log_warn("!!!!!!!!!! %d", ntohs( upara->fl_send_addr.sin_port));
         dls_layer_objs.device->send_pkt(dls_layer_objs.device, out,
                                         config.role == LD_AS ? RL : FL);
 
