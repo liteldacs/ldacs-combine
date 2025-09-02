@@ -164,6 +164,7 @@ typedef struct dc_frag_ack_s {
 typedef struct dls_direct_s {
     uint16_t AS_SAC;
     uint16_t GS_SAC;
+    uint8_t orient;
     buffer_t *dls_pdu;
 } dls_direct_t;
 
@@ -271,5 +272,7 @@ static const void *dls_delete_map_node(const uint16_t SAC, l_err (*clear_func)(d
 
 void delete_dls_enode_by_ua(uint16_t ua_as);
 
+
 l_err set_new_dls_frequency(double fl_freq, double rl_freq);
+
 #endif //LDACS_SIM_LDACS_DLS_H

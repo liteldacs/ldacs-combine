@@ -9,6 +9,7 @@
 
 l_err process_direct_dls(void *args);
 
+
 dls_layer_objs_t dls_layer_objs = {
 };
 
@@ -113,12 +114,12 @@ void D_SAPD(ld_prim_t *prim) {
         dls_direct_t direct = {
             .AS_SAC = ori_sdu->AS_SAC,
             .GS_SAC = ori_sdu->GS_SAC,
+            .orient = config.role == LD_AS ? RL : FL,
             .dls_pdu = gen_pdu(&data, &dls_data_desc, "DLS DATA DIRECT"),
         };
 
         buffer_t *out = gen_pdu(&direct, &dls_direct_desc, "DLS DIRECT");
 
-        ld_dev_udp_para_t *upara = (ld_dev_udp_para_t *) dls_layer_objs.device;
         dls_layer_objs.device->send_pkt(dls_layer_objs.device, out,
                                         config.role == LD_AS ? RL : FL);
 
@@ -212,9 +213,6 @@ void M_SAPD_cb(ld_prim_t *prim) {
                 return;
             }
 
-            log_warn("=========== %d", rl_data->SAC);
-
-            // log_buf(LOG_INFO, "buf", rl_data->buf->ptr, rl_data->buf->len);
             buffer_t *rbuffer = init_buffer_unptr();
             CLONE_BY_BUFFER_UNFREE(*rbuffer, *rl_data->buf);
             /* 放入SAC对应实体的重组队列 */
