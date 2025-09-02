@@ -5,6 +5,7 @@
 #include <iso646.h>
 
 #include "ldacs_dls.h"
+#include "device_udp.h"
 
 l_err process_direct_dls(void *args);
 
@@ -117,7 +118,7 @@ void D_SAPD(ld_prim_t *prim) {
 
         buffer_t *out = gen_pdu(&direct, &dls_direct_desc, "DLS DIRECT");
 
-        ld_dev_udp_para_t *upara = (ld_dev_udp_para_t *)dls_layer_objs.device;
+        ld_dev_udp_para_t *upara = (ld_dev_udp_para_t *) dls_layer_objs.device;
         dls_layer_objs.device->send_pkt(dls_layer_objs.device, out,
                                         config.role == LD_AS ? RL : FL);
 
@@ -400,7 +401,6 @@ l_err process_direct_dls(void *args) {
 }
 
 l_err set_new_dls_frequency(double fl_freq, double rl_freq) {
-
     if (!set_new_freq(dls_layer_objs.device, fl_freq + 50.0, FL)) {
         log_error("Cannot set new frequency");
         return LD_ERR_INTERNAL;

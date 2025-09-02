@@ -33,7 +33,9 @@ typedef struct device_entity_s {
     bool freq_table[CHANNEL_MAX];
 
     l_err (*send_pkt)(struct device_entity_s *, buffer_t *, ld_orient);
+
     void *(*recv_pkt)(void *);
+
     l_err (*set_freq)(struct device_entity_s *, int, ld_orient);
 
     l_err (*process_func)(void *);
@@ -55,9 +57,6 @@ void *start_recv(void *args);
  * @return real new freq
  */
 double set_new_freq(device_entity_t *dev_en, double new_f, ld_orient ori);
-
-
-#include "device_udp.h"
 
 
 #endif //LDACS_SIM_DEVICE_H

@@ -3,14 +3,14 @@
 //
 
 #include "device.h"
-
+#include "device_udp.h"
 
 device_entity_t *set_device(const char *dev_name, l_err (*process_func)(void *)) {
     size_t name_len = sizeof(dev_name);
 
     device_entity_t *dev_en = NULL;
     if (!strncmp(dev_name, "UDP", name_len)) {
-        dev_en = (device_entity_t *)setup_udp_device(process_func);
+        dev_en = (device_entity_t *) setup_udp_device(process_func);
     } else if (!strncmp(dev_name, "USRP", name_len)) {
         log_warn("USRP has not been implied");
         return NULL;
@@ -27,7 +27,7 @@ device_entity_t *set_device(const char *dev_name, l_err (*process_func)(void *))
 
 void *start_recv(void *args) {
     device_entity_t *dev_en = args;
-    if (!dev_en)    return NULL;
+    if (!dev_en) return NULL;
 
     // if (pthread_create(&dev_en->recv_th, NULL, dev_en->recv_pkt, dev_en) != 0) {
     //     pthread_exit(NULL);
