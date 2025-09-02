@@ -103,7 +103,7 @@ void *trans_ra_cr_timer_func(void *args) {
     ra_cell_rqst_t rqst = {
         .r_type = R_TYP_CR,
         .UA = lme_layer_objs.lme_as_man->AS_UA,
-        .SAC = lme_layer_objs.GS_SAC,
+        .SAC = 301,
         .SCGS = 1,
         .VER = 0x1,
     };
