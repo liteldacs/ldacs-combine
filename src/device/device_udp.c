@@ -4,6 +4,7 @@
 
 #include "device/device_udp.h"
 
+
 int init_udp_bd_send(struct sockaddr_in *addr, int send_port) {
     int on = 1;
 
@@ -82,15 +83,13 @@ static l_err udp_send_msg(device_entity_t *arg, buffer_t *buf, ld_orient ori) {
     return LD_OK;
 }
 
-
-static void *udp_recving_msgs(void *arg) {
-    ld_dev_udp_para_t *udp_para = (ld_dev_udp_para_t *)arg;
-    lfqueue_t *queue = udp_para->dev.msg_queue;
+static void *udp_recving_msgs(void *arg, ld_orient ori) {
+    ld_dev_udp_para_t *udp_para = arg;
     int recv_fd;
 
-    if (config.role == LD_AS) {
+    if (ori == FL) {
         recv_fd = udp_para->fl_recv_fd;
-    } else {
+    }else {
         recv_fd = udp_para->rl_recv_fd;
     }
 
@@ -100,7 +99,7 @@ static void *udp_recving_msgs(void *arg) {
         buffer_t *buf = init_buffer_unptr();
         if (len) {
             CLONE_TO_CHUNK(*buf, str, len)
-            lfqueue_put(queue, buf);
+            lfqueue_put(udp_para->dev.msg_queue, buf);
         }else {
             free_buffer(buf);
         }
@@ -109,24 +108,33 @@ static void *udp_recving_msgs(void *arg) {
     return NULL;
 }
 
-static void *udp_recv_msg(void *arg) {
-    ld_dev_udp_para_t *udp_para = (ld_dev_udp_para_t *)arg;
-    // int *recv_fd = (config.role == LD_AS) ? &udp_para.fl_fd : &udp_para.rl_fd;
-    if (config.role == LD_AS) {
-        if (pthread_create(&udp_para->fl_th, NULL, udp_recving_msgs, udp_para) != 0) {
-            log_error("Attacker FL Receiving thread create failed");
-        }
-        pthread_join(udp_para->fl_th, NULL);
-    } else if (config.role == LD_GS) {
-        if (pthread_create(&udp_para->rl_th, NULL, udp_recving_msgs, udp_para) != 0) {
-            log_error("Attacker RL Receiving thread create failed");
-        }
-        pthread_join(udp_para->rl_th, NULL);
-    }
-
-    return NULL;
+static void *udp_recving_msgs_fl(void *arg) {
+     udp_recving_msgs(arg, FL);
 }
 
+static void *udp_recving_msgs_rl(void *arg) {
+    udp_recving_msgs(arg, RL);
+}
+
+
+// static void *udp_recv_msg(void *arg) {
+//     ld_dev_udp_para_t *udp_para = (ld_dev_udp_para_t *)arg;
+//     // int *recv_fd = (config.role == LD_AS) ? &udp_para.fl_fd : &udp_para.rl_fd;
+//     if (config.role == LD_AS) {
+//         if (pthread_create(&udp_para->fl_th, NULL, udp_recving_msgs, &(udp_recv_args_t){udp_para, FL}) != 0) {
+//             log_error("Attacker FL Receiving thread create failed");
+//         }
+//         pthread_join(udp_para->fl_th, NULL);
+//     } else if (config.role == LD_GS) {
+//         if (pthread_create(&udp_para->rl_th, NULL, udp_recving_msgs, &(udp_recv_args_t){udp_para, RL}) != 0) {
+//             log_error("Attacker RL Receiving thread create failed");
+//         }
+//         pthread_join(udp_para->rl_th, NULL);
+//     }
+//
+//     return NULL;
+// }
+//
 /**
  * set new port by frequency
  * @param arg
@@ -146,10 +154,10 @@ static l_err set_freq_port(device_entity_t *arg, int channel_num, ld_orient ori)
                 udp_para->fl_recv_fd = init_udp_bd_recv(port);
                 log_error("FL recv port %d, fd: %d", port, udp_para->fl_recv_fd);
 
-                if (udp_para->rl_th) {
+                if (udp_para->fl_th) {
                     pthread_kill(udp_para->fl_th, 0);
                 }
-                if (pthread_create(&udp_para->fl_th, NULL, udp_recving_msgs, udp_para) != 0) {
+                if (pthread_create(&udp_para->fl_th, NULL, udp_recving_msgs_fl, udp_para) != 0) {
                     log_error("Attacker FL Receiving thread create failed");
                 }
                 pthread_detach(udp_para->fl_th);
@@ -179,7 +187,7 @@ static l_err set_freq_port(device_entity_t *arg, int channel_num, ld_orient ori)
                 if (udp_para->rl_th) {
                     pthread_kill(udp_para->rl_th, 0);
                 }
-                if (pthread_create(&udp_para->rl_th, NULL, udp_recving_msgs, udp_para) != 0) {
+                if (pthread_create(&udp_para->rl_th, NULL, udp_recving_msgs_rl, udp_para) != 0) {
                     log_error("Attacker RL Receiving thread create failed");
                 }
                 pthread_detach(udp_para->rl_th);
@@ -205,7 +213,7 @@ ld_dev_udp_para_t *setup_udp_device(l_err (*process_func)(void *)) {
     udp_para->rl_recv_fd = -1;
 
     udp_para->dev.send_pkt = udp_send_msg;
-    udp_para->dev.recv_pkt = udp_recv_msg;
+    // udp_para->dev.recv_pkt = udp_recv_msg;
     udp_para->dev.set_freq = set_freq_port;
 
     udp_para->dev.name = "UDP";
