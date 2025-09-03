@@ -79,7 +79,8 @@ l_err make_dls_layer() {
         default:
             break;
     }
-    if (config.direct) {
+    // if (config.direct) {
+    if (1) {
         if ((dls_layer_objs.device = set_device("UDP", process_direct_dls)) == NULL) {
             log_error("Cannot set SNP device");
             return LD_ERR_INTERNAL;
@@ -101,7 +102,8 @@ l_err make_dls_layer() {
 void D_SAPD(ld_prim_t *prim) {
     orient_sdu_t *ori_sdu = dup_prim_data(prim->prim_objs, sizeof(orient_sdu_t));
 
-    if (config.direct) {
+    // if (config.direct) {
+    if (1) {
         dls_data_t data = {
             .TYP = ACK_DATA,
             .RST = 0,
@@ -170,7 +172,8 @@ void D_SAPD(ld_prim_t *prim) {
  * Control DLS entity open or not
  */
 void D_SAPC(ld_prim_t *prim) {
-    if (config.direct) return;
+    // if (config.direct) return;
+    if (1) return;
     switch (prim->prim_seq) {
         case DLS_OPEN_REQ: {
             dls_en_data_t *en_data = prim->prim_objs;

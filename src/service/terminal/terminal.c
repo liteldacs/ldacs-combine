@@ -148,14 +148,14 @@ void *send_user_data_func(void *args) {
 
 
 static void handle_st_chg_terminal(lme_state_chg_t *st_chg) {
-    log_warn("The Current LME state is %d, by %.02x", st_chg->state, st_chg->sac);
+    log_warn("The Current LME state is %d, by %.03x", st_chg->state, st_chg->sac);
 
-    if (config.direct) {
-        if (st_chg->state != LME_OPEN) return;
+    // if (config.direct) {
+    if (st_chg->state != LME_OPEN) return;
 
-        pthread_create(&terminal_obj.data_th, NULL, send_user_data_func, NULL);
-        pthread_detach(terminal_obj.data_th);
-    }
+    pthread_create(&terminal_obj.data_th, NULL, send_user_data_func, NULL);
+    pthread_detach(terminal_obj.data_th);
+    // }
 }
 
 static void handle_as_info_key_upd_terminal(as_info_key_upd_t *as_upd) {

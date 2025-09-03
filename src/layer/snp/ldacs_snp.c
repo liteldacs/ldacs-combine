@@ -125,7 +125,7 @@ static uint32_t *get_SQN(uint16_t AS_SAC, bool is_send) {
     lme_as_man_t *as_man = config.role == LD_AS ? lme_layer_objs.lme_as_man : (lme_as_man_t *) get_lme_as_enode(AS_SAC);
 
     if (as_man == NULL) {
-        log_error("Cannot find AS: %d", as_man->AS_SAC);
+        log_error("Cannot find AS: %d", AS_SAC);
         return NULL;
     }
 

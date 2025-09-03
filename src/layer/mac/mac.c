@@ -887,7 +887,7 @@ l_err generate_dc_pkt() {
 l_err generate_data_pkt() {
     if (config.role == LD_GS) {
         if (mac_layer_objs.cd_to_trans_node == NULL) {
-            log_error("CC-DCH To Trans Node is NULL");
+            // log_error("CC-DCH To Trans Node is NULL");
             return LD_ERR_NULL;
         }
         ld_lock(&mac_layer_objs.CCL.mutex);
