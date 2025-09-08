@@ -8,6 +8,7 @@
 #include <crypto/secure_core.h>
 
 #include "ipv6_parse.h"
+#include <gmssl/rand.h>
 
 terminal_obj_t terminal_obj = {
 
@@ -100,7 +101,7 @@ static l_err init_terminal_service() {
     return LD_OK;
 }
 
-buffer_t *gen_ipv6_pkt() {
+buffer_t *gen_ipv6_pkt(size_t len) {
     ipv6_tcp_t v6 = {
         .version = 0x6,
         .traffic_class = 0x3,
@@ -130,13 +131,22 @@ buffer_t *gen_ipv6_pkt() {
     inet_pton(AF_INET6, "2001::E304", &dst_addr);
     CLONE_TO_CHUNK(*v6.dst_address, dst_addr.__in6_u.__u6_addr8, GEN_ADDRLEN);
 
-    CLONE_TO_CHUNK(*v6.data, "hello world", 11);
+    size_t curr = 0;
+    uint8_t msg[1500];
+    for (int j = 0; j < len / RAND_BYTES_MAX_SIZE; j++) {
+        km_generate_random(msg + curr, RAND_BYTES_MAX_SIZE);
+        curr += RAND_BYTES_MAX_SIZE;
+    }
+    log_warn("!!!!!!! ==>  %d %d %d", len,  curr, RAND_BYTES_MAX_SIZE);
+    km_generate_random(msg + curr, len % RAND_BYTES_MAX_SIZE);
+
+    CLONE_TO_CHUNK(*v6.data, msg, len);
 
     return gen_pdu(&v6, &ipv6_tcp_desc, "TCP V6");
 }
 
 void *send_user_data_func(void *args) {
-    buffer_t *buf = gen_ipv6_pkt();
+    buffer_t *buf = gen_ipv6_pkt(20);
     log_buf(LOG_INFO, "IPV6", buf->ptr, buf->len);
     while (1) {
         sleep(5);
@@ -150,12 +160,12 @@ void *send_user_data_func(void *args) {
 static void handle_st_chg_terminal(lme_state_chg_t *st_chg) {
     log_warn("The Current LME state is %d, by %.03x", st_chg->state, st_chg->sac);
 
-    // if (config.direct) {
+    if (config.direct) {
     if (st_chg->state != LME_OPEN) return;
 
     pthread_create(&terminal_obj.data_th, NULL, send_user_data_func, NULL);
     pthread_detach(terminal_obj.data_th);
-    // }
+    }
 }
 
 static void handle_as_info_key_upd_terminal(as_info_key_upd_t *as_upd) {
@@ -169,14 +179,14 @@ static void handle_as_info_upd_terminal(as_info_upd_t *as_info) {
 }
 
 static void handle_user_msg_terminal(user_msg_t *umsg) {
-    char msg[100] = {0};
+    char msg[2048] = {0};
     memcpy(msg, umsg->msg->ptr, umsg->msg->len);
 
     log_fatal("USER MESSAGE %d", umsg->msg->len);
 }
 
 static void send_singal_data_terminal(int argc, char **argv) {
-    buffer_t *buf = gen_ipv6_pkt();
+    buffer_t *buf = gen_ipv6_pkt(20);
 
     send_user_data(buf->ptr, buf->len, terminal_obj.AS_SAC);
 }
@@ -193,9 +203,9 @@ static void trigger_handover(int argc, char **argv) {
 
 static void send_multi_data_terminal(int argc, char **argv) {
     // const char *test_msg = "Testing User Message for LDACS\0";
-    buffer_t *buf = gen_ipv6_pkt();
-    for (int i = 0; i < 50; i++) {
-        log_warn("Sending %d Packet===============", i+1);
+    for (int i = 1; i <= 10; i++) {
+        buffer_t *buf = gen_ipv6_pkt(i*100);
+        log_warn("Sending %d Packet===============", i);
         send_user_data(buf->ptr, buf->len, terminal_obj.AS_SAC);
         usleep(250000);
     }
