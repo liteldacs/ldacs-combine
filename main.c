@@ -45,6 +45,7 @@ config_t config = {
     .is_merged = FALSE,
     .role = LD_UNDEFINED,
     .direct = FALSE,
+    .pipe_fd = 0,
 };
 
 
@@ -76,7 +77,7 @@ static int init_config_path() {
 
 int opt_parse(int argc, char *const *argv) {
     int c;
-    while ((c = getopt(argc, argv, "p:dt:w:c:AGWHMBED")) != -1) {
+    while ((c = getopt(argc, argv, "p:f:dt:w:c:AGWHMBED")) != -1) {
         switch (c) {
             case 'p': {
                 config.port = strtol(optarg, NULL, 10);
@@ -155,6 +156,17 @@ int opt_parse(int argc, char *const *argv) {
                 config.is_merged = TRUE;
                 config.is_beihang = FALSE;
                 config.is_e304 = TRUE;
+                break;
+            }
+            case 'f': {
+                config.pipe_fd = (int)strtol(optarg, NULL, 10);
+                // 重定向标准输出到 /dev/null，这样子进程的printf就不会显示在父进程终端上
+                int dev_null = open("/dev/null", O_WRONLY);
+                if (dev_null != -1) {
+                    dup2(dev_null, STDERR_FILENO); // 重定向stdout
+                    dup2(dev_null, STDOUT_FILENO); // 重定向stdout
+                    close(dev_null);
+                }
                 break;
             }
             default: {
