@@ -137,7 +137,6 @@ buffer_t *gen_ipv6_pkt(size_t len) {
         km_generate_random(msg + curr, RAND_BYTES_MAX_SIZE);
         curr += RAND_BYTES_MAX_SIZE;
     }
-    log_warn("!!!!!!! ==>  %d %d %d", len,  curr, RAND_BYTES_MAX_SIZE);
     km_generate_random(msg + curr, len % RAND_BYTES_MAX_SIZE);
 
     CLONE_TO_CHUNK(*v6.data, msg, len);

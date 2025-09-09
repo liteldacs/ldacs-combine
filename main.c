@@ -8,6 +8,23 @@ is_stop volatile stop_flag = FALSE;
 mem_size_t max_mem = 2 * GB + 1000 * MB + 1000 * KB;
 mem_size_t mempool_size = 1 * GB + 500 * MB + 500 * KB;
 
+config_t config = {
+    .port = 8081,
+    .debug = FALSE,
+    .timeout = 999,
+    .worker = 4,
+    .ip_ver = IPVERSION_4,
+    .init_fl_freq = 960.0,
+    .use_http = FALSE,
+    .auto_auth = TRUE,
+    .UA = 0,
+    .is_merged = FALSE,
+    .role = LD_UNDEFINED,
+    .direct = FALSE,
+    .pipe_fd = 0,
+};
+
+
 
 static void sigint_handler(int signum) {
     if (config.role == LD_AS || config.role == LD_SGW) {
@@ -31,22 +48,6 @@ void init_signal() {
     signal(SIGQUIT, sigint_handler);
     signal(SIGPIPE, SIG_IGN); // client close, server write will recv sigpipe
 }
-
-config_t config = {
-    .port = 8081,
-    .debug = FALSE,
-    .timeout = 999,
-    .worker = 4,
-    .ip_ver = IPVERSION_4,
-    .init_fl_freq = 960.0,
-    .use_http = FALSE,
-    .auto_auth = TRUE,
-    .UA = 0,
-    .is_merged = FALSE,
-    .role = LD_UNDEFINED,
-    .direct = FALSE,
-    .pipe_fd = 0,
-};
 
 
 static int init_config_path() {

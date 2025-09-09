@@ -2,7 +2,6 @@
 // Created by 邹嘉旭 on 2023/12/14.
 //
 
-
 #include "ldacs_lme.h"
 #include "snf.h"
 #include "layer_p2p.h"
@@ -164,7 +163,7 @@ l_err make_lme_layer() {
                         init_gs_snf_layer_inside(&config, trans_snp_data, register_snf_failed,
                                                  gst_handover_complete_key, mms_setup_entity, send_ho_com);
                         if (config.GS_SAC == 16) {
-                            for (int i = 0; i < 30; i++) {
+                            for (int i = 0; i < 40; i++) {
                                 mms_setup_entity(301 + i, 1012345 + i * 10000);
                             }
                         }
