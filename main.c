@@ -24,8 +24,6 @@ config_t config = {
     .pipe_fd = 0,
 };
 
-
-
 static void sigint_handler(int signum) {
     if (config.role == LD_AS || config.role == LD_SGW) {
         stop_rcu();
@@ -46,6 +44,7 @@ void init_signal() {
     signal(SIGINT, sigint_handler);
     signal(SIGABRT, sigint_handler);
     signal(SIGQUIT, sigint_handler);
+    signal(SIGTERM, sigint_handler);
     signal(SIGPIPE, SIG_IGN); // client close, server write will recv sigpipe
 }
 
@@ -161,6 +160,12 @@ int opt_parse(int argc, char *const *argv) {
             }
             case 'f': {
                 config.pipe_fd = (int)strtol(optarg, NULL, 10);
+                config.pipe_file = fdopen(config.pipe_fd, "w");
+                if (config.pipe_file == NULL) {
+                    perror("fdopen");
+                    exit(EXIT_FAILURE);
+                }
+                printf("AS: %d ( 子进程 PID: %d ) 启动\n", config.UA, getpid());
                 // 重定向标准输出到 /dev/null，这样子进程的printf就不会显示在父进程终端上
                 int dev_null = open("/dev/null", O_WRONLY);
                 if (dev_null != -1) {

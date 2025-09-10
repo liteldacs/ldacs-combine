@@ -159,7 +159,7 @@ l_err make_lme_layer() {
 
 
                     if (config.direct) {
-                        //TODO: 选择一个GS 的init方法,应首选 is_e304同款，但是需要在这里就做好三十个AS的mms_setup_entity，相当于弃用最后一个函数指针
+                        //TODO: 选择一个GS 的init方法,应首选 is_e304同款，但是需要在这里就做好三十个AS的mms_setup_entity，相当于弃用mms函数指针
                         init_gs_snf_layer_inside(&config, trans_snp_data, register_snf_failed,
                                                  gst_handover_complete_key, mms_setup_entity, send_ho_com);
                         if (config.GS_SAC == 16) {
@@ -428,6 +428,15 @@ l_err change_LME_CONNECTING() {
 int8_t as_finish_auth_func() {
     change_LME_OPEN();
     lme_layer_objs.finish_status = LME_AUTH_FINISHED;
+    if (config.pipe_fd) {
+        char pipe_msg[64] = {0};
+        sprintf(pipe_msg, "AS: %d 已成功接入\n", lme_layer_objs.lme_as_man->AS_UA);
+
+        // if (fwrite(pipe_msg, 1, 64, config.pipe_file) != 64) {
+        //     perror("fwrite to pipe");
+        // }
+        // fflush(config.pipe_file); // 确保数据写入管道
+    }
     return 0;
 }
 

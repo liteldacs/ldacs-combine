@@ -101,6 +101,24 @@ static l_err init_terminal_service() {
     return LD_OK;
 }
 
+// 生成包含A-Z a-z 0-9的随机字符串
+static void generate_random_string(char *str, size_t length) {
+    const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    int charset_size = sizeof(charset) - 1; // 减1是因为末尾的'\0'
+
+    // 初始化随机数种子
+    srand((unsigned int)time(NULL));
+
+    // 生成随机字符串
+    for (int i = 0; i < length; i++) {
+        int key = rand() % charset_size;
+        str[i] = charset[key];
+    }
+
+    // 字符串结束符
+    str[length] = '\0';
+}
+
 buffer_t *gen_ipv6_pkt(size_t len) {
     ipv6_tcp_t v6 = {
         .version = 0x6,
@@ -133,11 +151,13 @@ buffer_t *gen_ipv6_pkt(size_t len) {
 
     size_t curr = 0;
     uint8_t msg[1500];
-    for (int j = 0; j < len / RAND_BYTES_MAX_SIZE; j++) {
-        km_generate_random(msg + curr, RAND_BYTES_MAX_SIZE);
-        curr += RAND_BYTES_MAX_SIZE;
-    }
-    km_generate_random(msg + curr, len % RAND_BYTES_MAX_SIZE);
+    // for (int j = 0; j < len / RAND_BYTES_MAX_SIZE; j++) {
+    //     km_generate_random(msg + curr, RAND_BYTES_MAX_SIZE);
+    //     curr += RAND_BYTES_MAX_SIZE;
+    // }
+    // km_generate_random(msg + curr, len % RAND_BYTES_MAX_SIZE);
+
+    generate_random_string(msg, len);
 
     CLONE_TO_CHUNK(*v6.data, msg, len);
 
@@ -201,6 +221,12 @@ static void trigger_handover(int argc, char **argv) {
 }
 
 static void send_multi_data_terminal(int argc, char **argv) {
+
+    if (config.direct) {
+        log_warn("Direct mode cant send multiple message");
+        return;
+    }
+
     // const char *test_msg = "Testing User Message for LDACS\0";
     for (int i = 1; i <= 10; i++) {
         buffer_t *buf = gen_ipv6_pkt(i*100);
