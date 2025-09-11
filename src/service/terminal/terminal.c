@@ -201,7 +201,13 @@ static void handle_user_msg_terminal(user_msg_t *umsg) {
     char msg[2048] = {0};
     memcpy(msg, umsg->msg->ptr, umsg->msg->len);
 
-    log_fatal("USER MESSAGE %d", umsg->msg->len);
+    if (config.direct) {
+        log_info("用户数据长度 %d", umsg->msg->len);
+    }else {
+        char payload[2048] = {0};
+        memcpy(payload, umsg->msg->ptr + 60, umsg->msg->len-60);
+        log_info("获取 TCP Payload: %s", payload);
+    }
 }
 
 static void send_singal_data_terminal(int argc, char **argv) {

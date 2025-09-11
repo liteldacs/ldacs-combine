@@ -199,6 +199,8 @@ int main(int argc, char **argv) {
     //
     // log_warn("%p %p", global_mp->mlist, global_mp->mlist->alloc_list);
 
+    log_info("Task PID: %d", getpid());
+
     if (argc < 2 || opt_parse(argc, argv) != OK) {
         usage(argv[0]);
         exit(ERROR);
