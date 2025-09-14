@@ -150,7 +150,7 @@ buffer_t *gen_ipv6_pkt(size_t len) {
     CLONE_TO_CHUNK(*v6.dst_address, dst_addr.__in6_u.__u6_addr8, GEN_ADDRLEN);
 
     size_t curr = 0;
-    uint8_t msg[1500];
+    uint8_t msg[1800];
     // for (int j = 0; j < len / RAND_BYTES_MAX_SIZE; j++) {
     //     km_generate_random(msg + curr, RAND_BYTES_MAX_SIZE);
     //     curr += RAND_BYTES_MAX_SIZE;
@@ -227,6 +227,7 @@ static void trigger_handover(int argc, char **argv) {
     rcu_handover(UA, GST_SAC);
 }
 
+#define PKT_COUNT 10
 static void send_multi_data_terminal(int argc, char **argv) {
 
     if (config.direct) {
@@ -234,10 +235,12 @@ static void send_multi_data_terminal(int argc, char **argv) {
         return;
     }
 
+    int pkt_lens[PKT_COUNT] = {210, 274, 402, 423, 444, 466, 530, 1150, 1555, 1683};
+
     // const char *test_msg = "Testing User Message for LDACS\0";
-    for (int i = 1; i <= 10; i++) {
-        buffer_t *buf = gen_ipv6_pkt(i*100);
-        log_warn("Sending %d Packet===============", i);
+    for (int i = 0; i < PKT_COUNT; i++) {
+        buffer_t *buf = gen_ipv6_pkt(pkt_lens[i]);
+        log_warn("Sending %d Packet===============", i + 1);
         send_user_data(buf->ptr, buf->len, terminal_obj.AS_SAC);
         usleep(250000);
     }
