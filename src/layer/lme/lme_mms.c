@@ -95,10 +95,10 @@ void *trans_lme_bc_timer_func(void *args) {
 
 void *trans_ra_cr_timer_func(void *args) {
     //only for LME_CONNECTING state
-    if (!config.direct) {
-        if (!in_state(&lme_mms_obj.lme_obj->lme_fsm, lme_fsm_states[LME_CONNECTING])) {
-            return NULL;
-        }
+    if (config.direct)  return NULL;
+
+    if (!in_state(&lme_mms_obj.lme_obj->lme_fsm, lme_fsm_states[LME_CONNECTING])) {
+        return NULL;
     }
     ra_cell_rqst_t rqst = {
         .r_type = R_TYP_CR,

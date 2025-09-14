@@ -557,6 +557,7 @@ static l_err send_ho_com(uint16_t AS_SAC, uint16_t GS_SAC, uint16_t next_CO) {
     preempt_prim(&MAC_CCCH_REQ_PRIM, C_TYP_HO_COM,
                  gen_pdu(&ho_com, cc_format_descs[C_TYP_HO_COM].f_desc, "cc resp OUT"), NULL, 0, 0);
     unregister_snf_en(AS_SAC);
+    delete_lme_as_node_by_sac(AS_SAC, clear_as_man);
     return LD_OK;
 }
 
