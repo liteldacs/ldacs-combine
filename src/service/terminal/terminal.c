@@ -202,12 +202,12 @@ static void handle_user_msg_terminal(user_msg_t *umsg) {
     memcpy(msg, umsg->msg->ptr, umsg->msg->len);
 
     if (config.direct) {
-        log_info("用户数据长度 %d", umsg->msg->len);
+        log_info("TCP Payload length %d", umsg->msg->len);
     }else {
-        char payload[2048] = {0};
-        memcpy(payload, umsg->msg->ptr + 60, umsg->msg->len-60);
-        // log_info("获取 TCP Payload: %s %d", payload, strlen(payload));
-        log_info("获取 TCP Payload 长度: %d", strlen(payload));
+        // char payload[2048] = {0};
+        // memcpy(payload, umsg->msg->ptr + 60, umsg->msg->len-60);
+
+        log_buf(LOG_INFO, "TCP Payload:", umsg->msg->ptr + 60, umsg->msg->len-60);
     }
 }
 
