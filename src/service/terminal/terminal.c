@@ -227,7 +227,7 @@ static void trigger_handover(int argc, char **argv) {
     rcu_handover(UA, GST_SAC);
 }
 
-#define PKT_COUNT 10
+#define PKT_COUNT 12
 static void send_multi_data_terminal(int argc, char **argv) {
 
     if (config.direct) {
@@ -235,7 +235,7 @@ static void send_multi_data_terminal(int argc, char **argv) {
         return;
     }
 
-    int pkt_lens[PKT_COUNT] = {210, 274, 402, 423, 444, 466, 530, 1150, 1555, 1683};
+    int pkt_lens[PKT_COUNT] = {128, 256, 384, 512, 640, 768, 896, 1024, 1152, 1280, 1408, 1536};
 
     // const char *test_msg = "Testing User Message for LDACS\0";
     for (int i = 0; i < PKT_COUNT; i++) {
