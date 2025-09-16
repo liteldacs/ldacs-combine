@@ -331,8 +331,6 @@ l_err process_snp(orient_sdu_t *o_sdu) {
         return LD_ERR_INVALID_MAC;
     }
 
-    log_buf(LOG_FATAL, "SNP IN", snp_in->ptr, snp_in->len);
-
     pdu.sdu = init_buffer_ptr(snp_in->len - get_sec_maclen(snp_layer_objs.SEC) - (SNP_HEAD_LEN >> 3));
     init_pbs(&pbs, snp_in->ptr, snp_in->len, "SNP IN");
     if (!in_struct(&pdu, &snp_pdu_desc, &pbs, NULL)) {
@@ -345,15 +343,13 @@ l_err process_snp(orient_sdu_t *o_sdu) {
     if (check_sqn == NULL) {
         return LD_ERR_INTERNAL;
     }
-    log_warn("!!!! %d %d", *check_sqn, pdu.sqn);
     if (pdu.sqn < *check_sqn || abs((int) pdu.sqn - *check_sqn) > SNP_SQN_RANGE) {
         log_warn("The received sqn is out of range.");
         preempt_prim(&SN_DATA_IND_PRIM, VER_WRONG_SQN, o_sdu, NULL, 0, 0);
         free_buffer(pdu.sdu);
         return LD_ERR_INVALID;
-    } else {
-        (*check_sqn) = pdu.sqn+1;
     }
+    (*check_sqn) = pdu.sqn + 1;
 
     /* free the previous orient buffer, and set the new one */
     free_buffer(o_sdu->buf);
