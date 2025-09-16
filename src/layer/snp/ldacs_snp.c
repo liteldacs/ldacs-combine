@@ -215,6 +215,7 @@ void SN_SAPD(ld_prim_t *prim) {
     CLONE_TO_CHUNK(*enc_buf, enc_arr, enc_sz);
 
     /* 如果还没有派生KAS-GS，则不验证完整性 */
+
     snp_pdu_t snp_pdu = {
         .ctrl = prim->prim_obj_typ == SN_TYP_FROM_UP ? USER_PLANE_PACKET : CONTROL_PLANE_PACKET,
         .sec_level = snp_layer_objs.SEC,
@@ -322,8 +323,6 @@ l_err process_snp(orient_sdu_t *o_sdu) {
     zero(&pbs);
     snp_pdu_t pdu;
 
-    // log_buf(LOG_FATAL, "SNP IN", snp_in->ptr, snp_in->len);
-
 
     /* TODO: 搞出更多的错误代码，然后再网关显示 */
     if (snpsub_vfy_hmac(o_sdu->AS_SAC, snp_layer_objs.SEC, snp_in->ptr, snp_in->len) != LDCAUC_OK) {
@@ -331,6 +330,8 @@ l_err process_snp(orient_sdu_t *o_sdu) {
         preempt_prim(&SN_DATA_IND_PRIM, VER_WRONG_MAC, o_sdu, NULL, 0, 0);
         return LD_ERR_INVALID_MAC;
     }
+
+    log_buf(LOG_FATAL, "SNP IN", snp_in->ptr, snp_in->len);
 
     pdu.sdu = init_buffer_ptr(snp_in->len - get_sec_maclen(snp_layer_objs.SEC) - (SNP_HEAD_LEN >> 3));
     init_pbs(&pbs, snp_in->ptr, snp_in->len, "SNP IN");
@@ -344,13 +345,14 @@ l_err process_snp(orient_sdu_t *o_sdu) {
     if (check_sqn == NULL) {
         return LD_ERR_INTERNAL;
     }
-    if (abs((int) pdu.sqn - *check_sqn) < SNP_RANGE) {
-        (*check_sqn) = pdu.sqn;
-    } else {
+    log_warn("!!!! %d %d", *check_sqn, pdu.sqn);
+    if (pdu.sqn < *check_sqn || abs((int) pdu.sqn - *check_sqn) > SNP_SQN_RANGE) {
         log_warn("The received sqn is out of range.");
         preempt_prim(&SN_DATA_IND_PRIM, VER_WRONG_SQN, o_sdu, NULL, 0, 0);
         free_buffer(pdu.sdu);
         return LD_ERR_INVALID;
+    } else {
+        (*check_sqn) = pdu.sqn+1;
     }
 
     /* free the previous orient buffer, and set the new one */

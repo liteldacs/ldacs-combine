@@ -12,7 +12,7 @@
 
 #define MAX_SNP_SDU_LEN 2012
 #define MAX_SNP_PDU_LEN 2048
-#define SNP_RANGE 10
+#define SNP_SQN_RANGE 3
 
 typedef enum {
     SN_DATA_REQ = 0x1,
