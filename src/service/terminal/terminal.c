@@ -177,7 +177,7 @@ void *send_user_data_func(void *args) {
 
 
 static void handle_st_chg_terminal(lme_state_chg_t *st_chg) {
-    log_warn("The Current LME state is %d, by %.03x", st_chg->state, st_chg->sac);
+    // log_warn("The Current LME state is %d, by %.03x", st_chg->state, st_chg->sac);
 
     if (config.direct) {
     if (st_chg->state != LME_OPEN) return;
@@ -204,9 +204,6 @@ static void handle_user_msg_terminal(user_msg_t *umsg) {
     if (config.direct) {
         log_info("TCP Payload length %d", umsg->msg->len);
     }else {
-        // char payload[2048] = {0};
-        // memcpy(payload, umsg->msg->ptr + 60, umsg->msg->len-60);
-
         log_buf(LOG_INFO, "TCP Payload:", umsg->msg->ptr + 60, umsg->msg->len-60);
     }
 }
@@ -215,6 +212,10 @@ static void send_singal_data_terminal(int argc, char **argv) {
     buffer_t *buf = gen_ipv6_pkt(20);
 
     send_user_data(buf->ptr, buf->len, terminal_obj.AS_SAC);
+
+    if (!config.direct) {
+        log_buf(LOG_INFO, "TCP Payload:", buf->ptr + 60, buf->len-60);
+    }
 }
 
 static void trigger_handover(int argc, char **argv) {
