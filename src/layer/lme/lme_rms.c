@@ -300,6 +300,8 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
 
                     set_new_dls_frequency(1112.0, 966.0);
 
+                    lme_rms_obj.lme_obj->lme_as_man->send_T_SQN = lme_rms_obj.lme_obj->lme_as_man->recv_T_SQN = 0;
+
                     /* Tell MAC change to HO2 state */
                     if ((prim->prim_err = preempt_prim(&MAC_HO_REQ_PRIM, E_TYP_ANY, NULL, NULL, 0, 0)) != LD_OK) {
                         log_error("LME can not call MAC layers manipulate HO2");
