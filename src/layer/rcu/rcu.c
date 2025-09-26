@@ -166,6 +166,11 @@ l_rcu_err rcu_update_key(uint16_t sac) {
 }
 
 static l_err init_path(path_function_t *path) {
+    // 添加边界检查
+    if (!path) {
+        log_error("path struct is null");
+        return LD_ERR_NULL;
+    }
 
     srand(time(NULL));
     double angle = (((double)rand() / (double)RAND_MAX) - 0.5) * 4;
