@@ -124,3 +124,7 @@ void handle_user_msg_http(user_msg_t *umsg) {
     if (!req) return;
     HTTP_SSE_SEND_OK_WITH_DETAIL(umsg, &user_msg_tmpl_desc, "", "recv_user_msg");
 }
+
+void handle_update_coordinates_http(uint16_t AS_SAC, double longtitude, double latitude) {
+
+}

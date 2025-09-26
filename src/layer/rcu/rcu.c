@@ -9,6 +9,8 @@
 rcu_layer_obj_t rcu_layer_obj = {
     .rcu_status = RCU_CLOSED,
     .is_occupied = FALSE,
+    .longitude = 0,
+    .latitude = 0,
 };
 
 static void powering_on() {

@@ -25,6 +25,8 @@ static void handle_as_info_upd_terminal(as_info_upd_t *as_info);
 
 static void handle_user_msg_terminal(user_msg_t *umsg);
 
+static void handle_update_coordinates_termianl(uint16_t AS_SAC, double longtitude, double latitude);
+
 static void send_singal_data_terminal(int argc, char **argv);
 
 static void trigger_handover(int argc, char **argv);
@@ -33,7 +35,7 @@ static void send_multi_data_terminal(int argc, char **argv);
 
 static void send_specific_data_terminal(int argc, char **argv);
 
-static void send_bdsbas_data_terminal(int argc, char **argv);
+static void start_auth(int argc, char **argv);
 
 static const size_t funcs_sz = 5;
 static terminal_func terminal_funcs[] = {
@@ -41,7 +43,7 @@ static terminal_func terminal_funcs[] = {
     trigger_handover,
     send_multi_data_terminal,
     send_specific_data_terminal,
-    send_bdsbas_data_terminal,
+    start_auth,
 };
 
 ld_service_t terminal_service = {
@@ -50,6 +52,7 @@ ld_service_t terminal_service = {
     .handle_as_info_key_upd = handle_as_info_key_upd_terminal,
     .handle_as_info_upd = handle_as_info_upd_terminal,
     .handle_recv_user_msg = handle_user_msg_terminal,
+    .handle_update_coordinates = handle_update_coordinates_termianl,
 };
 
 static void monitor_terminal_input() {
@@ -95,7 +98,7 @@ static l_err init_terminal_service() {
     }
 
     rcu_power_on(config.role); //power on directly
-    if (config.role == LD_AS) rcu_start_auth();
+    start_auth(0, NULL);
 
     monitor_terminal_input();
     return LD_OK;
@@ -208,6 +211,10 @@ static void handle_user_msg_terminal(user_msg_t *umsg) {
     }
 }
 
+static void handle_update_coordinates_termianl(uint16_t AS_SAC, double longtitude, double latitude) {
+
+}
+
 static void send_singal_data_terminal(int argc, char **argv) {
     buffer_t *buf = gen_ipv6_pkt(20);
 
@@ -263,10 +270,8 @@ static void send_specific_data_terminal(int argc, char **argv) {
     send_user_data(rand, size, terminal_obj.AS_SAC);
 }
 
-static void send_bdsbas_data_terminal(int argc, char **argv) {
-    uint8_t bdsbas_data[32] = {
-        0x53, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x34, 0x74, 0x3E, 0x00
-    };
-    send_user_data(bdsbas_data, sizeof(bdsbas_data), terminal_obj.AS_SAC);
+
+static void start_auth(int argc, char **argv) {
+    if (config.role == LD_AS) rcu_start_auth();
+    else log_warn("Only AS can start auth");
 }

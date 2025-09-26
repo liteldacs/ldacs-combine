@@ -13,6 +13,7 @@ ld_service_t http_service = {
     .handle_as_info_key_upd = handle_as_info_key_upd_http,
     .handle_as_info_upd = handle_as_info_upd_http,
     .handle_recv_user_msg = handle_user_msg_http,
+    .handle_update_coordinates = handle_update_coordinates_http,
 };
 
 http_server_t http_server = {

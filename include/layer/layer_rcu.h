@@ -22,6 +22,8 @@ typedef struct ld_service_s {
     void (*handle_as_info_upd)(as_info_upd_t *);
 
     void (*handle_recv_user_msg)(user_msg_t *);
+
+    void (*handle_update_coordinates)(uint16_t, double, double);
 } ld_service_t;
 
 typedef enum RCU_RET_E {
@@ -43,6 +45,8 @@ typedef struct rcu_layer_obj_s {
     enum ELE_TYP lme_status;
     bool is_occupied;
     ld_service_t service;
+    double longitude;
+    double latitude;
 } rcu_layer_obj_t;
 
 extern rcu_layer_obj_t rcu_layer_obj;
