@@ -23,7 +23,7 @@ typedef struct ld_service_s {
 
     void (*handle_recv_user_msg)(user_msg_t *);
 
-    void (*handle_update_coordinates)(uint16_t, double, double);
+    void (*handle_update_coordinates)(uint32_t, double, double);
 } ld_service_t;
 
 typedef enum RCU_RET_E {
@@ -40,13 +40,24 @@ enum RCU_STATUS_E {
     RCU_CLOSED,
 };
 
+#define GEN_POINTS 20
+
+typedef struct path_function_s {
+    double start_position[2];
+    double refer_position[2];
+    double end_position[2];
+    double *curr_position;
+    double path_points[GEN_POINTS][2];
+    pthread_t th;
+    bool is_stop;
+}path_function_t;
+
 typedef struct rcu_layer_obj_s {
     enum RCU_STATUS_E rcu_status;
     enum ELE_TYP lme_status;
     bool is_occupied;
     ld_service_t service;
-    double longitude;
-    double latitude;
+    path_function_t  path;
 } rcu_layer_obj_t;
 
 extern rcu_layer_obj_t rcu_layer_obj;

@@ -25,7 +25,7 @@ static void handle_as_info_upd_terminal(as_info_upd_t *as_info);
 
 static void handle_user_msg_terminal(user_msg_t *umsg);
 
-static void handle_update_coordinates_termianl(uint16_t AS_SAC, double longtitude, double latitude);
+static void handle_update_coordinates_termianl(uint32_t AS_UA, double longitude, double latitude);
 
 static void send_singal_data_terminal(int argc, char **argv);
 
@@ -211,7 +211,9 @@ static void handle_user_msg_terminal(user_msg_t *umsg) {
     }
 }
 
-static void handle_update_coordinates_termianl(uint16_t AS_SAC, double longtitude, double latitude) {
+static void handle_update_coordinates_termianl(uint32_t AS_UA, double longitude, double latitude) {
+    // log_warn("!!!!!! %d %.6f %.6f", AS_UA, longitude, latitude);
+
 
 }
 

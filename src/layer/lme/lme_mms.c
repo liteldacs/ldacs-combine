@@ -174,6 +174,12 @@ void M_SAPB_cb(ld_prim_t *prim) {
                 if (!in_state(&lme_mms_obj.lme_obj->lme_fsm, lme_fsm_states[LME_CSCANNING])) break;
 
                 //TODO: 增加经纬度判断
+                if (calculate_distance(rcu_layer_obj.path.curr_position, GS1_COORDINATE) > GS_COVERAGE) {
+                    break;
+                }
+
+                log_info("AS has get into the GS coverage");
+
                 bc_sib_t *sib = data_struct;
                 lme_layer_objs.GS_SAC = sib->SAC;
                 lme_layer_objs.PROTOCOL_VER = sib->VER;

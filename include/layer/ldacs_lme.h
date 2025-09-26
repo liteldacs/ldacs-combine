@@ -28,6 +28,9 @@
 
 #define SHAREDINFO_LEN 21
 
+#define GS1_COORDINATE (double[2]){117, 36.5}
+#define GS2_COORDINATE (double[2]){117.2, 31.8}
+
 
 enum CMS_en {
     CMS_TYP_1 = 0, /* QPSK with 1/2 code-rate */

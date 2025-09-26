@@ -8,7 +8,6 @@
 #include "layer_core.h"
 #include "layer_rcu.h"
 
-
 typedef struct int_layer_obj_s {
     void (*msg_handler)(user_msg_t *);
 } int_layer_obj_t;

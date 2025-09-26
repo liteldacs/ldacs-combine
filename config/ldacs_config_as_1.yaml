@@ -11,6 +11,13 @@ http:
   http_port: 9456
   auto_auth: 1
 
+path:
+  start-longitude: 116.597176
+  start-latitude: 39.917498
+  refer-longitude: 117.050000
+  refer-latitude: 33.400000
+
+
 # direct snp
 AS-SAC: 301
 GS-SAC: 16

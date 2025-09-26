@@ -6,12 +6,13 @@
 #include "layer_rcu.h"
 #include "layer_interface.h"
 
+static l_err init_path_function();
+
 rcu_layer_obj_t rcu_layer_obj = {
     .rcu_status = RCU_CLOSED,
     .is_occupied = FALSE,
-    .longitude = 0,
-    .latitude = 0,
 };
+
 
 static void powering_on() {
     // make_phy_layer(PHY_SIM_JSON);
@@ -97,6 +98,9 @@ l_rcu_err rcu_power_on(uint8_t role) {
     if (rcu_layer_obj.rcu_status == RCU_OPEN) return LD_RCU_ALREADY_IN_STATE;
     powering_on();
 
+    if (config.role == LD_AS) {
+        init_path_function();
+    }
     if (preempt_prim(&LME_OPEN_REQ_PRIM, RC_TYP_OPEN, NULL, NULL, 0, 0) || rcu_layer_obj.rcu_status != RCU_OPEN) {
         log_error("Can not open Stack correctly");
         return LD_RCU_FAILED;
@@ -161,3 +165,53 @@ l_rcu_err rcu_update_key(uint16_t sac) {
     return LD_RCU_OK;
 }
 
+static l_err init_path(path_function_t *path) {
+
+    srand(time(NULL));
+    double angle = (((double)rand() / (double)RAND_MAX) - 0.5) * 4;
+
+    path->end_position[0] = path->start_position[0] + (path->refer_position[0] - path->start_position[0]) *2 + angle;
+    path->end_position[1] = path->start_position[1] + (path->refer_position[1] - path->start_position[1]) *2 + angle;
+
+
+    for (int i = 0; i < GEN_POINTS; i++) {
+        double ratio = (double)i / (double)(GEN_POINTS);
+        path->path_points[i][0] = path->start_position[0] + (path->end_position[0] - path->start_position[0]) * ratio;
+        path->path_points[i][1] = path->start_position[1] + (path->end_position[1] - path->start_position[1]) * ratio;
+    }
+
+    return LD_OK;
+}
+
+static void *path_function_thread(void *arg) {
+    path_function_t *path = &rcu_layer_obj.path;
+    int i = 0;
+    while (1) {
+        if (i >= GEN_POINTS) break;
+        sleep(1);
+        if (path->is_stop) continue;
+        rcu_layer_obj.service.handle_update_coordinates(config.UA, path->path_points[i][0], path->path_points[i][1]);
+        path->curr_position = path->path_points[i];
+
+        // double ret = calculate_distance(path->path_points[i], (double[2]){117, 36.5});
+        // log_warn("~~ %.6f", ret);
+
+        i++;
+    }
+}
+
+static l_err init_path_function() {
+    path_function_t *path = &rcu_layer_obj.path;
+    zero(path);
+    path->start_position[0] = config.start_longitude;
+    path->start_position[1] = config.start_latitude;
+    path->refer_position[0] = config.refer_longitude;
+    path->refer_position[1] = config.refer_latitude;
+
+    init_path(path);
+
+    pthread_create(&path->th, NULL, path_function_thread, NULL);
+    pthread_detach(path->th);
+
+    return LD_OK;
+}

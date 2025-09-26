@@ -86,6 +86,6 @@ void handle_as_info_upd_http(as_info_upd_t *as_info);
 
 void handle_user_msg_http(user_msg_t *umsg);
 
-void handle_update_coordinates_http(uint16_t AS_SAC, double longtitude, double latitude);
+void handle_update_coordinates_http(uint32_t AS_UA, double longitude, double latitude);
 
 #endif //HTTP_RESPONSE_H
