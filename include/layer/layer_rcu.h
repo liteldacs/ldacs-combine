@@ -56,7 +56,7 @@ typedef struct rcu_layer_obj_s {
     enum RCU_STATUS_E rcu_status;
     enum ELE_TYP lme_status;
     bool is_occupied;
-    ld_service_t service;
+    ld_service_t *service;
     path_function_t  path;
 } rcu_layer_obj_t;
 
@@ -132,7 +132,7 @@ void L_SAPC_cb(ld_prim_t *prim);
 
 void L_SAPT_cb(ld_prim_t *prim);
 
-void init_rcu(ld_service_t service);
+void init_rcu(ld_service_t *service);
 
 void stop_rcu();
 

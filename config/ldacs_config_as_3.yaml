@@ -8,7 +8,7 @@ init_fl_freq: 1110.0
 init_rl_freq: 964.0
 
 http:
-  http_port: 25641
+  http_port: 10323
   auto_auth: 1
 
 AS-SAC: 303

@@ -5,3 +5,4 @@ set(CMAKE_C_STANDARD 11)
 
 add_subdirectory(http)
 add_subdirectory(terminal)
+add_subdirectory(dashboard)

@@ -2,6 +2,7 @@
 #include "ldacs_role.h"
 #include "http_core.h"
 #include "cconfig.h"
+#include "dashboard.h"
 
 is_stop volatile stop_flag = FALSE;
 
@@ -16,6 +17,7 @@ config_t config = {
     .ip_ver = IPVERSION_4,
     .init_fl_freq = 960.0,
     .use_http = FALSE,
+    .use_dashboard = FALSE,
     .auto_auth = TRUE,
     .UA = 0,
     .is_merged = FALSE,
@@ -77,7 +79,7 @@ static int init_config_path() {
 
 int opt_parse(int argc, char *const *argv) {
     int c;
-    while ((c = getopt(argc, argv, "p:f:dt:w:c:AGWHMBED")) != -1) {
+    while ((c = getopt(argc, argv, "p:f:dt:w:c:AGWHSMBED")) != -1) {
         switch (c) {
             case 'p': {
                 config.port = strtol(optarg, NULL, 10);
@@ -134,6 +136,11 @@ int opt_parse(int argc, char *const *argv) {
             }
             case 'H': {
                 config.use_http = TRUE;
+                break;
+            }
+            case 'S': {
+                config.use_dashboard = TRUE;
+                config.dashboard_port = config.http_port;
                 break;
             }
             case 'D': {
@@ -209,8 +216,15 @@ int main(int argc, char **argv) {
     log_init(LOG_DEBUG, config.log_dir, roles_str[config.role]);
     init_signal();
 
-    if (config.role == LD_AS || config.role == LD_GS)
-        init_rcu(config.use_http == FALSE ? terminal_service : http_service);
+    if (config.role == LD_AS || config.role == LD_GS) {
+        ld_service_t *service = &terminal_service;
+        if (config.use_http) {
+            service = &http_service;
+        }else if (config.use_dashboard) {
+            service = &dashboard_service;
+        }
+        init_rcu(service);
+    }
     else if (config.role == LD_SGW) {
         run_sgw();
     }

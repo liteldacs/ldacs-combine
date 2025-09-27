@@ -22,6 +22,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include/layer)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include/device)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include/tools)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include/service/http)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include/service/dashboard)
 INCLUDE_DIRECTORIES(/usr/local/sqlite/include)
 #INCLUDE_DIRECTORIES(/usr/local/include/ldacs)
 
@@ -34,7 +35,7 @@ add_executable(cli::test_client ALIAS ${PROJECT_NAME})
 #target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal cli::ldacs_device
 #        event event_pthreads ldcauc)
 
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal cli::ldacs_device
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal cli::ldacs_device cli::ldacs_dashboard
         event event_pthreads)
 
 find_package(SQLite3 REQUIRED)

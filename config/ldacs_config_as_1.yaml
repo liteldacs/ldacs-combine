@@ -8,7 +8,7 @@ init_fl_freq: 1110.0
 init_rl_freq: 964.0
 
 http:
-  http_port: 9456
+  http_port: 10123 #暂时和dashboard_port共用
   auto_auth: 1
 
 path:

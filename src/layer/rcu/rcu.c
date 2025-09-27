@@ -23,10 +23,10 @@ static void powering_on() {
     make_snp_layer();
 }
 
-void init_rcu(ld_service_t service) {
-    register_int_handler(service.handle_recv_user_msg);
+void init_rcu(ld_service_t *service) {
+    register_int_handler(service->handle_recv_user_msg);
     rcu_layer_obj.service = service;
-    rcu_layer_obj.service.init_service();
+    rcu_layer_obj.service->init_service();
 }
 
 void stop_rcu() {
@@ -46,19 +46,19 @@ void L_SAPC_cb(ld_prim_t *prim) {
             rcu_layer_obj.lme_status = prim->prim_obj_typ;
             switch (prim->prim_obj_typ) {
                 case LME_STATE_CHANGE: {
-                    passert(rcu_layer_obj.service.handle_state_chg != NULL);
-                    rcu_layer_obj.service.handle_state_chg(prim->prim_objs);
+                    passert(rcu_layer_obj.service->handle_state_chg != NULL);
+                    rcu_layer_obj.service->handle_state_chg(prim->prim_objs);
                     break;
                 }
                 case LME_AS_KEY_UPDATE: {
-                    passert(rcu_layer_obj.service.handle_as_info_key_upd != NULL);
-                    rcu_layer_obj.service.handle_as_info_key_upd(prim->prim_objs);
+                    passert(rcu_layer_obj.service->handle_as_info_key_upd != NULL);
+                    rcu_layer_obj.service->handle_as_info_key_upd(prim->prim_objs);
                     break;
                 }
                 case LME_AS_UPDATE: {
-                    passert(rcu_layer_obj.service.handle_as_info_upd != NULL);
+                    passert(rcu_layer_obj.service->handle_as_info_upd != NULL);
                     lme_as_man_t *as_man = prim->prim_objs;
-                    rcu_layer_obj.service.handle_as_info_upd(&(as_info_upd_t){
+                    rcu_layer_obj.service->handle_as_info_upd(&(as_info_upd_t){
                         .AS_UA = as_man->AS_UA,
                         .AS_SAC = as_man->AS_SAC,
                         .AS_CURR_GS_SAC = as_man->AS_CURR_GS_SAC,
@@ -145,7 +145,7 @@ l_rcu_err rcu_handover(uint32_t UA, uint16_t GST_SAC) {
 enum RCU_STATUS_E rcu_get_rcu_state() {
     if (config.role == LD_AS && rcu_layer_obj.rcu_status == RCU_OPEN) {
         lme_as_man_t *as_man = lme_layer_objs.lme_as_man;
-        rcu_layer_obj.service.handle_as_info_upd(&(as_info_upd_t){
+        rcu_layer_obj.service->handle_as_info_upd(&(as_info_upd_t){
             .AS_UA = as_man->AS_UA,
             .AS_SAC = as_man->AS_SAC,
             .AS_CURR_GS_SAC = as_man->AS_CURR_GS_SAC,
@@ -195,7 +195,7 @@ static void *path_function_thread(void *arg) {
         if (i >= GEN_POINTS) break;
         sleep(1);
         if (path->is_stop) continue;
-        rcu_layer_obj.service.handle_update_coordinates(config.UA, path->path_points[i][0], path->path_points[i][1]);
+        rcu_layer_obj.service->handle_update_coordinates(config.UA, path->path_points[i][0], path->path_points[i][1]);
         path->curr_position = path->path_points[i];
 
         // double ret = calculate_distance(path->path_points[i], (double[2]){117, 36.5});
