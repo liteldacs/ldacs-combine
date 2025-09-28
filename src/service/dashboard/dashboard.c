@@ -46,7 +46,29 @@ static void *dashboard_conn_connect(net_ctx_t *ctx, char *remote_addr, int remot
 }
 
 static l_err dashboard_data_recv(basic_conn_t *bc) {
-    log_warn("!!!!!!!!~~~~~~");
+    if (!bc->read_pkt) {
+        log_warn("Read pkt is null");
+        return LD_ERR_NULL;
+    }
+    log_warn("%s", bc->read_pkt->ptr);
+
+    dashboard_data_t to_resp;
+
+    cJSON *root = cJSON_Parse((const char *)bc->read_pkt->ptr);
+    unmarshel_json(root, &to_resp, &dashboard_data_tmpl_desc);
+    cJSON_Delete(root);
+
+    switch (to_resp.type) {
+        case SWITCH_AS: {
+            rcu_switch_as();
+            break;
+        }
+        default: {
+            log_warn("Wrong Response Type");
+            return LD_ERR_INTERNAL;
+        }
+    }
+
     return LD_OK;
 }
 
@@ -59,7 +81,7 @@ static l_err dashboard_data_send(DASHBOARD_FUNCTION func_e, void *data) {
     }
 
     dashboard_data_t to_resp = {
-        .func = (uint8_t)func_e,
+        .type = (uint8_t)func_e,
         .data = data_str,
     };
 

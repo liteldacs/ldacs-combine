@@ -4,7 +4,7 @@
 #include "dashboard.h"
 
 static json_tmpl_t dashboard_data_tmpl[] = {
-    {cJSON_Number, sizeof(uint8_t), "func", "function", NULL},
+    {cJSON_Number, sizeof(uint8_t), "type", "function", NULL},
     {cJSON_Raw, sizeof(char *), "data", "data", NULL},
     {cJSON_Invalid, 0, NULL, NULL, NULL}
 };
@@ -28,7 +28,14 @@ json_tmpl_desc_t dashboard_update_coordinate_tmpl_desc = {
     .size = sizeof(dashboard_update_coordinate_t)
 };
 
+// json_tmpl_desc_t dashboard_stop_as_tmpl_desc = {
+//     .desc = "DASHBOARD_STOP_AS",
+//     .tmpl = dashboard_stupdate_coordinate_tmpl,
+//     .size = sizeof(dashboard_update_coordinate_t)
+// };
+
 const dashboard_func_define_t dashboard_func_defines[] = {
     {REGISTER_AS, &dashboard_update_coordinate_tmpl_desc},
     {UPDATA_COORDINATE, &dashboard_update_coordinate_tmpl_desc},
+    // {STOP_AS, &dashboard_stop_as_tmpl_desc},
 };

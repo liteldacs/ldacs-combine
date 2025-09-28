@@ -165,6 +165,11 @@ l_rcu_err rcu_update_key(uint16_t sac) {
     return LD_RCU_OK;
 }
 
+l_rcu_err rcu_switch_as() {
+    rcu_layer_obj.path.is_stop = !rcu_layer_obj.path.is_stop;
+    return LD_RCU_OK;
+}
+
 static l_err init_path(path_function_t *path) {
     // 添加边界检查
     if (!path) {

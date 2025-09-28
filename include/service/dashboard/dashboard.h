@@ -13,6 +13,7 @@
 typedef enum {
     REGISTER_AS,
     UPDATA_COORDINATE,
+    SWITCH_AS,
 }DASHBOARD_FUNCTION;
 
 typedef struct dashboard_func_define_s{
@@ -22,7 +23,7 @@ typedef struct dashboard_func_define_s{
 
 #pragma pack(1)
 typedef struct dashboard_data_s {
-    uint8_t func;
+    uint8_t type;
     char *data;
 } dashboard_data_t;
 
@@ -34,7 +35,7 @@ typedef struct dashboard_update_coordinate_s {
 #pragma pack()
 
 extern json_tmpl_desc_t dashboard_data_tmpl_desc;
-extern json_tmpl_desc_t dashboard_update_coordinate_desc;
+extern json_tmpl_desc_t dashboard_update_coordinate_tmpl_desc;
 
 extern const dashboard_func_define_t dashboard_func_defines[];
 

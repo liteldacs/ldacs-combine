@@ -156,4 +156,6 @@ l_rcu_err rcu_change_occupied(bool to_change);
 
 l_rcu_err rcu_update_key(uint16_t sac);
 
+l_rcu_err rcu_switch_as();
+
 #endif //LAYER_RCU_H
