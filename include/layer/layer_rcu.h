@@ -23,6 +23,8 @@ typedef struct ld_service_s {
 
     void (*handle_recv_user_msg)(user_msg_t *);
 
+    void (*handle_register_as)(uint32_t, double, double);
+
     void (*handle_update_coordinates)(uint32_t, double, double);
 } ld_service_t;
 

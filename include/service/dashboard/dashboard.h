@@ -11,6 +11,7 @@
 #define BACKEND_PORT 9876
 
 typedef enum {
+    REGISTER_AS,
     UPDATA_COORDINATE,
 }DASHBOARD_FUNCTION;
 
@@ -24,9 +25,16 @@ typedef struct dashboard_data_s {
     uint8_t func;
     char *data;
 } dashboard_data_t;
+
+typedef struct dashboard_update_coordinate_s {
+    uint32_t UA;
+    double longitude;
+    double latitude;
+}dashboard_update_coordinate_t;
 #pragma pack()
 
 extern json_tmpl_desc_t dashboard_data_tmpl_desc;
+extern json_tmpl_desc_t dashboard_update_coordinate_desc;
 
 extern const dashboard_func_define_t dashboard_func_defines[];
 

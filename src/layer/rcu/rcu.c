@@ -191,10 +191,15 @@ static l_err init_path(path_function_t *path) {
 static void *path_function_thread(void *arg) {
     path_function_t *path = &rcu_layer_obj.path;
     int i = 0;
+    if (!rcu_layer_obj.service->handle_update_coordinates || !rcu_layer_obj.service->handle_register_as) return NULL;
+    // 注册as
+    rcu_layer_obj.service->handle_register_as(config.UA, config.start_longitude, config.start_latitude);
     while (1) {
         if (i >= GEN_POINTS) break;
         sleep(1);
         if (path->is_stop) continue;
+
+        //更新位置
         rcu_layer_obj.service->handle_update_coordinates(config.UA, path->path_points[i][0], path->path_points[i][1]);
         path->curr_position = path->path_points[i];
 

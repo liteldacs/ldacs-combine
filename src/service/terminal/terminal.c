@@ -213,8 +213,6 @@ static void handle_user_msg_terminal(user_msg_t *umsg) {
 
 static void handle_update_coordinates_termianl(uint32_t AS_UA, double longitude, double latitude) {
     // log_warn("!!!!!! %d %.6f %.6f", AS_UA, longitude, latitude);
-
-
 }
 
 static void send_singal_data_terminal(int argc, char **argv) {

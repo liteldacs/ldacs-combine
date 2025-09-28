@@ -15,9 +15,20 @@ static dashboad_obj_t dashboad_obj = {
 };
 
 static l_err init_dashboard_service();
+static void handle_as_info_key_upd_dashboard(as_info_key_upd_t *as_upd);
+static void handle_as_info_upd_dashboard(as_info_upd_t *as_info);
+static void handle_st_chg_dashboard(lme_state_chg_t *st_chg);
+static void handle_register_as_dashboard(uint32_t AS_UA, double longitude, double latitude);
+static void handle_update_coordinates_dashboard(uint32_t AS_UA, double longitude, double latitude);
+
 
 ld_service_t dashboard_service = {
     .init_service = init_dashboard_service,
+    .handle_as_info_key_upd = handle_as_info_key_upd_dashboard,
+    .handle_as_info_upd = handle_as_info_upd_dashboard,
+    .handle_state_chg = handle_st_chg_dashboard,
+    .handle_register_as = handle_register_as_dashboard,
+    .handle_update_coordinates = handle_update_coordinates_dashboard,
 };
 
 static void *dashboard_conn_connect(net_ctx_t *ctx, char *remote_addr, int remote_port, int local_port) {
@@ -58,8 +69,8 @@ static l_err dashboard_data_send(DASHBOARD_FUNCTION func_e, void *data) {
     buffer_t *to_send = init_buffer_unptr();
     CLONE_TO_CHUNK(*to_send, root_s, strlen(root_s));
 
-    // cn_log_buf(LOG_WARN, meta->net_ele->element_tag, meta->interface_type, "SEND", to_send->ptr, to_send->len);
-
+    log_error("%s %d", root_s, strlen(root_s));
+    //
     if (dashboad_obj.net_ctx.send_handler(dashboad_obj.conn, to_send, NULL, NULL) != LD_OK) {
         log_error("Send Dashboard data Failed!");
         return LD_ERR_INTERNAL;
@@ -74,10 +85,40 @@ static l_err dashboard_data_send(DASHBOARD_FUNCTION func_e, void *data) {
 
 static void dashboard_conn_close(basic_conn_t *bc) {
     if (!bc) return;
-    // delete_conn_enode_by_connptr(gs_conn, NULL);
     free(bc);
     log_warn("Closing connection!");
 }
+
+static void handle_as_info_key_upd_dashboard(as_info_key_upd_t *as_upd) {
+    const char *tag = "AS_SAC";
+    // if (as_upd->key->len >= strlen(tag) && !memcmp(as_upd->key->ptr, tag, strlen(tag))) {
+    //     // terminal_obj.AS_SAC = as_upd->value;
+    // }
+}
+
+static void handle_as_info_upd_dashboard(as_info_upd_t *as_info) {
+}
+
+static void handle_st_chg_dashboard(lme_state_chg_t *st_chg) {
+    //
+    // if (config.direct) {
+    //     if (st_chg->state != LME_OPEN) return;
+    //
+    //     pthread_create(&terminal_obj.data_th, NULL, send_user_data_func, NULL);
+    //     pthread_detach(terminal_obj.data_th);
+    // }
+}
+
+static void handle_register_as_dashboard(uint32_t AS_UA, double longitude, double latitude) {
+    dashboard_data_send(REGISTER_AS,
+                        &(dashboard_update_coordinate_t){.UA = AS_UA, .longitude = longitude, .latitude = latitude});
+}
+
+static void handle_update_coordinates_dashboard(uint32_t AS_UA, double longitude, double latitude) {
+    dashboard_data_send(UPDATA_COORDINATE,
+                        &(dashboard_update_coordinate_t){.UA = AS_UA, .longitude = longitude, .latitude = latitude});
+}
+
 
 static l_err init_dashboard_service() {
     // log_info("The ldacs simulator is using 'DASHBOARD' mode. Connecting to %s:%d.", BACKEND_IP"\0", BACKEND_PORT);
