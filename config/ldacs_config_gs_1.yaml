@@ -16,6 +16,10 @@ gsnf:
   gsnf_remote_port: 55559
   gsnf_local_port: 55560
 
+path:
+  start-longitude: 117
+  start-latitude: 36.5
+
 init_fl_freq: 1110.0
 init_rl_freq: 964.0
 http:

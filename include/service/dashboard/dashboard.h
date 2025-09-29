@@ -12,8 +12,12 @@
 
 typedef enum {
     REGISTER_AS,
-    UPDATA_COORDINATE,
+    UPDATE_COORDINATE,
+    START_STOP_AS,
+    REGISTER_GS,
     SWITCH_AS,
+
+    STOP_AS = 0xFF,
 }DASHBOARD_FUNCTION;
 
 typedef struct dashboard_func_define_s{
@@ -32,10 +36,17 @@ typedef struct dashboard_update_coordinate_s {
     double longitude;
     double latitude;
 }dashboard_update_coordinate_t;
+
+typedef struct dashboard_register_gs_s {
+    uint16_t TAG;
+    double longitude;
+    double latitude;
+}dashboard_register_gs_t;
 #pragma pack()
 
 extern json_tmpl_desc_t dashboard_data_tmpl_desc;
 extern json_tmpl_desc_t dashboard_update_coordinate_tmpl_desc;
+extern json_tmpl_desc_t dashboard_register_gs_tmpl_desc;
 
 extern const dashboard_func_define_t dashboard_func_defines[];
 

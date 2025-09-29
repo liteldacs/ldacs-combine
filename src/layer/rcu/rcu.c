@@ -98,8 +98,17 @@ l_rcu_err rcu_power_on(uint8_t role) {
     if (rcu_layer_obj.rcu_status == RCU_OPEN) return LD_RCU_ALREADY_IN_STATE;
     powering_on();
 
+
     if (config.role == LD_AS) {
+        // 注册as
+        if (rcu_layer_obj.service->handle_register_as) {
+            rcu_layer_obj.service->handle_register_as(config.UA, config.start_longitude, config.start_latitude);
+        }
         init_path_function();
+    }else if (config.role == LD_GS) {
+        if (rcu_layer_obj.service->handle_register_gs) {
+            rcu_layer_obj.service->handle_register_gs(config.GS_SAC, config.start_longitude, config.start_latitude);
+        }
     }
     if (preempt_prim(&LME_OPEN_REQ_PRIM, RC_TYP_OPEN, NULL, NULL, 0, 0) || rcu_layer_obj.rcu_status != RCU_OPEN) {
         log_error("Can not open Stack correctly");
@@ -165,7 +174,7 @@ l_rcu_err rcu_update_key(uint16_t sac) {
     return LD_RCU_OK;
 }
 
-l_rcu_err rcu_switch_as() {
+l_rcu_err rcu_start_stop_as() {
     rcu_layer_obj.path.is_stop = !rcu_layer_obj.path.is_stop;
     return LD_RCU_OK;
 }
@@ -196,9 +205,7 @@ static l_err init_path(path_function_t *path) {
 static void *path_function_thread(void *arg) {
     path_function_t *path = &rcu_layer_obj.path;
     int i = 0;
-    if (!rcu_layer_obj.service->handle_update_coordinates || !rcu_layer_obj.service->handle_register_as) return NULL;
-    // 注册as
-    rcu_layer_obj.service->handle_register_as(config.UA, config.start_longitude, config.start_latitude);
+    if (!rcu_layer_obj.service->handle_update_coordinates) return NULL;
     while (1) {
         if (i >= GEN_POINTS) break;
         sleep(1);

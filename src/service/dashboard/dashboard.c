@@ -19,6 +19,7 @@ static void handle_as_info_key_upd_dashboard(as_info_key_upd_t *as_upd);
 static void handle_as_info_upd_dashboard(as_info_upd_t *as_info);
 static void handle_st_chg_dashboard(lme_state_chg_t *st_chg);
 static void handle_register_as_dashboard(uint32_t AS_UA, double longitude, double latitude);
+static void handle_register_gs_dashboard(uint16_t GS_TAG, double longitude, double latitude);
 static void handle_update_coordinates_dashboard(uint32_t AS_UA, double longitude, double latitude);
 
 
@@ -28,6 +29,7 @@ ld_service_t dashboard_service = {
     .handle_as_info_upd = handle_as_info_upd_dashboard,
     .handle_state_chg = handle_st_chg_dashboard,
     .handle_register_as = handle_register_as_dashboard,
+    .handle_register_gs = handle_register_gs_dashboard,
     .handle_update_coordinates = handle_update_coordinates_dashboard,
 };
 
@@ -59,8 +61,12 @@ static l_err dashboard_data_recv(basic_conn_t *bc) {
     cJSON_Delete(root);
 
     switch (to_resp.type) {
+        case START_STOP_AS: {
+            rcu_start_stop_as();
+            break;
+        }
         case SWITCH_AS: {
-            rcu_switch_as();
+            log_info("Time to switch !!");
             break;
         }
         default: {
@@ -136,8 +142,13 @@ static void handle_register_as_dashboard(uint32_t AS_UA, double longitude, doubl
                         &(dashboard_update_coordinate_t){.UA = AS_UA, .longitude = longitude, .latitude = latitude});
 }
 
+static void handle_register_gs_dashboard(uint16_t GS_TAG, double longitude, double latitude) {
+    dashboard_data_send(REGISTER_GS,
+                        &(dashboard_register_gs_t){.TAG = GS_TAG, .longitude = longitude, .latitude = latitude});
+}
+
 static void handle_update_coordinates_dashboard(uint32_t AS_UA, double longitude, double latitude) {
-    dashboard_data_send(UPDATA_COORDINATE,
+    dashboard_data_send(UPDATE_COORDINATE,
                         &(dashboard_update_coordinate_t){.UA = AS_UA, .longitude = longitude, .latitude = latitude});
 }
 

@@ -25,6 +25,8 @@ typedef struct ld_service_s {
 
     void (*handle_register_as)(uint32_t, double, double);
 
+    void (*handle_register_gs)(uint16_t, double, double);
+
     void (*handle_update_coordinates)(uint32_t, double, double);
 } ld_service_t;
 
@@ -156,6 +158,6 @@ l_rcu_err rcu_change_occupied(bool to_change);
 
 l_rcu_err rcu_update_key(uint16_t sac);
 
-l_rcu_err rcu_switch_as();
+l_rcu_err rcu_start_stop_as();
 
 #endif //LAYER_RCU_H
