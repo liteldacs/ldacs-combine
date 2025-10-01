@@ -21,6 +21,8 @@ static void handle_st_chg_dashboard(lme_state_chg_t *st_chg);
 static void handle_register_as_dashboard(uint32_t AS_UA, double longitude, double latitude);
 static void handle_register_gs_dashboard(uint16_t GS_TAG, double longitude, double latitude);
 static void handle_update_coordinates_dashboard(uint32_t AS_UA, double longitude, double latitude);
+static void handle_received_user_message_dashboard(user_msg_t *user_msg);
+static void handle_received_control_message_dashboard(orient_sdu_t *osdu);
 
 
 ld_service_t dashboard_service = {
@@ -31,6 +33,8 @@ ld_service_t dashboard_service = {
     .handle_register_as = handle_register_as_dashboard,
     .handle_register_gs = handle_register_gs_dashboard,
     .handle_update_coordinates = handle_update_coordinates_dashboard,
+    .handle_received_ctrl_message = handle_received_control_message_dashboard,
+    .handle_recv_user_msg = handle_received_user_message_dashboard,
 };
 
 static void *dashboard_conn_connect(net_ctx_t *ctx, char *remote_addr, int remote_port, int local_port) {
@@ -155,6 +159,41 @@ static void handle_register_gs_dashboard(uint16_t GS_TAG, double longitude, doub
 static void handle_update_coordinates_dashboard(uint32_t AS_UA, double longitude, double latitude) {
     dashboard_data_send(UPDATE_COORDINATE,
                         &(dashboard_update_coordinate_t){.UA = AS_UA, .longitude = longitude, .latitude = latitude});
+}
+
+static void handle_received_control_message_dashboard(orient_sdu_t *osdu) {
+    buffer_t *b64_buf = encode_b64_buffer(0, osdu->buf->ptr, osdu->buf->len);
+    ld_orient orient = config.role == LD_AS ? FL : RL;
+
+    uint32_t AS_UA = 0;
+    if (config.role == LD_AS) {
+        AS_UA = lme_layer_objs.lme_as_man->AS_UA;
+    }else if (config.role == LD_GS){
+        lme_as_man_t *as_man  = get_lme_as_enode(osdu->AS_SAC);
+        AS_UA = as_man->AS_UA;
+    }
+
+    dashboard_data_send(RECEIVED_MSG,
+                        &(dashboard_received_msg_t){.orient = orient, .type = CONTROL_PLANE_PACKET, .sender = orient == FL ? osdu->GS_SAC : AS_UA, .receiver = orient == FL ? AS_UA : osdu->GS_SAC, .data = b64_buf});
+
+    free_buffer(b64_buf);
+}
+
+static void handle_received_user_message_dashboard(user_msg_t *user_msg) {
+    buffer_t *b64_buf = encode_b64_buffer(0, user_msg->msg->ptr, user_msg->msg->len);
+    ld_orient orient = config.role == LD_AS ? FL : RL;
+
+    uint32_t AS_UA = 0;
+    if (config.role == LD_AS) {
+        AS_UA = lme_layer_objs.lme_as_man->AS_UA;
+    }else if (config.role == LD_GS){
+        lme_as_man_t *as_man  = get_lme_as_enode(user_msg->AS_SAC);
+        AS_UA = as_man->AS_UA;
+    }
+    dashboard_data_send(RECEIVED_MSG,
+                        &(dashboard_received_msg_t){.orient = orient, .type = USER_PLANE_PACKET, .sender = orient == FL ? user_msg->GS_SAC : AS_UA, .receiver = orient == FL ? AS_UA : user_msg->GS_SAC, .data = b64_buf});
+
+    free_buffer(b64_buf);
 }
 
 

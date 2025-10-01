@@ -71,6 +71,13 @@ void L_SAPC_cb(ld_prim_t *prim) {
                     });
                     break;
                 }
+                case LME_CTRL_MSG: {
+                    if (!rcu_layer_obj.service->handle_received_ctrl_message) {
+                        break;
+                    }
+                    rcu_layer_obj.service->handle_received_ctrl_message(prim->prim_objs);
+                    break;
+                }
                 default: {
                     break;
                 }
@@ -100,7 +107,6 @@ l_rcu_err rcu_power_on(uint8_t role) {
     // if rcu startus is OPEN, return derictly
     if (rcu_layer_obj.rcu_status == RCU_OPEN) return LD_RCU_ALREADY_IN_STATE;
     powering_on();
-
 
     if (config.role == LD_AS) {
         // 注册as

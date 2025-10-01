@@ -29,6 +29,15 @@ static json_tmpl_t dashboard_switch_as_tmpl[] = {
     {cJSON_Invalid, 0, NULL, NULL, NULL}
 };
 
+static json_tmpl_t dashboard_received_msg_tmpl[] = {
+    {cJSON_Number, sizeof(uint8_t), "orient", "orient", NULL},
+    {cJSON_Number, sizeof(uint8_t), "type", "type", NULL},
+    {cJSON_Number, sizeof(uint32_t), "sender", "sender", NULL},
+    {cJSON_Number, sizeof(uint32_t), "receiver", "receiver", NULL},
+    {cJSON_String, sizeof(buffer_t *), "message", "message", NULL},
+    {cJSON_Invalid, 0, NULL, NULL, NULL}
+};
+
 json_tmpl_desc_t dashboard_data_tmpl_desc = {
     .desc = "DASHBOARD_DATA",
     .tmpl = dashboard_data_tmpl,
@@ -53,10 +62,17 @@ json_tmpl_desc_t dashboard_switch_as_tmpl_desc = {
     .size = sizeof(dashboard_switch_as_t)
 };
 
+json_tmpl_desc_t dashboard_received_msg_tmpl_desc = {
+    .desc = "DASHBOARD_RECEIVED_MSG",
+    .tmpl = dashboard_received_msg_tmpl,
+    .size = sizeof(dashboard_received_msg_t)
+};
+
 const dashboard_func_define_t dashboard_func_defines[] = {
     {REGISTER_AS, &dashboard_update_coordinate_tmpl_desc},
     {UPDATE_COORDINATE, &dashboard_update_coordinate_tmpl_desc},
     {START_STOP_AS, NULL},
     {REGISTER_GS, &dashboard_register_gs_tmpl_desc},
     {SWITCH_AS, &dashboard_switch_as_tmpl_desc},
+    {RECEIVED_MSG, &dashboard_received_msg_tmpl_desc},
 };

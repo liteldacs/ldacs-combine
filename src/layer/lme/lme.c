@@ -469,6 +469,14 @@ void SN_SAPC_cb(ld_prim_t *prim) {
 void SN_SAPD_L_cb(ld_prim_t *prim) {
     switch (prim->prim_seq) {
         case SN_DATA_IND: {
+            // 向RCU通告控制数据
+            l_err err;
+            if ((err = preempt_prim(&LME_STATE_IND_PRIM, LME_CTRL_MSG, prim->prim_objs, NULL, 0, 0))) {
+                log_error("LME can not call RCU current state");
+                prim->prim_err = err;
+                return;
+            }
+
             orient_sdu_t *osdu = prim->prim_objs;
             upload_snf(prim->prim_obj_typ, osdu->AS_SAC, osdu->GS_SAC, osdu->buf->ptr, osdu->buf->len);
             break;

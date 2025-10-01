@@ -21,13 +21,15 @@ typedef struct ld_service_s {
 
     void (*handle_as_info_upd)(as_info_upd_t *);
 
-    void (*handle_recv_user_msg)(user_msg_t *);
-
     void (*handle_register_as)(uint32_t, double, double);
 
     void (*handle_register_gs)(uint16_t, double, double);
 
     void (*handle_update_coordinates)(uint32_t, double, double);
+
+    void (*handle_recv_user_msg)(user_msg_t *);
+
+    void (*handle_received_ctrl_message)(orient_sdu_t *);
 } ld_service_t;
 
 typedef enum RCU_RET_E {

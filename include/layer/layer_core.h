@@ -106,6 +106,7 @@ enum ELE_TYP {
     LME_STATE_CHANGE = 0x01,
     LME_AS_KEY_UPDATE = 0x02,
     LME_AS_UPDATE = 0x03,
+    LME_CTRL_MSG = 0X04,
 
     /* SN */
     SN_TYP_FROM_LME = 0x1,

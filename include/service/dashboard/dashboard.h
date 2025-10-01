@@ -16,6 +16,7 @@ typedef enum {
     START_STOP_AS,
     REGISTER_GS,
     SWITCH_AS,
+    RECEIVED_MSG,
 
     STOP_AS = 0xFF,
 }DASHBOARD_FUNCTION;
@@ -47,6 +48,14 @@ typedef struct dashboard_switch_as_s {
     uint32_t UA;
     uint16_t GST_SAC;
 }dashboard_switch_as_t;
+
+typedef struct dashboard_received_msg_s {
+    uint8_t orient;
+    uint8_t type;
+    uint32_t sender;
+    uint32_t receiver;
+    buffer_t *data;
+}dashboard_received_msg_t;
 #pragma pack()
 
 extern json_tmpl_desc_t dashboard_data_tmpl_desc;
