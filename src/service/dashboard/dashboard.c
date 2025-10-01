@@ -66,7 +66,12 @@ static l_err dashboard_data_recv(basic_conn_t *bc) {
             break;
         }
         case SWITCH_AS: {
-            log_info("Time to switch !!");
+            dashboard_switch_as_t switch_as;
+            cJSON *data = cJSON_Parse(to_resp.data);
+            unmarshel_json(data, &switch_as, dashboard_func_defines[SWITCH_AS].tmpl);
+            cJSON_Delete(data);
+
+            rcu_handover(switch_as.UA, switch_as.GST_SAC);
             break;
         }
         default: {

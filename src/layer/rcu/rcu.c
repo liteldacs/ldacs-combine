@@ -11,6 +11,9 @@ static l_err init_path_function();
 rcu_layer_obj_t rcu_layer_obj = {
     .rcu_status = RCU_CLOSED,
     .is_occupied = FALSE,
+    .need_access = FALSE,
+    .has_access = FALSE,
+    .need_exit = FALSE,
 };
 
 
@@ -43,7 +46,7 @@ void L_SAPC_cb(ld_prim_t *prim) {
             break;
         }
         case LME_STATE_IND: {
-            rcu_layer_obj.lme_status = prim->prim_obj_typ;
+            // rcu_layer_obj.lme_status = prim->prim_obj_typ;
             switch (prim->prim_obj_typ) {
                 case LME_STATE_CHANGE: {
                     passert(rcu_layer_obj.service->handle_state_chg != NULL);
@@ -135,6 +138,7 @@ l_rcu_err rcu_start_auth() {
         return LD_RCU_FAILED;
     }
 
+    rcu_layer_obj.has_access = TRUE;
     log_info("LDACS Stack authentication correctly!");
     return LD_RCU_OK;
 }
@@ -164,10 +168,6 @@ enum RCU_STATUS_E rcu_get_rcu_state() {
         });
     }
     return rcu_layer_obj.rcu_status;
-}
-
-enum ELE_TYP rcu_get_lme_state() {
-    return rcu_layer_obj.lme_status;
 }
 
 l_rcu_err rcu_update_key(uint16_t sac) {
@@ -215,8 +215,15 @@ static void *path_function_thread(void *arg) {
         rcu_layer_obj.service->handle_update_coordinates(config.UA, path->path_points[i][0], path->path_points[i][1]);
         path->curr_position = path->path_points[i];
 
-        // double ret = calculate_distance(path->path_points[i], (double[2]){117, 36.5});
-        // log_warn("~~ %.6f", ret);
+        if (calculate_distance(rcu_layer_obj.path.curr_position, GS1_COORDINATE) <= GS_COVERAGE) {
+            rcu_layer_obj.need_access = TRUE;
+        }
+
+        if (rcu_layer_obj.has_access && calculate_distance(rcu_layer_obj.path.curr_position, GS1_COORDINATE) > GS_COVERAGE && calculate_distance(
+                rcu_layer_obj.path.curr_position, GS2_COORDINATE) > GS_COVERAGE) {
+            rcu_layer_obj.need_exit = TRUE;
+            rcu_power_off();
+        }
 
         i++;
     }

@@ -58,10 +58,13 @@ typedef struct path_function_s {
 
 typedef struct rcu_layer_obj_s {
     enum RCU_STATUS_E rcu_status;
-    enum ELE_TYP lme_status;
+    // enum ELE_TYP lme_status;
     bool is_occupied;
     ld_service_t *service;
     path_function_t  path;
+    bool need_access;
+    bool has_access;
+    bool need_exit;
 } rcu_layer_obj_t;
 
 extern rcu_layer_obj_t rcu_layer_obj;
@@ -149,8 +152,6 @@ l_rcu_err rcu_start_auth();
 l_rcu_err rcu_handover(uint32_t UA, uint16_t GST_SAC);
 
 enum RCU_STATUS_E rcu_get_rcu_state();
-
-enum ELE_TYP rcu_get_lme_state();
 
 bool rcu_is_occupied();
 

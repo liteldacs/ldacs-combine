@@ -42,6 +42,11 @@ typedef struct dashboard_register_gs_s {
     double longitude;
     double latitude;
 }dashboard_register_gs_t;
+
+typedef struct dashboard_switch_as_s {
+    uint32_t UA;
+    uint16_t GST_SAC;
+}dashboard_switch_as_t;
 #pragma pack()
 
 extern json_tmpl_desc_t dashboard_data_tmpl_desc;
