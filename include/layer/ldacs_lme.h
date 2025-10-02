@@ -604,12 +604,6 @@ static const void *delete_lme_as_node_by_sac(uint16_t as_sac, l_err (*clear_func
     return NULL;
 }
 
-//static void lme_enode_print_func(void *item) {
-//    const dls_entity_t *node = item;
-//    fprintf(stderr, "{%u}\n", node->SRC_SAC);
-//}
-
-
 static bool lme_map_has_ua(uint32_t target_UA) {
     size_t iter = 0;
     void *item;

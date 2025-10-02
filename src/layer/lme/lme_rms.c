@@ -353,14 +353,27 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                 }
                 case DC_TYP_CELL_EXIT: {
                     dc_cell_exit_t *cell_exit = data_struct;
+                    if (preempt_prim(&DLS_CLOSE_REQ_PRIM, E_TYP_ANY, &cell_exit->SAC, NULL, 0, 0) != LD_OK) {
+                        log_error("LME can not call DLS close AS");
+                        prim->prim_err = LD_ERR_INTERNAL;
+                        return;
+                    }
                     lme_as_man_t *as_man = get_lme_as_enode(cell_exit->SAC);
-                    preempt_prim(&DLS_CLOSE_REQ_PRIM, E_TYP_ANY, &cell_exit->SAC, NULL, 0, 0);
                     if (!as_man) {
                         prim->prim_err = LD_ERR_INTERNAL;
                         break;
                     }
+
+                    // 告诉rcu as已经推出
+                    if (preempt_prim(&LME_STATE_IND_PRIM, LME_AS_EXIT, &as_man->AS_UA, NULL, 0, 0) != LD_OK) {
+                        log_error("LME can not call RCU current state");
+                        prim->prim_err = LD_ERR_INTERNAL;
+                        return;
+                    }
+
                     exit_snf_en(cell_exit->SAC);
                     delete_lme_as_node_by_sac(cell_exit->SAC, clear_as_man);
+
                     break;
                 }
                 default: {

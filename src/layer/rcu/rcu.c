@@ -43,6 +43,7 @@ void L_SAPC_cb(ld_prim_t *prim) {
     switch (prim->prim_seq) {
         case LME_OPEN_REQ: {
             rcu_layer_obj.rcu_status = !prim->prim_err ? RCU_OPEN : RCU_CLOSED;
+
             break;
         }
         case LME_STATE_IND: {
@@ -76,6 +77,14 @@ void L_SAPC_cb(ld_prim_t *prim) {
                         break;
                     }
                     rcu_layer_obj.service->handle_received_ctrl_message(prim->prim_objs);
+                    break;
+                }
+                case LME_AS_EXIT: {
+                    if (!rcu_layer_obj.service->handle_as_exit) {
+                        break;
+                    }
+                    rcu_layer_obj.service->handle_as_exit(*(uint32_t *)prim->prim_objs);
+                    break;
                     break;
                 }
                 default: {
@@ -119,6 +128,10 @@ l_rcu_err rcu_power_on(uint8_t role) {
             rcu_layer_obj.service->handle_register_gs(config.GS_SAC, config.start_longitude, config.start_latitude);
         }
     }
+
+    // if (config.role == LD_AS) {
+    //     init_path_function();
+    // }
     if (preempt_prim(&LME_OPEN_REQ_PRIM, RC_TYP_OPEN, NULL, NULL, 0, 0) || rcu_layer_obj.rcu_status != RCU_OPEN) {
         log_error("Can not open Stack correctly");
         return LD_RCU_FAILED;
@@ -225,7 +238,7 @@ static void *path_function_thread(void *arg) {
             rcu_layer_obj.need_access = TRUE;
         }
 
-        if (rcu_layer_obj.has_access && calculate_distance(rcu_layer_obj.path.curr_position, GS1_COORDINATE) > GS_COVERAGE && calculate_distance(
+        if (rcu_layer_obj.has_access && !rcu_layer_obj.need_exit && calculate_distance(rcu_layer_obj.path.curr_position, GS1_COORDINATE) > GS_COVERAGE && calculate_distance(
                 rcu_layer_obj.path.curr_position, GS2_COORDINATE) > GS_COVERAGE) {
             rcu_layer_obj.need_exit = TRUE;
             rcu_power_off();

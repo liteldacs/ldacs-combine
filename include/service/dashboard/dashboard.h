@@ -11,12 +11,14 @@
 #define BACKEND_PORT 9876
 
 typedef enum {
-    REGISTER_AS,
-    UPDATE_COORDINATE,
-    START_STOP_AS,
-    REGISTER_GS,
-    SWITCH_AS,
-    RECEIVED_MSG,
+    AS_REGISTER,
+    AS_UPDATE_COORDINATE,
+    DASHBOARD_START_STOP_AS,
+    GS_REGISTER,
+    DASHBOARD_SWITCH_AS, // dashboard指导GS切换AS
+    AS_GS_RECEIVED_MSG,
+    GS_ACCESS_AS,
+    GS_AS_EXITED,
 
     STOP_AS = 0xFF,
 }DASHBOARD_FUNCTION;
@@ -56,6 +58,10 @@ typedef struct dashboard_received_msg_s {
     uint32_t receiver;
     buffer_t *data;
 }dashboard_received_msg_t;
+
+typedef struct dashboard_exit_as_s {
+    uint32_t UA;
+}dashboard_as_exit_t;
 #pragma pack()
 
 extern json_tmpl_desc_t dashboard_data_tmpl_desc;

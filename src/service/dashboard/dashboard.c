@@ -23,6 +23,7 @@ static void handle_register_gs_dashboard(uint16_t GS_TAG, double longitude, doub
 static void handle_update_coordinates_dashboard(uint32_t AS_UA, double longitude, double latitude);
 static void handle_received_user_message_dashboard(user_msg_t *user_msg);
 static void handle_received_control_message_dashboard(orient_sdu_t *osdu);
+static void handle_as_exit_dashboard(uint32_t);
 
 
 ld_service_t dashboard_service = {
@@ -35,6 +36,7 @@ ld_service_t dashboard_service = {
     .handle_update_coordinates = handle_update_coordinates_dashboard,
     .handle_received_ctrl_message = handle_received_control_message_dashboard,
     .handle_recv_user_msg = handle_received_user_message_dashboard,
+    .handle_as_exit = handle_as_exit_dashboard,
 };
 
 static void *dashboard_conn_connect(net_ctx_t *ctx, char *remote_addr, int remote_port, int local_port) {
@@ -56,7 +58,6 @@ static l_err dashboard_data_recv(basic_conn_t *bc) {
         log_warn("Read pkt is null");
         return LD_ERR_NULL;
     }
-    log_warn("%s", bc->read_pkt->ptr);
 
     dashboard_data_t to_resp;
 
@@ -65,14 +66,14 @@ static l_err dashboard_data_recv(basic_conn_t *bc) {
     cJSON_Delete(root);
 
     switch (to_resp.type) {
-        case START_STOP_AS: {
+        case DASHBOARD_START_STOP_AS: {
             rcu_start_stop_as();
             break;
         }
-        case SWITCH_AS: {
+        case DASHBOARD_SWITCH_AS: {
             dashboard_switch_as_t switch_as;
             cJSON *data = cJSON_Parse(to_resp.data);
-            unmarshel_json(data, &switch_as, dashboard_func_defines[SWITCH_AS].tmpl);
+            unmarshel_json(data, &switch_as, dashboard_func_defines[DASHBOARD_SWITCH_AS].tmpl);
             cJSON_Delete(data);
 
             rcu_handover(switch_as.UA, switch_as.GST_SAC);
@@ -134,30 +135,28 @@ static void handle_as_info_key_upd_dashboard(as_info_key_upd_t *as_upd) {
 }
 
 static void handle_as_info_upd_dashboard(as_info_upd_t *as_info) {
+
+    // 对于dashboard,AS的注册过程已经在RCU_POWERON时完成，不需要再update了
+    if (config.role == LD_AS)   return;
+    dashboard_data_send(GS_ACCESS_AS, as_info);
 }
 
 static void handle_st_chg_dashboard(lme_state_chg_t *st_chg) {
-    //
-    // if (config.direct) {
-    //     if (st_chg->state != LME_OPEN) return;
-    //
-    //     pthread_create(&terminal_obj.data_th, NULL, send_user_data_func, NULL);
-    //     pthread_detach(terminal_obj.data_th);
-    // }
+
 }
 
 static void handle_register_as_dashboard(uint32_t AS_UA, double longitude, double latitude) {
-    dashboard_data_send(REGISTER_AS,
+    dashboard_data_send(AS_REGISTER,
                         &(dashboard_update_coordinate_t){.UA = AS_UA, .longitude = longitude, .latitude = latitude});
 }
 
 static void handle_register_gs_dashboard(uint16_t GS_TAG, double longitude, double latitude) {
-    dashboard_data_send(REGISTER_GS,
+    dashboard_data_send(GS_REGISTER,
                         &(dashboard_register_gs_t){.TAG = GS_TAG, .longitude = longitude, .latitude = latitude});
 }
 
 static void handle_update_coordinates_dashboard(uint32_t AS_UA, double longitude, double latitude) {
-    dashboard_data_send(UPDATE_COORDINATE,
+    dashboard_data_send(AS_UPDATE_COORDINATE,
                         &(dashboard_update_coordinate_t){.UA = AS_UA, .longitude = longitude, .latitude = latitude});
 }
 
@@ -173,10 +172,15 @@ static void handle_received_control_message_dashboard(orient_sdu_t *osdu) {
         AS_UA = as_man->AS_UA;
     }
 
-    dashboard_data_send(RECEIVED_MSG,
+    dashboard_data_send(AS_GS_RECEIVED_MSG,
                         &(dashboard_received_msg_t){.orient = orient, .type = CONTROL_PLANE_PACKET, .sender = orient == FL ? osdu->GS_SAC : AS_UA, .receiver = orient == FL ? AS_UA : osdu->GS_SAC, .data = b64_buf});
 
     free_buffer(b64_buf);
+}
+
+static void handle_as_exit_dashboard(uint32_t UA) {
+    dashboard_data_send(GS_AS_EXITED,
+                        &(dashboard_as_exit_t){.UA = UA});
 }
 
 static void handle_received_user_message_dashboard(user_msg_t *user_msg) {
@@ -190,7 +194,7 @@ static void handle_received_user_message_dashboard(user_msg_t *user_msg) {
         lme_as_man_t *as_man  = get_lme_as_enode(user_msg->AS_SAC);
         AS_UA = as_man->AS_UA;
     }
-    dashboard_data_send(RECEIVED_MSG,
+    dashboard_data_send(AS_GS_RECEIVED_MSG,
                         &(dashboard_received_msg_t){.orient = orient, .type = USER_PLANE_PACKET, .sender = orient == FL ? user_msg->GS_SAC : AS_UA, .receiver = orient == FL ? AS_UA : user_msg->GS_SAC, .data = b64_buf});
 
     free_buffer(b64_buf);

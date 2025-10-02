@@ -30,6 +30,8 @@ typedef struct ld_service_s {
     void (*handle_recv_user_msg)(user_msg_t *);
 
     void (*handle_received_ctrl_message)(orient_sdu_t *);
+
+    void (*handle_as_exit)(uint32_t);
 } ld_service_t;
 
 typedef enum RCU_RET_E {
