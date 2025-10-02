@@ -27,9 +27,9 @@ static void handle_user_msg_terminal(user_msg_t *umsg);
 
 static void handle_update_coordinates_termianl(uint32_t AS_UA, double longitude, double latitude);
 
-static void send_singal_data_terminal(int argc, char **argv);
-
 static void trigger_handover(int argc, char **argv);
+
+static void send_singal_data_terminal(int argc, char **argv);
 
 static void send_multi_data_terminal(int argc, char **argv);
 
@@ -104,75 +104,14 @@ static l_err init_terminal_service() {
     return LD_OK;
 }
 
-// 生成包含A-Z a-z 0-9的随机字符串
-static void generate_random_string(char *str, size_t length) {
-    const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    int charset_size = sizeof(charset) - 1; // 减1是因为末尾的'\0'
 
-    // 初始化随机数种子
-    srand((unsigned int)time(NULL));
-
-    // 生成随机字符串
-    for (int i = 0; i < length; i++) {
-        int key = rand() % charset_size;
-        str[i] = charset[key];
-    }
-
-    // 字符串结束符
-    str[length] = '\0';
-}
-
-buffer_t *gen_ipv6_pkt(size_t len) {
-    ipv6_tcp_t v6 = {
-        .version = 0x6,
-        .traffic_class = 0x3,
-        .flow_label = 0x1,
-        .payload_len = 11,
-        .next_header = 0x7,
-        .hop_limit = 0x10,
-        .src_address = init_buffer_unptr(),
-        .dst_address = init_buffer_unptr(),
-        .src_port = 9456,
-        .dst_port = 9789,
-        .sqn = 1000,
-        .ack = 2000,
-        .bias = 0,
-        .reserve = 0x1,
-        .flag = 0x2,
-        .window = 500,
-        .checksum = 0xABCD,
-        .urgent = 0,
-        .data = init_buffer_unptr()
-    };
-
-    struct in6_addr src_addr, dst_addr;
-    inet_pton(AF_INET6, config.addr, &src_addr);
-    CLONE_TO_CHUNK(*v6.src_address, src_addr.__in6_u.__u6_addr8, GEN_ADDRLEN);
-
-    inet_pton(AF_INET6, "2001::E304", &dst_addr);
-    CLONE_TO_CHUNK(*v6.dst_address, dst_addr.__in6_u.__u6_addr8, GEN_ADDRLEN);
-
-    size_t curr = 0;
-    uint8_t msg[1800];
-    // for (int j = 0; j < len / RAND_BYTES_MAX_SIZE; j++) {
-    //     km_generate_random(msg + curr, RAND_BYTES_MAX_SIZE);
-    //     curr += RAND_BYTES_MAX_SIZE;
-    // }
-    // km_generate_random(msg + curr, len % RAND_BYTES_MAX_SIZE);
-
-    generate_random_string(msg, len);
-
-    CLONE_TO_CHUNK(*v6.data, msg, len);
-
-    return gen_pdu(&v6, &ipv6_tcp_desc, "TCP V6");
-}
 
 void *send_user_data_func(void *args) {
     buffer_t *buf = gen_ipv6_pkt(20);
     log_buf(LOG_INFO, "IPV6", buf->ptr, buf->len);
     while (1) {
         sleep(5);
-        send_user_data(buf->ptr, buf->len, terminal_obj.AS_SAC);
+        send_user_data_as(buf->ptr, buf->len);
     }
 
     return NULL;
@@ -212,17 +151,6 @@ static void handle_user_msg_terminal(user_msg_t *umsg) {
 }
 
 static void handle_update_coordinates_termianl(uint32_t AS_UA, double longitude, double latitude) {
-    // log_warn("!!!!!! %d %.6f %.6f", AS_UA, longitude, latitude);
-}
-
-static void send_singal_data_terminal(int argc, char **argv) {
-    buffer_t *buf = gen_ipv6_pkt(20);
-
-    send_user_data(buf->ptr, buf->len, terminal_obj.AS_SAC);
-
-    if (!config.direct) {
-        log_buf(LOG_INFO, "TCP Payload:", buf->ptr + 60, buf->len-60);
-    }
 }
 
 static void trigger_handover(int argc, char **argv) {
@@ -235,23 +163,12 @@ static void trigger_handover(int argc, char **argv) {
     rcu_handover(UA, GST_SAC);
 }
 
-#define PKT_COUNT 12
+static void send_singal_data_terminal(int argc, char **argv) {
+    send_singal_data(terminal_obj.AS_SAC);
+}
+
 static void send_multi_data_terminal(int argc, char **argv) {
-
-    if (config.direct) {
-        log_warn("Direct mode cant send multiple message");
-        return;
-    }
-
-    int pkt_lens[PKT_COUNT] = {128, 256, 384, 512, 640, 768, 896, 1024, 1152, 1280, 1408, 1536};
-
-    // const char *test_msg = "Testing User Message for LDACS\0";
-    for (int i = 0; i < PKT_COUNT; i++) {
-        buffer_t *buf = gen_ipv6_pkt(pkt_lens[i]);
-        log_warn("Sending %d Packet===============", i + 1);
-        send_user_data(buf->ptr, buf->len, terminal_obj.AS_SAC);
-        usleep(250000);
-    }
+    send_multi_datas(terminal_obj.AS_SAC);
 }
 
 static void send_specific_data_terminal(int argc, char **argv) {
@@ -267,7 +184,7 @@ static void send_specific_data_terminal(int argc, char **argv) {
     uint8_t rand[2000] = {0};
     generate_nrand(rand, size);
 
-    send_user_data(rand, size, terminal_obj.AS_SAC);
+    send_user_data_as(rand, size);
 }
 
 

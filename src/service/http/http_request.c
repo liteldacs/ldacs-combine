@@ -159,7 +159,7 @@ DEFUN_HTTP_POST_API(h_as_post_start_auth, post_null_t, post_null_tmpl_desc, {
                     })
 
 DEFUN_HTTP_POST_API(h_as_post_send_msg, post_as_send_msg_t, post_as_send_msg_tmpl_desc, {
-                    if (send_user_data(dstruct.msg->ptr, dstruct.msg->len, dstruct.sac) == LD_OK) {
+                    if (send_user_data_as(dstruct.msg->ptr, dstruct.msg->len) == LD_OK) {
                     HTTP_SEND_OK;
                     }else {
                     HTTP_SEND_FAILED;

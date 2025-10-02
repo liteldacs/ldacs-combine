@@ -48,7 +48,7 @@ enum RCU_STATUS_E {
     RCU_CLOSED,
 };
 
-#define GEN_POINTS 20
+#define GEN_POINTS 50
 
 typedef struct path_function_s {
     double start_position[2];

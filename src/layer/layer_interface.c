@@ -33,16 +33,18 @@ void SN_SAPD_U_cb(ld_prim_t *prim) {
     });
 }
 
-/* 对于GS，未来需要维护一个IP <-> SAC的路由表以查询目的AS的SAC，对于AS，AS SAC和目的GS SAC都为已知，因此第三个参数仅用于测试，可删除 */
 /**
- * Send user data
+ * Send user data for AS
  * @param data data to send
  * @param sz data length
- * @param AS_SAC SAC of as. In GS, it is the target SAC, in AS, it is the SAC of itself
  * @return
  */
-l_err send_user_data(uint8_t *data, size_t sz, uint16_t AS_SAC) {
-    orient_sdu_t *orient_sdu = create_orient_sdus(AS_SAC,
+l_err send_user_data_as(uint8_t *data, size_t sz) {
+    if (config.role != LD_AS) {
+        log_error("Invalid role for sending AS data");
+        return LD_ERR_INVALID;
+    }
+    orient_sdu_t *orient_sdu = create_orient_sdus(lme_layer_objs.lme_as_man->AS_SAC,
                                                   config.role == LD_AS
                                                       ? lme_layer_objs.lme_as_man->AS_CURR_GS_SAC
                                                       : lme_layer_objs.GS_SAC);

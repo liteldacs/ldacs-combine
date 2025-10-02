@@ -16,6 +16,6 @@ l_err register_int_handler(void (*handler)(user_msg_t *));
 
 void SN_SAPD_U_cb(ld_prim_t *prim);
 
-l_err send_user_data(uint8_t *data, size_t sz, uint16_t AS_SAC);
+l_err send_user_data_as(uint8_t *data, size_t sz);
 
 #endif //LAYER_INTERFACE_H

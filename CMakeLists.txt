@@ -35,7 +35,7 @@ add_executable(cli::test_client ALIAS ${PROJECT_NAME})
 #target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal cli::ldacs_device
 #        event event_pthreads ldcauc)
 
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal cli::ldacs_device cli::ldacs_dashboard
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC cli::ldacs_roles cli::ldacs_layer cli::ldacs_http cli::ldacs_terminal cli::ldacs_device cli::ldacs_dashboard cli::ldacs_service
         event event_pthreads)
 
 find_package(SQLite3 REQUIRED)

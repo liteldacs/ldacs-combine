@@ -8,6 +8,7 @@
 #include <ldacs_sim.h>
 #include <layer_rcu.h>
 #include <layer_interface.h>
+#include "service/service.h"
 
 typedef struct terminal_obj_s {
     uint16_t AS_SAC;
