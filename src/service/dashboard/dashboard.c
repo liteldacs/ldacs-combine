@@ -4,6 +4,8 @@
 #include "dashboard.h"
 #include <ld_net.h>
 
+#include "service/service.h"
+
 typedef struct dashboad_obj_s {
     pthread_t conn_th;
     net_ctx_t net_ctx;
@@ -77,6 +79,14 @@ static l_err dashboard_data_recv(basic_conn_t *bc) {
             cJSON_Delete(data);
 
             rcu_handover(switch_as.UA, switch_as.GST_SAC);
+            break;
+        }
+        case DASHBOARD_SEND_SINGLE_DATA: {
+            send_singal_data();
+            break;
+        }
+        case DASHBOARD_SEND_MULTI_DATA: {
+            send_multi_datas();
             break;
         }
         default: {

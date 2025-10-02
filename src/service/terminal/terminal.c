@@ -104,8 +104,6 @@ static l_err init_terminal_service() {
     return LD_OK;
 }
 
-
-
 void *send_user_data_func(void *args) {
     buffer_t *buf = gen_ipv6_pkt(20);
     log_buf(LOG_INFO, "IPV6", buf->ptr, buf->len);
@@ -113,19 +111,17 @@ void *send_user_data_func(void *args) {
         sleep(5);
         send_user_data_as(buf->ptr, buf->len);
     }
-
     return NULL;
 }
-
 
 static void handle_st_chg_terminal(lme_state_chg_t *st_chg) {
     // log_warn("The Current LME state is %d, by %.03x", st_chg->state, st_chg->sac);
 
     if (config.direct) {
-    if (st_chg->state != LME_OPEN) return;
+        if (st_chg->state != LME_OPEN) return;
 
-    pthread_create(&terminal_obj.data_th, NULL, send_user_data_func, NULL);
-    pthread_detach(terminal_obj.data_th);
+        pthread_create(&terminal_obj.data_th, NULL, send_user_data_func, NULL);
+        pthread_detach(terminal_obj.data_th);
     }
 }
 
@@ -164,11 +160,11 @@ static void trigger_handover(int argc, char **argv) {
 }
 
 static void send_singal_data_terminal(int argc, char **argv) {
-    send_singal_data(terminal_obj.AS_SAC);
+    send_singal_data();
 }
 
 static void send_multi_data_terminal(int argc, char **argv) {
-    send_multi_datas(terminal_obj.AS_SAC);
+    send_multi_datas();
 }
 
 static void send_specific_data_terminal(int argc, char **argv) {

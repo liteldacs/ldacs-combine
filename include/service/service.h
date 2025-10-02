@@ -11,8 +11,8 @@ buffer_t *gen_ipv6_pkt(size_t len);
 
 void generate_random_string(char *str, size_t length);
 
-void send_singal_data(uint16_t AS_SAC);
+void send_singal_data();
 
-void send_multi_datas(uint16_t AS_SAC);
+void send_multi_datas();
 
 #endif //SERVICE_H

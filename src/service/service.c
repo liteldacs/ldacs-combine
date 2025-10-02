@@ -64,7 +64,7 @@ buffer_t *gen_ipv6_pkt(size_t len) {
     return gen_pdu(&v6, &ipv6_tcp_desc, "TCP V6");
 }
 
-void send_singal_data(uint16_t AS_SAC) {
+void send_singal_data() {
     buffer_t *buf = gen_ipv6_pkt(20);
 
     send_user_data_as(buf->ptr, buf->len);
@@ -75,7 +75,7 @@ void send_singal_data(uint16_t AS_SAC) {
 }
 
 #define PKT_COUNT 12
-void send_multi_datas(uint16_t AS_SAC) {
+void send_multi_datas() {
     if (config.direct) {
         log_warn("Direct mode cant send multiple message");
         return;
