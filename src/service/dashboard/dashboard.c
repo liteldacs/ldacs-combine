@@ -10,6 +10,7 @@ typedef struct dashboad_obj_s {
     pthread_t conn_th;
     net_ctx_t net_ctx;
     basic_conn_t *conn;
+    pthread_t data_th;
 }dashboad_obj_t;
 
 static dashboad_obj_t dashboad_obj = {
@@ -152,6 +153,12 @@ static void handle_as_info_upd_dashboard(as_info_upd_t *as_info) {
 
 static void handle_st_chg_dashboard(lme_state_chg_t *st_chg) {
 
+    if (config.direct) {
+        if (st_chg->state != LME_OPEN) return;
+
+        pthread_create(&dashboad_obj.data_th, NULL, send_user_data_func, NULL);
+        pthread_detach(dashboad_obj.data_th);
+    }
 }
 
 static void handle_register_as_dashboard(uint32_t AS_UA, double longitude, double latitude) {

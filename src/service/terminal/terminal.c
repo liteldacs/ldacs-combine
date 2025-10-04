@@ -104,15 +104,6 @@ static l_err init_terminal_service() {
     return LD_OK;
 }
 
-void *send_user_data_func(void *args) {
-    buffer_t *buf = gen_ipv6_pkt(20);
-    log_buf(LOG_INFO, "IPV6", buf->ptr, buf->len);
-    while (1) {
-        sleep(5);
-        send_user_data_as(buf->ptr, buf->len);
-    }
-    return NULL;
-}
 
 static void handle_st_chg_terminal(lme_state_chg_t *st_chg) {
     // log_warn("The Current LME state is %d, by %.03x", st_chg->state, st_chg->sac);

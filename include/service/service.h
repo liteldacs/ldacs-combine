@@ -15,4 +15,6 @@ void send_singal_data();
 
 void send_multi_datas();
 
+void *send_user_data_func(void *args);
+
 #endif //SERVICE_H

@@ -92,3 +92,13 @@ void send_multi_datas() {
     }
 }
 
+
+void *send_user_data_func(void *args) {
+    buffer_t *buf = gen_ipv6_pkt(20);
+    log_buf(LOG_INFO, "IPV6", buf->ptr, buf->len);
+    while (1) {
+        sleep(5);
+        send_user_data_as(buf->ptr, buf->len);
+    }
+    return NULL;
+}
