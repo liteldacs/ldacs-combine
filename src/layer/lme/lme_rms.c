@@ -298,6 +298,8 @@ void M_SAPC_L_cb(ld_prim_t *prim) {
                     cc_ho_com_t *ho_com = data_struct;
                     //HO2不需要CELL_EXIT！！！！除非信号特别差得手动退出
 
+                    lme_layer_objs.lme_as_man->AS_CURR_GS_SAC = ho_com->GS_SAC;
+
                     set_new_dls_frequency(1112.0, 966.0);
 
                     lme_rms_obj.lme_obj->lme_as_man->send_T_SQN = lme_rms_obj.lme_obj->lme_as_man->recv_T_SQN = 0;

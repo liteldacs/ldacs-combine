@@ -196,7 +196,6 @@ static void handle_received_user_message_dashboard(user_msg_t *user_msg) {
     buffer_t *b64_buf = encode_b64_buffer(0, user_msg->msg->ptr, user_msg->msg->len);
     ld_orient orient = config.role == LD_AS ? FL : RL;
 
-    log_warn("?? %d", user_msg->GS_SAC);
     uint32_t AS_UA = 0;
     if (config.role == LD_AS) {
         AS_UA = lme_layer_objs.lme_as_man->AS_UA;

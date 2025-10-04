@@ -44,6 +44,7 @@ l_err send_user_data_as(uint8_t *data, size_t sz) {
         log_error("Invalid role for sending AS data");
         return LD_ERR_INVALID;
     }
+
     orient_sdu_t *orient_sdu = create_orient_sdus(lme_layer_objs.lme_as_man->AS_SAC,
                                                   config.role == LD_AS
                                                       ? lme_layer_objs.lme_as_man->AS_CURR_GS_SAC
