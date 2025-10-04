@@ -117,8 +117,7 @@ static l_err dashboard_data_send(DASHBOARD_FUNCTION func_e, void *data) {
     buffer_t *to_send = init_buffer_unptr();
     CLONE_TO_CHUNK(*to_send, root_s, strlen(root_s));
 
-    log_error("%s %d", root_s, strlen(root_s));
-    //
+    // log_fatal("%s %d", root_s, strlen(root_s));
     if (dashboad_obj.net_ctx.send_handler(dashboad_obj.conn, to_send, NULL, NULL) != LD_OK) {
         log_error("Send Dashboard data Failed!");
         return LD_ERR_INTERNAL;
@@ -157,7 +156,7 @@ static void handle_st_chg_dashboard(lme_state_chg_t *st_chg) {
 
 static void handle_register_as_dashboard(uint32_t AS_UA, double longitude, double latitude) {
     dashboard_data_send(AS_REGISTER,
-                        &(dashboard_update_coordinate_t){.UA = AS_UA, .longitude = longitude, .latitude = latitude});
+                        &(dashboard_update_coordinate_t){.UA = AS_UA, .longitude = longitude, .latitude = latitude, .is_direct = config.direct});
 }
 
 static void handle_register_gs_dashboard(uint16_t GS_TAG, double longitude, double latitude) {
@@ -167,7 +166,7 @@ static void handle_register_gs_dashboard(uint16_t GS_TAG, double longitude, doub
 
 static void handle_update_coordinates_dashboard(uint32_t AS_UA, double longitude, double latitude) {
     dashboard_data_send(AS_UPDATE_COORDINATE,
-                        &(dashboard_update_coordinate_t){.UA = AS_UA, .longitude = longitude, .latitude = latitude});
+                        &(dashboard_update_coordinate_t){.UA = AS_UA, .longitude = longitude, .latitude = latitude, .is_direct = config.direct});
 }
 
 static void handle_received_control_message_dashboard(orient_sdu_t *osdu) {
@@ -197,6 +196,7 @@ static void handle_received_user_message_dashboard(user_msg_t *user_msg) {
     buffer_t *b64_buf = encode_b64_buffer(0, user_msg->msg->ptr, user_msg->msg->len);
     ld_orient orient = config.role == LD_AS ? FL : RL;
 
+    log_warn("?? %d", user_msg->GS_SAC);
     uint32_t AS_UA = 0;
     if (config.role == LD_AS) {
         AS_UA = lme_layer_objs.lme_as_man->AS_UA;

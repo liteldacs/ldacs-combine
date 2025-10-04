@@ -186,5 +186,5 @@ static void send_specific_data_terminal(int argc, char **argv) {
 
 static void start_auth(int argc, char **argv) {
     if (config.role == LD_AS) rcu_start_auth();
-    else log_warn("Only AS can start auth");
+    // else log_warn("Only AS can start auth");
 }

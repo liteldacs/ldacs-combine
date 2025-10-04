@@ -40,6 +40,7 @@ typedef struct dashboard_update_coordinate_s {
     uint32_t UA;
     double longitude;
     double latitude;
+    bool is_direct;
 }dashboard_update_coordinate_t;
 
 typedef struct dashboard_register_gs_s {

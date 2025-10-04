@@ -13,6 +13,7 @@ static json_tmpl_t dashboard_update_coordinate_tmpl[] = {
     {cJSON_Number, sizeof(uint32_t), "UA", "UA", NULL},
     {cJSON_Number, sizeof(double), "longitude", "longitude", &isfloat},
     {cJSON_Number, sizeof(double), "latitude", "latitude", &isfloat},
+    {cJSON_Number, sizeof(uint8_t), "isDirect", "isDirect", NULL},
     {cJSON_Invalid, 0, NULL, NULL, NULL}
 };
 

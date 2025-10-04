@@ -208,8 +208,13 @@ static l_err init_path(path_function_t *path) {
     srand(time(NULL));
     double angle = (((double)rand() / (double)RAND_MAX) - 0.5) * 4;
 
-    path->end_position[0] = path->start_position[0] + (path->refer_position[0] - path->start_position[0]) *2 + angle;
-    path->end_position[1] = path->start_position[1] + (path->refer_position[1] - path->start_position[1]) *2 + angle;
+    if (config.direct) {
+        path->end_position[0] = path->start_position[0] + (path->refer_position[0] - path->start_position[0]) *2 + angle;
+        path->end_position[1] = path->start_position[1] + (path->refer_position[1] - path->start_position[1]) *2 + angle;
+    }else {
+        path->end_position[0] = path->start_position[0] + (path->refer_position[0] - path->start_position[0]) *2 + angle;
+        path->end_position[1] = path->start_position[1] + (path->refer_position[1] - path->start_position[1]) *2 + angle;
+    }
 
 
     for (int i = 0; i < GEN_POINTS; i++) {

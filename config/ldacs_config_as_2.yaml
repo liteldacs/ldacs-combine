@@ -11,5 +11,11 @@ http:
   http_port: 10223
   auto_auth: 1
 
+path:
+  start-longitude: 117.102000
+  start-latitude: 36.602000
+  refer-longitude: 117.050000
+  refer-latitude: 33.400000
+
 AS-SAC: 302
 GS-SAC: 16

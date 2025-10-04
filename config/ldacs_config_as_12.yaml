@@ -8,8 +8,14 @@ init_fl_freq: 1110.0
 init_rl_freq: 964.0
 
 http:
-  http_port: 25641
+  http_port: 11223
   auto_auth: 1
+
+path:
+  start-longitude: 117.112000
+  start-latitude: 36.612000
+  refer-longitude: 117.050000
+  refer-latitude: 33.400000
 
 AS-SAC: 312
 GS-SAC: 16
