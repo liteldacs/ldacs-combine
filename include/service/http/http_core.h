@@ -15,7 +15,6 @@
 typedef void (*h_controller)(struct evhttp_request *request, void *arg);
 
 
-extern ld_service_t http_service;
 
 typedef struct http_ctrl_config_s {
     const char *res_name;

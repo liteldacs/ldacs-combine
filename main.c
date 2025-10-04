@@ -1,8 +1,7 @@
-#include <service/terminal.h>
 #include "ldacs_role.h"
 #include "http_core.h"
 #include "cconfig.h"
-#include "dashboard.h"
+#include "service/service.h"
 
 is_stop volatile stop_flag = FALSE;
 

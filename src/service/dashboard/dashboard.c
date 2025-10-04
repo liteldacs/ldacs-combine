@@ -1,17 +1,10 @@
 //
 // Created by jiaxv on 25-9-27.
 //
-#include "dashboard.h"
+#include <ld_dashboard.h>
 #include <ld_net.h>
 
 #include "service/service.h"
-
-typedef struct dashboad_obj_s {
-    pthread_t conn_th;
-    net_ctx_t net_ctx;
-    basic_conn_t *conn;
-    pthread_t data_th;
-}dashboad_obj_t;
 
 static dashboad_obj_t dashboad_obj = {
     .conn_th = 0,
@@ -148,7 +141,7 @@ static void handle_as_info_upd_dashboard(as_info_upd_t *as_info) {
 
     // 对于dashboard,AS的注册过程已经在RCU_POWERON时完成，不需要再update了
     if (config.role == LD_AS)   return;
-    dashboard_data_send(GS_ACCESS_AS, as_info);
+    dashboard_data_send(GS_ACCESS_AS, &(dashboard_as_info_upd_t){.UA = as_info->AS_UA, .AS_SAC = as_info->AS_SAC, .GS_SAC = as_info->AS_CURR_GS_SAC});
 }
 
 static void handle_st_chg_dashboard(lme_state_chg_t *st_chg) {
@@ -229,7 +222,7 @@ static l_err init_dashboard_service() {
     };
 
 
-    dashboad_obj.conn = client_entity_setup(&dashboad_obj.net_ctx, BACKEND_IP, BACKEND_PORT, config.dashboard_port);
+    dashboad_obj.conn = client_entity_setup(&dashboad_obj.net_ctx, BACKEND_IP, BACKEND_PORT, 0); //不需要绑定本地端口
     pthread_create(&dashboad_obj.conn_th, NULL, net_setup, &dashboad_obj.net_ctx);
 
     rcu_power_on(config.role); //power on directly

@@ -6,6 +6,13 @@
 #define SERVICE_H
 #include "ldacs_sim.h"
 #include <ld_buffer.h>
+#include "layer_rcu.h"
+
+extern ld_service_t terminal_service;
+
+extern ld_service_t http_service;
+
+extern ld_service_t dashboard_service;
 
 buffer_t *gen_ipv6_pkt(size_t len);
 
