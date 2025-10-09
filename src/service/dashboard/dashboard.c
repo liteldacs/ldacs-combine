@@ -68,6 +68,19 @@ static l_err dashboard_data_recv(basic_conn_t *bc) {
             send_multi_datas();
             break;
         }
+        case DASHBOARD_ACCELRATE_AS: {
+            dashboard_accelerate_as_t accelerate_as;
+            cJSON *data = cJSON_Parse(to_resp.data);
+            unmarshel_json(data, &accelerate_as, dashboard_func_defines[DASHBOARD_ACCELRATE_AS].tmpl);
+            cJSON_Delete(data);
+            uint8_t multiplier = accelerate_as.multiplier;
+            if (multiplier > 4 || multiplier < 1) {
+                log_warn("The accelerate multiplier can not more than 4 or less than 1");
+                break;
+            }
+            rcu_set_accelerate_multiplier(accelerate_as.multiplier);
+            break;
+        }
         default: {
             log_warn("Wrong Response Type");
             return LD_ERR_INTERNAL;

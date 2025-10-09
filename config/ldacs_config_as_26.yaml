@@ -12,8 +12,8 @@ http:
   auto_auth: 1
 
 path:
-  start-longitude: 117.126000
-  start-latitude: 36.626000
+  start-longitude: 116.6000
+  start-latitude: 36.6000
   refer-longitude: 117.050000
   refer-latitude: 33.400000
 

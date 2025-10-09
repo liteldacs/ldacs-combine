@@ -14,6 +14,7 @@ rcu_layer_obj_t rcu_layer_obj = {
     .need_access = FALSE,
     .has_access = FALSE,
     .need_exit = FALSE,
+    .accel_multiplier = 1,
 };
 
 
@@ -198,6 +199,11 @@ l_rcu_err rcu_start_stop_as() {
     return LD_RCU_OK;
 }
 
+l_rcu_err rcu_set_accelerate_multiplier(uint8_t multiplier) {
+    rcu_layer_obj.accel_multiplier = multiplier;
+    return LD_RCU_OK;
+}
+
 static l_err init_path(path_function_t *path) {
     // 添加边界检查
     if (!path) {
@@ -232,7 +238,7 @@ static void *path_function_thread(void *arg) {
     if (!rcu_layer_obj.service->handle_update_coordinates) return NULL;
     while (1) {
         if (i >= GEN_POINTS) break;
-        sleep(1);
+        usleep(400000 >> rcu_layer_obj.accel_multiplier);
         if (path->is_stop) continue;
 
         //更新位置

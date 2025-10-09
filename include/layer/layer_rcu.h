@@ -48,7 +48,7 @@ enum RCU_STATUS_E {
     RCU_CLOSED,
 };
 
-#define GEN_POINTS 50
+#define GEN_POINTS 1000
 
 typedef struct path_function_s {
     double start_position[2];
@@ -69,6 +69,7 @@ typedef struct rcu_layer_obj_s {
     bool need_access;
     bool has_access;
     bool need_exit;
+    uint8_t accel_multiplier;
 } rcu_layer_obj_t;
 
 extern rcu_layer_obj_t rcu_layer_obj;
@@ -164,5 +165,7 @@ l_rcu_err rcu_change_occupied(bool to_change);
 l_rcu_err rcu_update_key(uint16_t sac);
 
 l_rcu_err rcu_start_stop_as();
+
+l_rcu_err rcu_set_accelerate_multiplier(uint8_t multiplier);
 
 #endif //LAYER_RCU_H
