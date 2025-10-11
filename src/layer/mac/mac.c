@@ -251,8 +251,8 @@ static void *mac_process_func(void *input_struct) {
 
 l_err make_mac_layer() {
     /* temperory */
-    UA_STR(ua_as);
-    UA_STR(ua_sgw);
+    // UA_STR(ua_as);
+    // UA_STR(ua_sgw);
     //    if (config.role == LD_AS) {
     //        key_get_handle(config.role, get_ua_str(config.UA, ua_as), get_ua_str(10000, ua_sgw), ROOT_KEY,
     //                       &mac_layer_objs.sm3_key);

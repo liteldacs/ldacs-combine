@@ -37,14 +37,13 @@ static void send_specific_data_terminal(int argc, char **argv);
 
 static void start_auth(int argc, char **argv);
 
-static const size_t funcs_sz = 6;
+static const size_t funcs_sz = 5;
 static terminal_func terminal_funcs[] = {
     send_singal_data_terminal,
     trigger_handover,
     send_multi_data_terminal,
     send_specific_data_terminal,
     start_auth,
-    query_keys,
 };
 
 ld_service_t terminal_service = {

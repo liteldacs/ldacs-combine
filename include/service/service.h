@@ -27,6 +27,4 @@ void send_multi_datas();
 
 void *send_user_data_func(void *args);
 
-void query_keys(int argc, char **argv);
-
 #endif //SERVICE_H
