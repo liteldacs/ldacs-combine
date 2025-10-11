@@ -214,19 +214,45 @@ static l_err init_path(path_function_t *path) {
     srand(time(NULL));
     double angle = (((double)rand() / (double)RAND_MAX) - 0.5) * 4;
 
-    if (config.direct) {
-        path->end_position[0] = path->start_position[0] + (path->refer_position[0] - path->start_position[0]) *2 + angle;
-        path->end_position[1] = path->start_position[1] + (path->refer_position[1] - path->start_position[1]) *2 + angle;
-    }else {
-        path->end_position[0] = path->start_position[0] + (path->refer_position[0] - path->start_position[0]) *2 + angle;
-        path->end_position[1] = path->start_position[1] + (path->refer_position[1] - path->start_position[1]) *2 + angle;
-    }
+    // 计算中点坐标
+    double mid_position[2];
+    mid_position[0] = path->start_position[0] + (path->refer_position[0] - path->start_position[0]);
+    mid_position[1] = path->start_position[1] + (path->refer_position[1] - path->start_position[1]);
 
+    // 计算前半段方向向量
+    double dx = path->refer_position[0] - path->start_position[0];
+    double dy = path->refer_position[1] - path->start_position[1];
 
+    // 生成随机偏转角度（小于90度）
+    double random_angle = ((double)rand() / (double)RAND_MAX) * M_PI_2; // M_PI_2 = π/2 = 90度
+    // 随机决定顺时针还是逆时针偏转
+    if (rand() % 2) random_angle = -random_angle;
+
+    // 计算偏转后的方向向量
+    double cos_angle = cos(random_angle);
+    double sin_angle = sin(random_angle);
+    double rotated_dx = dx * cos_angle - dy * sin_angle;
+    double rotated_dy = dx * sin_angle + dy * cos_angle;
+
+    // 计算终点坐标（从中点继续偏转方向）
+    path->end_position[0] = mid_position[0] + rotated_dx + angle;
+    path->end_position[1] = mid_position[1] + rotated_dy + angle;
+
+    // 生成路径点
     for (int i = 0; i < GEN_POINTS; i++) {
-        double ratio = (double)i / (double)(GEN_POINTS);
-        path->path_points[i][0] = path->start_position[0] + (path->end_position[0] - path->start_position[0]) * ratio;
-        path->path_points[i][1] = path->start_position[1] + (path->end_position[1] - path->start_position[1]) * ratio;
+        double ratio = (double)i / (double)(GEN_POINTS - 1);
+
+        if (ratio <= 0.5) {
+            // 前半段：从起点到中点的直线
+            double seg_ratio = ratio * 2; // 将0-0.5映射到0-1
+            path->path_points[i][0] = path->start_position[0] + (mid_position[0] - path->start_position[0]) * seg_ratio;
+            path->path_points[i][1] = path->start_position[1] + (mid_position[1] - path->start_position[1]) * seg_ratio;
+        } else {
+            // 后半段：从中点到终点的直线
+            double seg_ratio = (ratio - 0.5) * 2; // 将0.5-1映射到0-1
+            path->path_points[i][0] = mid_position[0] + (path->end_position[0] - mid_position[0]) * seg_ratio;
+            path->path_points[i][1] = mid_position[1] + (path->end_position[1] - mid_position[1]) * seg_ratio;
+        }
     }
 
     return LD_OK;

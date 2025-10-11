@@ -4,9 +4,12 @@
 
 #ifndef SERVICE_H
 #define SERVICE_H
-#include "ldacs_sim.h"
 #include <ld_buffer.h>
+#include <sqlite3.h>
+#include <ldacs_sim.h>
 #include "layer_rcu.h"
+
+
 
 extern ld_service_t terminal_service;
 
@@ -23,5 +26,7 @@ void send_singal_data();
 void send_multi_datas();
 
 void *send_user_data_func(void *args);
+
+void query_keys(int argc, char **argv);
 
 #endif //SERVICE_H
