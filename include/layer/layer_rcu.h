@@ -48,8 +48,8 @@ enum RCU_STATUS_E {
     RCU_CLOSED,
 };
 
-// #define GEN_POINTS 1000
-#define GEN_POINTS 20
+#define GEN_POINTS 1000
+// #define GEN_POINTS 20
 
 typedef struct path_function_s {
     double start_position[2];
