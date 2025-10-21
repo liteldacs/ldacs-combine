@@ -3,19 +3,16 @@ UA: 1352345
 port: 8081
 debug: 1
 ipv6_address: 2001:da8:a012:389:7bf3:43b7:9c07:4f35
-
 init_fl_freq: 1110.0
 init_rl_freq: 964.0
-
 http:
   http_port: 13523
   auto_auth: 1
-
 path:
-  start-longitude: 117.5000
-  start-latitude: 37.5000
-  refer-longitude: 117.050000
-  refer-latitude: 33.400000
-
+  start-longitude: 116.3788
+  start-latitude: 36.3569
+  refer-longitude: 117.05
+  refer-latitude: 33.4
 AS-SAC: 335
 GS-SAC: 16
+

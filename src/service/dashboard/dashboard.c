@@ -15,7 +15,7 @@ static l_err init_dashboard_service();
 static void handle_as_info_key_upd_dashboard(as_info_key_upd_t *as_upd);
 static void handle_as_info_upd_dashboard(as_info_upd_t *as_info);
 static void handle_st_chg_dashboard(lme_state_chg_t *st_chg);
-static void handle_register_as_dashboard(uint32_t AS_UA, double longitude, double latitude);
+static void handle_register_as_dashboard(uint32_t AS_UA, double longitude, double latitude, double angle);
 static void handle_register_gs_dashboard(uint16_t GS_TAG, double longitude, double latitude);
 static void handle_update_coordinates_dashboard(uint32_t AS_UA, double longitude, double latitude);
 static void handle_received_user_message_dashboard(user_msg_t *user_msg);
@@ -120,9 +120,9 @@ static void handle_st_chg_dashboard(lme_state_chg_t *st_chg) {
     }
 }
 
-static void handle_register_as_dashboard(uint32_t AS_UA, double longitude, double latitude) {
+static void handle_register_as_dashboard(uint32_t AS_UA, double longitude, double latitude, double angle) {
     dashboard_data_send(&dashboard_obj, AS_REGISTER,
-                        &(dashboard_update_coordinate_t){.UA = AS_UA, .longitude = longitude, .latitude = latitude, .is_direct = config.direct});
+                        &(dashboard_update_coordinate_t){.UA = AS_UA, .longitude = longitude, .latitude = latitude, .is_direct = config.direct, .angle = angle});
 }
 
 static void handle_register_gs_dashboard(uint16_t GS_TAG, double longitude, double latitude) {

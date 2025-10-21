@@ -120,10 +120,10 @@ l_rcu_err rcu_power_on(uint8_t role) {
 
     if (config.role == LD_AS) {
         // 注册as
-        if (rcu_layer_obj.service->handle_register_as) {
-            rcu_layer_obj.service->handle_register_as(config.UA, config.start_longitude, config.start_latitude);
-        }
         init_path_function();
+        if (rcu_layer_obj.service->handle_register_as) {
+            rcu_layer_obj.service->handle_register_as(config.UA, config.start_longitude, config.start_latitude, rcu_layer_obj.path.angle);
+        }
     }else if (config.role == LD_GS) {
         if (rcu_layer_obj.service->handle_register_gs) {
             rcu_layer_obj.service->handle_register_gs(config.GS_SAC, config.start_longitude, config.start_latitude);
@@ -204,7 +204,7 @@ l_rcu_err rcu_set_accelerate_multiplier(uint8_t multiplier) {
     return LD_RCU_OK;
 }
 
-static l_err init_path(path_function_t *path) {
+static l_err init_single_path(path_function_t *path) {
     // 添加边界检查
     if (!path) {
         log_error("path struct is null");
@@ -212,47 +212,40 @@ static l_err init_path(path_function_t *path) {
     }
 
     srand(time(NULL));
-    double angle = (((double)rand() / (double)RAND_MAX) - 0.5) * 4;
+    double rand_basic = ((((double) rand() / (double) RAND_MAX)) - 0.5) ;
 
-    // 计算中点坐标
-    double mid_position[2];
-    mid_position[0] = path->start_position[0] + (path->refer_position[0] - path->start_position[0]);
-    mid_position[1] = path->start_position[1] + (path->refer_position[1] - path->start_position[1]);
+    if (config.direct) {
+        path->angle = rand_basic * 180;
+    }else {
+        path->angle = rand_basic * 5;
+        // path->angle = -30;
+    }
 
-    // 计算前半段方向向量
-    double dx = path->refer_position[0] - path->start_position[0];
-    double dy = path->refer_position[1] - path->start_position[1];
+    // 使用经纬度计算公式，基于起始点、方向角度和500公里距离计算终点坐标
+    double distance_km = 1000.0; // 500公里
+    double earth_radius_km = 6371.0; // 地球半径（公里）
 
-    // 生成随机偏转角度（小于90度）
-    double random_angle = ((double)rand() / (double)RAND_MAX) * M_PI_2; // M_PI_2 = π/2 = 90度
-    // 随机决定顺时针还是逆时针偏转
-    if (rand() % 2) random_angle = -random_angle;
+    // 将角度转换为弧度进行计算
+    double lat1_rad = path->start_position[1] * M_PI / 180.0; // 起始纬度转弧度
+    double lon1_rad = path->start_position[0] * M_PI / 180.0; // 起始经度转弧度
+    double bearing_rad = (path->angle + 180.0) * M_PI / 180.0; // 方位角转弧度
 
-    // 计算偏转后的方向向量
-    double cos_angle = cos(random_angle);
-    double sin_angle = sin(random_angle);
-    double rotated_dx = dx * cos_angle - dy * sin_angle;
-    double rotated_dy = dx * sin_angle + dy * cos_angle;
+    // 使用球面三角公式计算终点经纬度
+    double lat2_rad = asin(sin(lat1_rad) * cos(distance_km / earth_radius_km) +
+                          cos(lat1_rad) * sin(distance_km / earth_radius_km) * cos(bearing_rad));
 
-    // 计算终点坐标（从中点继续偏转方向）
-    path->end_position[0] = mid_position[0] + rotated_dx + angle;
-    path->end_position[1] = mid_position[1] + rotated_dy + angle;
+    double lon2_rad = lon1_rad + atan2(sin(bearing_rad) * sin(distance_km / earth_radius_km) * cos(lat1_rad),
+                                      cos(distance_km / earth_radius_km) - sin(lat1_rad) * sin(lat2_rad));
 
-    // 生成路径点
+    // 转换回角度并保存到终点坐标
+    path->end_position[1] = lat2_rad * 180.0 / M_PI; // 终点纬度
+    path->end_position[0] = lon2_rad * 180.0 / M_PI; // 终点经度
+
+
     for (int i = 0; i < GEN_POINTS; i++) {
-        double ratio = (double)i / (double)(GEN_POINTS - 1);
-
-        if (ratio <= 0.5) {
-            // 前半段：从起点到中点的直线
-            double seg_ratio = ratio * 2; // 将0-0.5映射到0-1
-            path->path_points[i][0] = path->start_position[0] + (mid_position[0] - path->start_position[0]) * seg_ratio;
-            path->path_points[i][1] = path->start_position[1] + (mid_position[1] - path->start_position[1]) * seg_ratio;
-        } else {
-            // 后半段：从中点到终点的直线
-            double seg_ratio = (ratio - 0.5) * 2; // 将0.5-1映射到0-1
-            path->path_points[i][0] = mid_position[0] + (path->end_position[0] - mid_position[0]) * seg_ratio;
-            path->path_points[i][1] = mid_position[1] + (path->end_position[1] - mid_position[1]) * seg_ratio;
-        }
+        double ratio = (double)i / (double)(GEN_POINTS);
+        path->path_points[i][0] = path->start_position[0] + (path->end_position[0] - path->start_position[0]) * ratio;
+        path->path_points[i][1] = path->start_position[1] + (path->end_position[1] - path->start_position[1]) * ratio;
     }
 
     return LD_OK;
@@ -293,7 +286,7 @@ static l_err init_path_function() {
     path->refer_position[0] = config.refer_longitude;
     path->refer_position[1] = config.refer_latitude;
 
-    init_path(path);
+    init_single_path(path);
 
     pthread_create(&path->th, NULL, path_function_thread, NULL);
     pthread_detach(path->th);

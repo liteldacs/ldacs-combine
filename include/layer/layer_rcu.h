@@ -21,7 +21,7 @@ typedef struct ld_service_s {
 
     void (*handle_as_info_upd)(as_info_upd_t *);
 
-    void (*handle_register_as)(uint32_t, double, double);
+    void (*handle_register_as)(uint32_t, double, double, double);
 
     void (*handle_register_gs)(uint16_t, double, double);
 
@@ -48,7 +48,7 @@ enum RCU_STATUS_E {
     RCU_CLOSED,
 };
 
-#define GEN_POINTS 1000
+#define GEN_POINTS 2000
 // #define GEN_POINTS 20
 
 typedef struct path_function_s {
@@ -59,6 +59,7 @@ typedef struct path_function_s {
     double path_points[GEN_POINTS][2];
     pthread_t th;
     bool is_stop;
+    double angle;
 }path_function_t;
 
 typedef struct rcu_layer_obj_s {
