@@ -256,7 +256,8 @@ static void *path_function_thread(void *arg) {
     if (!rcu_layer_obj.service->handle_update_coordinates) return NULL;
     while (1) {
         if (i >= GEN_POINTS) break;
-        usleep(400000 >> rcu_layer_obj.accel_multiplier);
+        // usleep(400000 >> rcu_layer_obj.accel_multiplier);
+        usleep(400000);
         if (path->is_stop) continue;
 
         //更新位置
@@ -273,7 +274,7 @@ static void *path_function_thread(void *arg) {
             rcu_power_off();
         }
 
-        i++;
+        i += rcu_layer_obj.accel_multiplier;
     }
 }
 

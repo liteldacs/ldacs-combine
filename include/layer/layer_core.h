@@ -216,6 +216,7 @@ typedef struct orient_sdu_s {
     buffer_t *buf;
     uint16_t AS_SAC,
             GS_SAC;
+    buffer_t *cbuf; // 传输密文
 } orient_sdu_t;
 
 extern ld_gtimer_t gtimer;
@@ -223,6 +224,7 @@ extern ld_gtimer_t gtimer;
 static orient_sdu_t *create_orient_sdus(uint16_t AS_SAC, uint16_t GS_SAC) {
     orient_sdu_t *orient_sdu = malloc(sizeof(orient_sdu_t));
     orient_sdu->buf = init_buffer_unptr();
+    orient_sdu->cbuf = init_buffer_unptr();
     orient_sdu->AS_SAC = AS_SAC;
     orient_sdu->GS_SAC = GS_SAC;
     return orient_sdu;
@@ -232,7 +234,8 @@ static void free_orient_sdus(void *p) {
     orient_sdu_t *orient_sdu_p = p;
     if (orient_sdu_p) {
         //free_buffer_v(&orient_sdu_p->buf);
-        free_buffer(orient_sdu_p->buf);
+        if (orient_sdu_p->buf)        free_buffer(orient_sdu_p->buf);
+        if (orient_sdu_p->cbuf)    free_buffer(orient_sdu_p->cbuf);
         free(orient_sdu_p);
     }
 }

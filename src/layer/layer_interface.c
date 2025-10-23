@@ -29,7 +29,8 @@ void SN_SAPD_U_cb(ld_prim_t *prim) {
     int_obj.msg_handler(&(user_msg_t){
         .AS_SAC = o_sdu->AS_SAC,
         .GS_SAC = o_sdu->GS_SAC,
-        .msg = o_sdu->buf
+        .msg = o_sdu->buf,
+        .cmsg = o_sdu->cbuf,
     });
 }
 

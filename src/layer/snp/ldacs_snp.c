@@ -311,6 +311,7 @@ l_err process_snp(orient_sdu_t *o_sdu) {
     uint8_t dec_arr[2048] = {0};
     size_t dec_sz = 0;
     o_sdu->buf = init_buffer_unptr();
+    o_sdu->cbuf = init_buffer_unptr();
 
     // log_buf(LOG_INFO, "TO DEC", pdu.sdu->ptr, pdu.sdu->len);
     if (snpsub_crypto(o_sdu->AS_SAC, pdu.sdu->ptr, pdu.sdu->len, dec_arr, &dec_sz, FALSE) != LDCAUC_OK) {
@@ -318,6 +319,7 @@ l_err process_snp(orient_sdu_t *o_sdu) {
         return LD_ERR_INTERNAL;
     }
     CLONE_TO_CHUNK(*(o_sdu->buf), dec_arr, dec_sz);
+    CLONE_TO_CHUNK(*(o_sdu->cbuf), pdu.sdu->ptr, pdu.sdu->len);
 
     free_buffer(pdu.sdu);
     if (pdu.ctrl == CONTROL_PLANE_PACKET) {

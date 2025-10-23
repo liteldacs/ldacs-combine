@@ -77,7 +77,7 @@ static l_err dashboard_data_recv(basic_conn_t *bc) {
             unmarshel_json(data, &accelerate_as, dashboard_func_defines[DASHBOARD_ACCELRATE_AS].tmpl);
             cJSON_Delete(data);
             uint8_t multiplier = accelerate_as.multiplier;
-            if (multiplier > 4 || multiplier < 1) {
+            if (multiplier > 32 || multiplier < 1) {
                 log_warn("The accelerate multiplier can not more than 4 or less than 1");
                 break;
             }
@@ -159,7 +159,12 @@ static void handle_as_exit_dashboard(uint32_t UA) {
 }
 
 static void handle_received_user_message_dashboard(user_msg_t *user_msg) {
+    if (!user_msg->msg || !user_msg->cmsg) {
+        log_warn("No valid msg or cmsg in user_msg struct");
+        return;
+    }
     buffer_t *b64_buf = encode_b64_buffer(0, user_msg->msg->ptr, user_msg->msg->len);
+    buffer_t *b64_cbuf = encode_b64_buffer(0, user_msg->cmsg->ptr, user_msg->cmsg->len);
     ld_orient orient = config.role == LD_AS ? FL : RL;
 
     uint32_t AS_UA = 0;
@@ -169,10 +174,13 @@ static void handle_received_user_message_dashboard(user_msg_t *user_msg) {
         lme_as_man_t *as_man  = get_lme_as_enode(user_msg->AS_SAC);
         AS_UA = as_man->AS_UA;
     }
+
+    // log_buf(LOG_WARN, "!!!!", user_msg->cmsg->ptr, user_msg->cmsg->len);
     dashboard_data_send(&dashboard_obj, AS_GS_RECEIVED_MSG,
-                        &(dashboard_received_msg_t){.orient = orient, .type = USER_PLANE_PACKET, .sender = orient == FL ? user_msg->GS_SAC : AS_UA, .receiver = orient == FL ? AS_UA : user_msg->GS_SAC, .data = b64_buf});
+                        &(dashboard_received_msg_t){.orient = orient, .type = USER_PLANE_PACKET, .sender = orient == FL ? user_msg->GS_SAC : AS_UA, .receiver = orient == FL ? AS_UA : user_msg->GS_SAC, .data = b64_buf, .cdata = b64_cbuf});
 
     free_buffer(b64_buf);
+    free_buffer(b64_cbuf);
 }
 
 static l_err init_dashboard_service() {
