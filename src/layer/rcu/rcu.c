@@ -218,11 +218,10 @@ static l_err init_single_path(path_function_t *path) {
         path->angle = rand_basic * 180;
     }else {
         path->angle = rand_basic * 5;
-        // path->angle = -30;
     }
 
-    // 使用经纬度计算公式，基于起始点、方向角度和500公里距离计算终点坐标
-    double distance_km = 1000.0; // 500公里
+    // 使用经纬度计算公式，基于起始点、方向角度和2000公里距离计算终点坐标
+    double distance_km = 2000.0; // 2000公里
     double earth_radius_km = 6371.0; // 地球半径（公里）
 
     // 将角度转换为弧度进行计算

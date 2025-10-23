@@ -48,7 +48,7 @@ enum RCU_STATUS_E {
     RCU_CLOSED,
 };
 
-#define GEN_POINTS 2000
+#define GEN_POINTS 8000
 // #define GEN_POINTS 20
 
 typedef struct path_function_s {
@@ -115,6 +115,7 @@ struct user_msg_s {
     uint16_t AS_SAC;
     uint16_t GS_SAC;
     buffer_t *msg;
+    buffer_t *cmsg;
 };
 
 #pragma pack()
